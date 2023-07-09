@@ -1,5 +1,7 @@
 //! In this module are declared the entities manipulated by this program
 
+use self::technologies::Technology;
+
 pub mod technologies;
 
 /// Represents which protocol is used between TCP and UDP
@@ -38,12 +40,19 @@ impl Port {
     }
 }
 
-/// Represent a target to scan
-pub struct Target {
-    /// The IPv4 address or hostname of the target
+/// Represents an asset to scan
+pub struct Asset {
+    /// The IPv4 address or hostname of the asset
     /// A target can be scanned either by its IP address or its hostname
     pub ip_hostname: String,
-    /// The list of ports to scan on the target
+    /// The list of ports to scan on the asset
     pub ports_to_scan: Vec<Port>,
 }
 
+/// Represents a finding of a technology running on an asset
+pub struct Finding {
+    /// The technology found
+    pub technology: Technology,
+    /// The version of the technology
+    pub version: String,
+}
