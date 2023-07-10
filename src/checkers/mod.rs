@@ -12,7 +12,7 @@ pub trait Checker {
     /// data will usually contain only one string (the banner), but
     /// some technologies could provide information from different
     /// sources (HTTP headers & response for example).
-    fn check(data: &[String]) -> Vec<Finding>;
+    fn check(&self, data: &[String]) -> Vec<Finding>;
     /// Gets the different types of scans for the current checker.
     /// As an example, an OpenSSH checker would be TCP, while an
     /// Apache httpd checker would be HTTP. A software running on
