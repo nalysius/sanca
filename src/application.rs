@@ -3,20 +3,30 @@
 
 use crate::checkers::Checker;
 use crate::checkers::openssh::OpenSSHChecker;
+use crate::checkers::proftpd::ProFTPDChecker;
+use crate::models::Finding;
 use crate::readers::tcpreader::TcpReader;
 use crate::writers::Writer;
 use crate::writers::textstdout::TextStdout;
 
 /// Represents the application
 pub struct Application {
-
+    /// The list of checkers available to the application.
+    checkers: Vec<Box<dyn Checker>>,
 }
 
 impl Application {
     /// Creates a new application
     pub fn new() -> Self {
-        Application {
 
+        // When a new checker is created, it has to be instanciated here
+        // to be used.
+        let checkers: Vec<Box<dyn Checker>> = vec![
+            Box::new(OpenSSHChecker::new()),
+        ];
+
+        Application {
+            checkers
         }
     }
 
@@ -41,9 +51,11 @@ impl Application {
         } else {
             println!("----------{}:{}----------\n", ip_hostname, port);
             let banner = banner_result.unwrap();
-            // TODO: loop over all checkers, not only OpenSSH
-            let openssh_checker = OpenSSHChecker::new();
-            let findings = openssh_checker.check(&[banner]);
+            let mut findings: Vec<Finding> = Vec::new();
+            for checker in &self.checkers {
+                findings.append(&mut checker.check(&[banner.clone()]));
+            }
+
             let writer = TextStdout::new();
             writer.write(findings);           
         }

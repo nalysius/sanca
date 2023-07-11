@@ -3,6 +3,7 @@
 //! to against a technology.
 
 pub mod openssh;
+pub mod proftpd;
 
 use crate::models::{Finding, ScanType};
 
@@ -17,5 +18,5 @@ pub trait Checker {
     /// As an example, an OpenSSH checker would be TCP, while an
     /// Apache httpd checker would be HTTP. A software running on
     /// TCP & UDP could use both scan types.
-    fn get_scan_types() -> Vec<ScanType>;
+    fn get_scan_types(&self) -> Vec<ScanType>;
 }

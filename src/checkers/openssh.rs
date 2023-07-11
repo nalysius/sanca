@@ -68,7 +68,7 @@ impl Checker for OpenSSHChecker {
         return findings;
     }
 
-    fn get_scan_types() -> Vec<ScanType> {
+    fn get_scan_types(&self) -> Vec<ScanType> {
         vec![ScanType::Tcp]
     }
 }
