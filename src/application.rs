@@ -23,6 +23,7 @@ impl Application {
         // to be used.
         let checkers: Vec<Box<dyn Checker>> = vec![
             Box::new(OpenSSHChecker::new()),
+            Box::new(ProFTPDChecker::new()),
         ];
 
         Application {
@@ -44,7 +45,7 @@ impl Application {
         // Note: if the scan type or the technology is provided as CLI parameter,
         // use only this one
         let tcp_reader = TcpReader::new(ip_hostname, port);
-        let banner_result = tcp_reader.read(30);
+        let banner_result = tcp_reader.read(100);
 
         if let Err(e) = banner_result {
             println!("Unable to read. {:?}", e);
