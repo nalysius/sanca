@@ -2,6 +2,7 @@
 //! application.
 
 use crate::checkers::Checker;
+use crate::checkers::exim::EximChecker;
 use crate::checkers::openssh::OpenSSHChecker;
 use crate::checkers::proftpd::ProFTPDChecker;
 use crate::models::Finding;
@@ -24,6 +25,7 @@ impl Application {
         let checkers: Vec<Box<dyn Checker>> = vec![
             Box::new(OpenSSHChecker::new()),
             Box::new(ProFTPDChecker::new()),
+            Box::new(EximChecker::new()),
         ];
 
         Application {
