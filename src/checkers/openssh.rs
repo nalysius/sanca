@@ -2,8 +2,8 @@
 //! This module contains the checker used to determine if OpenSSH is
 //! used by the asset.
 
-use crate::models::{Finding, ScanType};
-use super::Checker;
+use crate::models::Finding;
+use super::TcpChecker;
 use regex::{Match, Regex};
 
 /// The OpenSSH checker
@@ -28,7 +28,7 @@ impl OpenSSHChecker {
 }
 
 
-impl Checker for OpenSSHChecker {
+impl TcpChecker for OpenSSHChecker {
     /// Check if the asset is running OpenSSH.
     /// It looks for the OpenSSH banner. It can create two findings,
     /// one for OpenSSH and one for the OS if present.
@@ -68,7 +68,4 @@ impl Checker for OpenSSHChecker {
         return findings;
     }
 
-    fn get_scan_types(&self) -> Vec<ScanType> {
-        vec![ScanType::Tcp]
-    }
 }

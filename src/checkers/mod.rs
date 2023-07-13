@@ -3,21 +3,17 @@
 //! to against a technology.
 
 pub mod exim;
+pub mod mariadb;
+pub mod mysql;
 pub mod openssh;
 pub mod proftpd;
 
-use crate::models::{Finding, ScanType};
+use crate::models::Finding;
 
-/// A common interface between all checkers
-pub trait Checker {
+/// A common interface between all TCP checkers
+pub trait TcpChecker {
     /// Checks data to determine if a given technology matches.
     /// data will usually contain only one string (the banner), but
-    /// some technologies could provide information from different
-    /// sources (HTTP headers & response for example).
+    /// some technologies could provide more information
     fn check(&self, data: &[String]) -> Vec<Finding>;
-    /// Gets the different types of scans for the current checker.
-    /// As an example, an OpenSSH checker would be TCP, while an
-    /// Apache httpd checker would be HTTP. A software running on
-    /// TCP & UDP could use both scan types.
-    fn get_scan_types(&self) -> Vec<ScanType>;
 }

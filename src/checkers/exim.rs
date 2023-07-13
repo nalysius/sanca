@@ -2,8 +2,8 @@
 //! This module contains the checker used to determine if Exim is
 //! used by the asset.
 
-use crate::models::{Finding, ScanType};
-use super::Checker;
+use crate::models::Finding;
+use super::TcpChecker;
 use regex::Regex;
 
 /// The Exim checker
@@ -19,7 +19,7 @@ impl EximChecker {
     pub fn new() -> Self {
         // Example: 220 test.example.com ESMTP Exim 4.96 Mon, 10 Jul 2023 19:39:15 +0300
         // Date / time are ignored
-        let regex = Regex::new(r"^^\d\d\d ([a-zA-Z0-9-]+\.)?([a-zA-Z0-9-]+\.)?[a-zA-Z0-9-]+ (?P<smtpprotocol>E?SMTP) Exim (?P<eximversion>\d+\.\d+) ").unwrap();
+        let regex = Regex::new(r"^\d\d\d ([a-zA-Z0-9-]+\.)?([a-zA-Z0-9-]+\.)?[a-zA-Z0-9-]+ (?P<smtpprotocol>E?SMTP) Exim (?P<eximversion>\d+\.\d+) ").unwrap();
         Self {
             regex: regex
         }
@@ -27,7 +27,7 @@ impl EximChecker {
 }
 
 
-impl Checker for EximChecker {
+impl TcpChecker for EximChecker {
     /// Check if the asset is running Exim.
     /// It looks for the Exim banner.
     fn check(&self, data: &[String]) -> Vec<Finding> {
@@ -53,9 +53,6 @@ impl Checker for EximChecker {
             }
         }
         return findings;
-}
-
-    fn get_scan_types(&self) -> Vec<ScanType> {
-        vec![ScanType::Tcp]
     }
+
 }

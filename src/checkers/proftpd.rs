@@ -2,8 +2,8 @@
 //! This module contains the checker used to determine if ProFTPd is
 //! used by the asset.
 
-use crate::models::{Finding, ScanType};
-use super::Checker;
+use crate::models::Finding;
+use super::TcpChecker;
 use regex::Regex;
 
 /// The ProFTPD checker
@@ -27,7 +27,7 @@ impl ProFTPDChecker {
 }
 
 
-impl Checker for ProFTPDChecker {
+impl TcpChecker for ProFTPDChecker {
     /// Check if the asset is running ProFTPD.
     /// It looks for the ProFTPD banner.
     fn check(&self, data: &[String]) -> Vec<Finding> {
@@ -55,7 +55,4 @@ impl Checker for ProFTPDChecker {
         return findings;
 }
 
-    fn get_scan_types(&self) -> Vec<ScanType> {
-        vec![ScanType::Tcp]
-    }
 }
