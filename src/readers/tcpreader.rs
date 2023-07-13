@@ -57,17 +57,8 @@ impl TcpReader {
             data.truncate(bytes_to_read);
         }
 
-        let from_utf8_result = std::str::from_utf8(&data);
+        let from_utf8 = String::from_utf8_lossy(&data);
+        return Ok(from_utf8.to_string());
 
-        if from_utf8_result.is_ok() {
-            return Ok(from_utf8_result.unwrap().to_string())
-        } else {
-            // Once this happens in practice I'll find a better solution.
-            // It could consist of not using a std::io::Error anymore and return
-            // an appropriate error here.
-            // But since the banners are texts, it should not be a problem in most
-            // cases.
-            panic!("[tcpreader] Unable to convert these bytes to UTF-8: {:?}", data);
-        }
     }
 }
