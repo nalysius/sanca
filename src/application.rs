@@ -1,8 +1,10 @@
 //! This module contains the main structure and logic for the whole
 //! application.
 
-use crate::checkers::Checker;
+use crate::checkers::TcpChecker;
 use crate::checkers::exim::EximChecker;
+use crate::checkers::mariadb::MariaDBChecker;
+use crate::checkers::mysql::MySQLChecker;
 use crate::checkers::openssh::OpenSSHChecker;
 use crate::checkers::proftpd::ProFTPDChecker;
 use crate::models::Finding;
@@ -12,8 +14,8 @@ use crate::writers::textstdout::TextStdout;
 
 /// Represents the application
 pub struct Application {
-    /// The list of checkers available to the application.
-    checkers: Vec<Box<dyn Checker>>,
+    /// The list of TCP checkers available to the application.
+    tcp_checkers: Vec<Box<dyn TcpChecker>>,
 }
 
 impl Application {
@@ -22,14 +24,16 @@ impl Application {
 
         // When a new checker is created, it has to be instanciated here
         // to be used.
-        let checkers: Vec<Box<dyn Checker>> = vec![
+        let tcp_checkers: Vec<Box<dyn TcpChecker>> = vec![
             Box::new(OpenSSHChecker::new()),
             Box::new(ProFTPDChecker::new()),
             Box::new(EximChecker::new()),
+            Box::new(MySQLChecker::new()),
+            Box::new(MariaDBChecker::new()),
         ];
 
         Application {
-            checkers
+            tcp_checkers
         }
     }
 
@@ -47,16 +51,17 @@ impl Application {
         // Note: if the scan type or the technology is provided as CLI parameter,
         // use only this one
         let tcp_reader = TcpReader::new(ip_hostname, port);
-        let banner_result = tcp_reader.read(100);
+        let banner_result = tcp_reader.read(200);
 
         if let Err(e) = banner_result {
             println!("Unable to read. {:?}", e);
         } else {
             println!("----------{}:{}----------\n", ip_hostname, port);
             let banner = banner_result.unwrap();
+
             let mut findings: Vec<Finding> = Vec::new();
-            for checker in &self.checkers {
-                findings.append(&mut checker.check(&[banner.clone()]));
+            for tcp_checker in &self.tcp_checkers {
+                findings.append(&mut tcp_checker.check(&[banner.clone()]));
             }
 
             let writer = TextStdout::new();
