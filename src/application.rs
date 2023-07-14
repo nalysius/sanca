@@ -2,6 +2,7 @@
 //! application.
 
 use crate::checkers::TcpChecker;
+use crate::checkers::dovecot::DovecotChecker;
 use crate::checkers::exim::EximChecker;
 use crate::checkers::mariadb::MariaDBChecker;
 use crate::checkers::mysql::MySQLChecker;
@@ -30,6 +31,7 @@ impl Application {
             Box::new(EximChecker::new()),
             Box::new(MySQLChecker::new()),
             Box::new(MariaDBChecker::new()),
+            Box::new(DovecotChecker::new()),
         ];
 
         Application {
