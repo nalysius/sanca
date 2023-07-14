@@ -6,17 +6,12 @@ use std::io::Result as IoResult;
 use std::io::prelude::*;
 use std::net::TcpStream;
 
-use super::Reader;
-
 /// A TCP reader
 pub struct TcpReader {
     /// The IP address or hostname to connect
     pub ip_hostname: String,
     /// The port for connection
     pub port: u16,
-}
-
-impl Reader for TcpReader {
 }
 
 impl TcpReader {
