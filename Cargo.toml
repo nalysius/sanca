@@ -13,3 +13,4 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 regex = "1.9.1"
+clap = { version = "4.3.11", features = ["derive"] }
