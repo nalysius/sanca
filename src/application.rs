@@ -1,6 +1,8 @@
 //! This module contains the main structure and logic for the whole
 //! application.
 
+use clap::Parser;
+
 use crate::checkers::TcpChecker;
 use crate::checkers::dovecot::DovecotChecker;
 use crate::checkers::exim::EximChecker;
@@ -8,7 +10,7 @@ use crate::checkers::mariadb::MariaDBChecker;
 use crate::checkers::mysql::MySQLChecker;
 use crate::checkers::openssh::OpenSSHChecker;
 use crate::checkers::proftpd::ProFTPDChecker;
-use crate::models::Finding;
+use crate::models::{Finding, ScanType};
 use crate::readers::tcpreader::TcpReader;
 use crate::writers::Writer;
 use crate::writers::textstdout::TextStdout;
@@ -17,12 +19,13 @@ use crate::writers::textstdout::TextStdout;
 pub struct Application {
     /// The list of TCP checkers available to the application.
     tcp_checkers: Vec<Box<dyn TcpChecker>>,
+    /// The arguments given on the command line
+    argv: Option<Args>,
 }
 
 impl Application {
     /// Creates a new application
     pub fn new() -> Self {
-
         // When a new checker is created, it has to be instanciated here
         // to be used.
         let tcp_checkers: Vec<Box<dyn TcpChecker>> = vec![
@@ -35,39 +38,87 @@ impl Application {
         ];
 
         Application {
-            tcp_checkers
+            tcp_checkers,
+            argv: None,
         }
     }
 
-    /// Prints the usage instructions
-    pub fn show_usage(&self) {
-        println!("Usage: ./sanca <ip_hostname> <port>");
-        println!("Where <ip_hostname> is either the IP address or the hostname of the asset to scan");
-        println!("and <port> the port to scan.");
+    /// Read argv to get the arguments before running the application
+    pub fn read_argv(&mut self) {
+        let args = Args::parse();
+        // For a TCP or UDP scan these two arguments are required
+        if (args.scan_type == ScanType::Tcp || args.scan_type == ScanType::Udp) && 
+            (args.ip_hostname.is_none() || args.port.is_none())
+        {
+            println!("Invalid parameters provided. Use sanca --help");
+            panic!("To perform a TCP or UDP scan, the scan type, ip or hostname, and the port are required.");
+        } else if args.scan_type == ScanType::Http && args.url.is_none() {
+            // If a HTTP scan is asked but no URL has been provided
+            println!("Invalid parameters provided. Use sanca --help");
+            panic!("To perform a HTTP scan, the url is required.");
+        }
+
+        self.argv = Some(args);
     }
+    
+    /// Executes a TCP or UDP scan
+    pub fn tcp_udp_scan(&self, ip_hostname: &str, port: u16, scan_type: ScanType) -> Vec<Finding> {
+        let mut findings: Vec<Finding> = Vec::new();
+        if scan_type == ScanType::Tcp {
+            let tcp_reader = TcpReader::new(ip_hostname, port);
+            let banner_result = tcp_reader.read(200);
 
-    /// Executes the application
-    pub fn run(&self, ip_hostname: &str, port: u16) {
-        // TODO: if tcp reader doesn't work, try UDP.
-        // if tcp works but doesn't read anything, try HTTP.
-        // Note: if the scan type or the technology is provided as CLI parameter,
-        // use only this one
-        let tcp_reader = TcpReader::new(ip_hostname, port);
-        let banner_result = tcp_reader.read(200);
-
-        if let Err(e) = banner_result {
-            println!("Unable to read. {:?}", e);
-        } else {
-            println!("----------{}:{}----------\n", ip_hostname, port);
-            let banner = banner_result.unwrap();
-
-            let mut findings: Vec<Finding> = Vec::new();
-            for tcp_checker in &self.tcp_checkers {
-                findings.append(&mut tcp_checker.check(&[banner.clone()]));
+            if let Err(e) = banner_result {
+                panic!("Unable to read. {:?}", e);
+            } else {
+                let banner = banner_result.unwrap();
+                for tcp_checker in &self.tcp_checkers {
+                    findings.append(&mut tcp_checker.check(&[banner.clone()]));
+                }
             }
-
-            let writer = TextStdout::new();
-            writer.write(findings);           
+        } else if scan_type == ScanType::Udp {
+            panic!("UDP is not supported yet.");
         }
+        return findings;
     }
+
+    /// Runs the global application
+    /// read_argv() MUST have been called before
+    pub fn run(&self) {
+        let args = self.argv.as_ref()
+                    .expect("CLI arguments haven't been read.");
+        let findings: Vec<Finding> = match args.scan_type {
+            ScanType::Tcp | ScanType::Udp => {
+                let ip_hostname = &args.ip_hostname.clone().unwrap();
+                let port = args.port.clone().unwrap();
+                let scan_type = args.scan_type.clone();
+                self.tcp_udp_scan(&ip_hostname, port, scan_type)
+            },
+            ScanType::Http => {
+                println!("TODO: implement HTTP scan in Application::run()");
+                Vec::new()
+            },
+        };
+
+        let writer = TextStdout::new(args.ip_hostname.clone(), args.port.clone(), args.url.clone());
+        writer.write(findings);           
+    }
+}
+
+/// Represents the CLI arguments accepted by Sanca
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// The URL where to send an HTTP request
+    #[arg(short, long, value_name = "URL")]
+    pub url: Option<String>,
+    /// The IP or hostname to connect on
+    #[arg(short, long, value_name = "IP_HOSTNAME")]
+    pub ip_hostname: Option<String>,
+    /// The port to connect on
+    #[arg(short, long, value_name = "PORT")]
+    pub port: Option<u16>,
+    /// The type of scan
+    #[arg(short, long, value_name = "SCAN_TYPE")]
+    pub scan_type: ScanType,
 }
