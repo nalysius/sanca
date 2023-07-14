@@ -48,7 +48,7 @@ impl TcpChecker for EximChecker {
                     item
                 );
 
-                let exim_finding = Finding::new("Exim", Some(&exim_version), item, &exim_evidence_text);
+                let exim_finding = Finding::new("Exim", Some(&exim_version), item, &exim_evidence_text, None);
                 findings.push(exim_finding);
             }
         }

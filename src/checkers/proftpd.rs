@@ -48,7 +48,7 @@ impl TcpChecker for ProFTPDChecker {
                     item
                 );
 
-                let proftpd_finding = Finding::new("ProFTPD", Some(&proftpd_version), item, &proftpd_evidence_text);
+                let proftpd_finding = Finding::new("ProFTPD", Some(&proftpd_version), item, &proftpd_evidence_text, None);
                 findings.push(proftpd_finding);
             }
         }

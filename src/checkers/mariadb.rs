@@ -47,7 +47,7 @@ impl TcpChecker for MariaDBChecker {
                     item
                 );
 
-                let finding = Finding::new("MariaDB", Some(&version), item, &evidence_text);
+                let finding = Finding::new("MariaDB", Some(&version), item, &evidence_text, None);
                 findings.push(finding);
             }
         }

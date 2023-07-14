@@ -51,7 +51,7 @@ impl TcpChecker for OpenSSHChecker {
                     item
                 );
 
-                let openssh_finding = Finding::new("OpenSSH", Some(&openssh_version), item, &openssh_evidence_text);
+                let openssh_finding = Finding::new("OpenSSH", Some(&openssh_version), item, &openssh_evidence_text, None);
                 findings.push(openssh_finding);
 
                 // The OS has been found
@@ -60,7 +60,7 @@ impl TcpChecker for OpenSSHChecker {
                         "The operating system {} has been identified using the banner presented by OpenSSH.",
                         os.unwrap().as_str()
                     );
-                    let os_finding = Finding::new("OS", None, item, &os_evidence_text);
+                    let os_finding = Finding::new("OS", None, item, &os_evidence_text, None);
                     findings.push(os_finding);
                 }
             }

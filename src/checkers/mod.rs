@@ -10,11 +10,20 @@ pub mod openssh;
 pub mod proftpd;
 
 use crate::models::Finding;
+use crate::readers::httpreader::HttpRequestResponse;
 
 /// A common interface between all TCP checkers
 pub trait TcpChecker {
     /// Checks data to determine if a given technology matches.
     /// data will usually contain only one string (the banner), but
-    /// some technologies could provide more information
+    /// some technologies could provide more information.
     fn check(&self, data: &[String]) -> Vec<Finding>;
 }
+
+/// A common interface between all HTTP checkers
+pub trait HttpChecker {
+    /// Checks data to determine if a given technology matches.
+    /// data will contain information about HTTP request & response.
+    fn check(&self, data: &[HttpRequestResponse]) -> Vec<Finding>;
+}
+

@@ -42,7 +42,7 @@ impl TcpChecker for DovecotChecker {
                     item
                 );
 
-                let finding = Finding::new("Dovecot", None, item, &evidence_text);
+                let finding = Finding::new("Dovecot", None, item, &evidence_text, None);
                 findings.push(finding);
             }
         }

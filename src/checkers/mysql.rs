@@ -51,7 +51,7 @@ impl TcpChecker for MySQLChecker {
                     item
                 );
 
-                let finding = Finding::new("MySQL", Some(&version), item, &evidence_text);
+                let finding = Finding::new("MySQL", Some(&version), item, &evidence_text, None);
                 findings.push(finding);
             }
         }
