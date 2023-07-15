@@ -1,8 +1,5 @@
 # Sanca
 
-Sanca is a scanner used to identify technologies running on a remote host.
-It focuses on providing an evidence for each finding.
-
 Using regex, Sanca tries to recognize software based on their banner or the
 data they transmit (e.g. HTTP responses). Moreover, it provides an evidence
 for each finding.
