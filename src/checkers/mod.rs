@@ -8,6 +8,7 @@ pub mod mariadb;
 pub mod mysql;
 pub mod openssh;
 pub mod proftpd;
+pub mod pureftpd;
 
 use crate::models::Finding;
 use crate::readers::httpreader::HttpRequestResponse;

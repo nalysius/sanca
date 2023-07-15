@@ -10,6 +10,7 @@ use crate::checkers::mariadb::MariaDBChecker;
 use crate::checkers::mysql::MySQLChecker;
 use crate::checkers::openssh::OpenSSHChecker;
 use crate::checkers::proftpd::ProFTPDChecker;
+use crate::checkers::pureftpd::PureFTPdChecker;
 use crate::models::{Finding, ScanType};
 use crate::readers::tcpreader::TcpReader;
 use crate::writers::Writer;
@@ -35,6 +36,7 @@ impl Application {
             Box::new(MySQLChecker::new()),
             Box::new(MariaDBChecker::new()),
             Box::new(DovecotChecker::new()),
+            Box::new(PureFTPdChecker::new()),
         ];
 
         Application {
