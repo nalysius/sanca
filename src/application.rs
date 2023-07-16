@@ -9,6 +9,7 @@ use crate::checkers::exim::EximChecker;
 use crate::checkers::mariadb::MariaDBChecker;
 use crate::checkers::mysql::MySQLChecker;
 use crate::checkers::openssh::OpenSSHChecker;
+use crate::checkers::os::OSChecker;
 use crate::checkers::proftpd::ProFTPDChecker;
 use crate::checkers::pureftpd::PureFTPdChecker;
 use crate::models::{Finding, ScanType};
@@ -37,6 +38,7 @@ impl Application {
             Box::new(MariaDBChecker::new()),
             Box::new(DovecotChecker::new()),
             Box::new(PureFTPdChecker::new()),
+            Box::new(OSChecker::new()),
         ];
 
         Application {

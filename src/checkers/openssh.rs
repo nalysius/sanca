@@ -4,7 +4,7 @@
 
 use crate::models::Finding;
 use super::TcpChecker;
-use regex::{Match, Regex};
+use regex::Regex;
 
 /// The OpenSSH checker
 pub struct OpenSSHChecker {
@@ -32,6 +32,7 @@ impl TcpChecker for OpenSSHChecker {
     /// Check if the asset is running OpenSSH.
     /// It looks for the OpenSSH banner. It can create two findings,
     /// one for OpenSSH and one for the OS if present.
+    /// TODO: return only one optional finding
     fn check(&self, data: &[String]) -> Vec<Finding> {
         let mut findings: Vec<Finding> = Vec::new();
 
@@ -43,7 +44,6 @@ impl TcpChecker for OpenSSHChecker {
                 let caps = caps_result.unwrap();
                 //let ssh_version: String = caps["sshversion"].to_string();
                 let openssh_version: String = caps["opensshversion"].to_string();
-                let os: Option<Match> = caps.name("os");
                 let openssh_evidence_text = format!(
                     "OpenSSH {} has been identified using the banner it presents after initiating a TCP connection: {}"
                     ,
@@ -53,16 +53,6 @@ impl TcpChecker for OpenSSHChecker {
 
                 let openssh_finding = Finding::new("OpenSSH", Some(&openssh_version), item, &openssh_evidence_text, None);
                 findings.push(openssh_finding);
-
-                // The OS has been found
-                if os.is_some() {
-                    let os_evidence_text = format!(
-                        "The operating system {} has been identified using the banner presented by OpenSSH.",
-                        os.unwrap().as_str()
-                    );
-                    let os_finding = Finding::new("OS", None, item, &os_evidence_text, None);
-                    findings.push(os_finding);
-                }
             }
         }
         return findings;
