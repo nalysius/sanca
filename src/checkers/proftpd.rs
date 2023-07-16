@@ -30,7 +30,7 @@ impl ProFTPDChecker {
 impl TcpChecker for ProFTPDChecker {
     /// Check if the asset is running ProFTPD.
     /// It looks for the ProFTPD banner.
-    fn check(&self, data: &[String]) -> Option<Finding> {
+    fn check_tcp(&self, data: &[String]) -> Option<Finding> {
         // For each item, check if it's an ProFTPD banner
         for item in data {
             let caps_result = self.regex.captures(item);

@@ -13,6 +13,7 @@ use crate::checkers::os::OSChecker;
 use crate::checkers::proftpd::ProFTPDChecker;
 use crate::checkers::pureftpd::PureFTPdChecker;
 use crate::models::{Finding, ScanType, Technology, UrlRequest};
+use crate::readers::httpreader::HttpReader;
 use crate::readers::tcpreader::TcpReader;
 use crate::writers::Writer;
 use crate::writers::textstdout::TextStdout;
@@ -92,7 +93,7 @@ impl Application {
                     // Use the current checker only if it supports one of the
                     // technologies we're looking for
                     if technologies.contains(&tcp_checker.get_technology()) {
-                        let option_finding = tcp_checker.check(&[banner.clone()]);
+                        let option_finding = tcp_checker.check_tcp(&[banner.clone()]);
                         if option_finding.is_some() {
                             findings.push(option_finding.unwrap());
                         }
@@ -118,7 +119,9 @@ impl Application {
                 self.tcp_udp_scan(&ip_hostname, port, scan_type, &args.technologies.as_ref().unwrap())
             },
             ScanType::Http => {
-                //let _url_requests = UrlRequest::from_technologies(&args.url.as_ref().unwrap(), &args.technologies.as_ref().unwrap());
+                //let url_requests = UrlRequest::from_technologies(&args.url.as_ref().unwrap(), &args.technologies.as_ref().unwrap());
+                //let http_reader = HttpReader::new();
+                //let url_responses = http_reader.read(&url_requests);
                 println!("TODO: implement HTTP scan in Application::run()");
                 Vec::new()
             },

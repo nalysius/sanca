@@ -29,7 +29,7 @@ impl PureFTPdChecker {
 impl TcpChecker for PureFTPdChecker {
     /// Check if the asset is running Pure-FTPd.
     /// It looks for the Pure-FTPd banner.
-    fn check(&self, data: &[String]) -> Option<Finding> {
+    fn check_tcp(&self, data: &[String]) -> Option<Finding> {
         // For each item, check if it's an Pure-FTPd banner
         for item in data {
             let caps_result = self.regex.captures(item);

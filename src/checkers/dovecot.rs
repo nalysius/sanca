@@ -30,7 +30,7 @@ impl DovecotChecker {
 impl TcpChecker for DovecotChecker {
     /// Check if the asset is running Dovecot.
     /// It looks for the Dovecot banner.
-    fn check(&self, data: &[String]) -> Option<Finding> {
+    fn check_tcp(&self, data: &[String]) -> Option<Finding> {
         // For each item, check if it's a Dovecot banner
         for item in data {
             // The regex matches

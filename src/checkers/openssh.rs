@@ -33,7 +33,7 @@ impl TcpChecker for OpenSSHChecker {
     /// It looks for the OpenSSH banner. It can create two findings,
     /// one for OpenSSH and one for the OS if present.
     /// TODO: return only one optional finding
-    fn check(&self, data: &[String]) -> Option<Finding> {
+    fn check_tcp(&self, data: &[String]) -> Option<Finding> {
         // For each item, check if it's an OpenSSH banner
         for item in data {
             let caps_result = self.regex.captures(item);

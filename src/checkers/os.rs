@@ -32,7 +32,7 @@ impl OSChecker {
 impl TcpChecker for OSChecker {
     /// Check what OS is running on the asset.
     /// It looks for the OpenSSH banner.
-    fn check(&self, data: &[String]) -> Option<Finding> {
+    fn check_tcp(&self, data: &[String]) -> Option<Finding> {
         // For each item, check if it's an OpenSSH banner
         for item in data {
             let caps_result = self.regex.captures(item);

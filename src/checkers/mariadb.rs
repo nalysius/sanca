@@ -30,7 +30,7 @@ impl MariaDBChecker {
 impl TcpChecker for MariaDBChecker {
     /// Check if the asset is running MariaDB.
     /// It looks for the MariaDB banner.
-    fn check(&self, data: &[String]) -> Option<Finding> {
+    fn check_tcp(&self, data: &[String]) -> Option<Finding> {
         // For each item, check if it's an MariaDB banner
         for item in data {
 
