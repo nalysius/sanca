@@ -2,14 +2,12 @@
 name = "sanca"
 version = "0.1.0"
 edition = "2021"
-author = "Nalysius"
 description = "A scanner to discover what technologies are running on a remote host. Focus on providing evidences."
 readme = "README.md"
 repository = "https://github.com/nalysius/sanca"
 keywords = ["scanner", "cybersecurity"]
 categories = ["command-line-utilities"]
 license = "MIT"
-license-file = "LICENSE.txt"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
