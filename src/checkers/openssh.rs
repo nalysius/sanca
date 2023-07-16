@@ -33,9 +33,7 @@ impl TcpChecker for OpenSSHChecker {
     /// It looks for the OpenSSH banner. It can create two findings,
     /// one for OpenSSH and one for the OS if present.
     /// TODO: return only one optional finding
-    fn check(&self, data: &[String]) -> Vec<Finding> {
-        let mut findings: Vec<Finding> = Vec::new();
-
+    fn check(&self, data: &[String]) -> Option<Finding> {
         // For each item, check if it's an OpenSSH banner
         for item in data {
             let caps_result = self.regex.captures(item);
@@ -51,11 +49,10 @@ impl TcpChecker for OpenSSHChecker {
                     item
                 );
 
-                let openssh_finding = Finding::new("OpenSSH", Some(&openssh_version), item, &openssh_evidence_text, None);
-                findings.push(openssh_finding);
+                return Some(Finding::new("OpenSSH", Some(&openssh_version), item, &openssh_evidence_text, None));
             }
         }
-        return findings;
+        return None;
     }
 
     /// This checker supports OpenSSH

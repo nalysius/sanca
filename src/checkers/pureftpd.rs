@@ -29,9 +29,7 @@ impl PureFTPdChecker {
 impl TcpChecker for PureFTPdChecker {
     /// Check if the asset is running Pure-FTPd.
     /// It looks for the Pure-FTPd banner.
-    fn check(&self, data: &[String]) -> Vec<Finding> {
-        let mut findings: Vec<Finding> = Vec::new();
-
+    fn check(&self, data: &[String]) -> Option<Finding> {
         // For each item, check if it's an Pure-FTPd banner
         for item in data {
             let caps_result = self.regex.captures(item);
@@ -51,11 +49,10 @@ impl TcpChecker for PureFTPdChecker {
                     evidence
                 );
 
-                let finding = Finding::new("Pure-FTPd", None, &evidence, &evidence_text, None);
-                findings.push(finding);
+                return Some(Finding::new("Pure-FTPd", None, &evidence, &evidence_text, None));
             }
         }
-        return findings;
+        return None;
     }
 
     /// This checker supports PureFTPd

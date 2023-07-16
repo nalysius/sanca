@@ -32,9 +32,7 @@ impl OSChecker {
 impl TcpChecker for OSChecker {
     /// Check what OS is running on the asset.
     /// It looks for the OpenSSH banner.
-    fn check(&self, data: &[String]) -> Vec<Finding> {
-        let mut findings: Vec<Finding> = Vec::new();
-
+    fn check(&self, data: &[String]) -> Option<Finding> {
         // For each item, check if it's an OpenSSH banner
         for item in data {
             let caps_result = self.regex.captures(item);
@@ -49,12 +47,11 @@ impl TcpChecker for OSChecker {
                         "The operating system {} has been identified using the banner presented by OpenSSH.",
                         os.unwrap().as_str()
                     );
-                    let os_finding = Finding::new("OS", None, item, &os_evidence_text, None);
-                    findings.push(os_finding);
+                    return Some(Finding::new("OS", None, item, &os_evidence_text, None));
                 }
             }
         }
-        return findings;
+        return None;
     }
 
     /// This checker supports the OS

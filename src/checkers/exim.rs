@@ -30,9 +30,7 @@ impl EximChecker {
 impl TcpChecker for EximChecker {
     /// Check if the asset is running Exim.
     /// It looks for the Exim banner.
-    fn check(&self, data: &[String]) -> Vec<Finding> {
-        let mut findings: Vec<Finding> = Vec::new();
-
+    fn check(&self, data: &[String]) -> Option<Finding> {
         // For each item, check if it's an Exim banner
         for item in data {
             let caps_result = self.regex.captures(item);
@@ -48,11 +46,10 @@ impl TcpChecker for EximChecker {
                     item
                 );
 
-                let exim_finding = Finding::new("Exim", Some(&exim_version), item, &exim_evidence_text, None);
-                findings.push(exim_finding);
+                return Some(Finding::new("Exim", Some(&exim_version), item, &exim_evidence_text, None));
             }
         }
-        return findings;
+        return None;
     }
 
     /// This checker supports Exim

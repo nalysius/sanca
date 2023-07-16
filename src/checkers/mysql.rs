@@ -30,9 +30,7 @@ impl MySQLChecker {
 impl TcpChecker for MySQLChecker {
     /// Check if the asset is running MySQL.
     /// It looks for the MySQL banner.
-    fn check(&self, data: &[String]) -> Vec<Finding> {
-        let mut findings: Vec<Finding> = Vec::new();
-
+    fn check(&self, data: &[String]) -> Option<Finding> {
         // For each item, check if it's an MySQL banner
         for item in data {
             // Avoid false positive when MariaDB is present in the banner
@@ -51,11 +49,10 @@ impl TcpChecker for MySQLChecker {
                     item
                 );
 
-                let finding = Finding::new("MySQL", Some(&version), item, &evidence_text, None);
-                findings.push(finding);
+                return Some(Finding::new("MySQL", Some(&version), item, &evidence_text, None));
             }
         }
-        return findings;
+        return None;
     }
 
     /// This checker supports MySQL

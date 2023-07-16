@@ -30,9 +30,7 @@ impl MariaDBChecker {
 impl TcpChecker for MariaDBChecker {
     /// Check if the asset is running MariaDB.
     /// It looks for the MariaDB banner.
-    fn check(&self, data: &[String]) -> Vec<Finding> {
-        let mut findings: Vec<Finding> = Vec::new();
-
+    fn check(&self, data: &[String]) -> Option<Finding> {
         // For each item, check if it's an MariaDB banner
         for item in data {
 
@@ -47,11 +45,10 @@ impl TcpChecker for MariaDBChecker {
                     item
                 );
 
-                let finding = Finding::new("MariaDB", Some(&version), item, &evidence_text, None);
-                findings.push(finding);
+                return Some(Finding::new("MariaDB", Some(&version), item, &evidence_text, None));
             }
         }
-        return findings;
+        return None;
     }
 
     /// This checker supports MariaDB

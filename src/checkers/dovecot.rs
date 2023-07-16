@@ -30,9 +30,7 @@ impl DovecotChecker {
 impl TcpChecker for DovecotChecker {
     /// Check if the asset is running Dovecot.
     /// It looks for the Dovecot banner.
-    fn check(&self, data: &[String]) -> Vec<Finding> {
-        let mut findings: Vec<Finding> = Vec::new();
-
+    fn check(&self, data: &[String]) -> Option<Finding> {
         // For each item, check if it's a Dovecot banner
         for item in data {
             // The regex matches
@@ -42,11 +40,10 @@ impl TcpChecker for DovecotChecker {
                     item
                 );
 
-                let finding = Finding::new("Dovecot", None, item, &evidence_text, None);
-                findings.push(finding);
+                return Some(Finding::new("Dovecot", None, item, &evidence_text, None));
             }
         }
-        return findings;
+        return None;
     }
 
     /// This checker supports Dovecot

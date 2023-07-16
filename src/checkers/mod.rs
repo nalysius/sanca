@@ -19,7 +19,7 @@ pub trait TcpChecker {
     /// Checks data to determine if a given technology matches.
     /// data will usually contain only one string (the banner), but
     /// some technologies could provide more information.
-    fn check(&self, data: &[String]) -> Vec<Finding>;
+    fn check(&self, data: &[String]) -> Option<Finding>;
 
     /// Get the technology supported by the checker.
     fn get_technology(&self) -> Technology;
