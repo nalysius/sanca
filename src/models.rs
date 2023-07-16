@@ -1,5 +1,7 @@
 //! In this module are declared the entities manipulated by this program
 
+use std::collections::HashMap;
+
 use clap::{ValueEnum, builder::PossibleValue};
 
 /// Represents the type of scan
@@ -80,6 +82,11 @@ pub enum Technology {
     Typo3,
     WordPress,
     Drupal,
+    /// Apache httpd
+    Httpd,
+    Tomcat,
+    Nginx
+    
 }
 
 impl Technology {
@@ -92,12 +99,39 @@ impl Technology {
             Self::OS => vec![ScanType::Tcp, ScanType::Http],
             Self::JS | Self::PHP | Self::PhpMyAdmin => vec![ScanType::Http],
             Self::WordPress | Self::Drupal | Self::Typo3 => vec![ScanType::Http],
+            Self::Httpd | Self::Tomcat | Self::Nginx => vec![ScanType::Http],
         }
     }
 
     /// Checks whether the technology supports the given scan type
     pub fn supports_scan(&self, scan_type: ScanType) -> bool {
         self.get_scans().contains(&scan_type)
+    }
+
+    /// Get the HTTP paths to request for a given technology
+    pub fn get_url_requests(&self, main_url: &str) -> Vec<UrlRequest> {
+        // At least loads the main URL
+        match self {
+            // Loads only the main URL, but fetch the JavaScript files
+            Self::JS => vec![UrlRequest::new(main_url, true)],
+            Self::PHP => {
+                vec![
+                    UrlRequest::new(main_url, false),
+                    UrlRequest::from_path(main_url, "/phpinfo.php", false),
+                    UrlRequest::from_path(main_url, "/info.php", false),
+                    UrlRequest::from_path(main_url, "phpinfo.php", false),
+                    UrlRequest::from_path(main_url, "info.php", false),
+                ]
+            },
+            Self::Httpd | Self::Tomcat | Self::Nginx  => {
+                vec![
+                    UrlRequest::new(main_url, false),
+                    UrlRequest::from_path(main_url, "/pageNotFoundNotFound", false),
+                ]
+            }
+            // Non-HTTP technologies don't need any paths
+            _ => Vec::new(),
+        }
     }
 }
 
@@ -129,6 +163,79 @@ impl ValueEnum for Technology {
             Technology::WordPress => Some(PossibleValue::new("wordpress")),
             Technology::Drupal => Some(PossibleValue::new("drupal")),
             Technology::Typo3 => Some(PossibleValue::new("typo3")),
+            Technology::Httpd => Some(PossibleValue::new("httpd")),
+            Technology::Tomcat => Some(PossibleValue::new("tomcat")),
+            Technology::Nginx => Some(PossibleValue::new("nginx")),
+        }
+    }
+}
+
+/// Represents a request that an HTTP reader will have to handle
+#[derive(PartialEq)]
+pub struct UrlRequest {
+    /// The URL where to send the HTTP request
+    url: String,
+    /// Whether to fetch the JavaScript files found in the response from url
+    fetch_js: bool,
+}
+
+impl UrlRequest {
+    /// Creates a list of UrlRequests based on a lits of technologies
+    pub fn from_technologies(main_url: &str, technologies: &[Technology]) -> Vec<UrlRequest> {
+        let mut url_requests: Vec<UrlRequest> = Vec::new();
+        // For each technology, add its UrlRequests to the list
+        for technology in technologies {
+            for url_request in technology.get_url_requests(main_url) {
+                // Avoid storing duplicates
+                if !url_requests.contains(&url_request) {
+                    url_requests.push(url_request);
+                }
+            }
+        }
+        // TODO: filter the list. Actually it's possible to have the same URL twice,
+        // once with fetch_js = true and the other one with fetch_js = false
+        // In this case, keep the UrlRequest only once, with fetch_js = true
+        return url_requests;
+    }
+
+    /// Creates a new UrlRequest
+    pub fn new(url: &str, fetch_js: bool) -> Self {
+        UrlRequest {
+            url: url.to_string(),
+            fetch_js: fetch_js
+        }
+    }
+
+    /// Generate a new URL based on the original one and the path.
+    ///
+    /// # Example
+    /// main_url = "https://example.com/blog/index.php"
+    /// 
+    /// If path = "/phpinfo.php" the result will be https://example.com/phpinfo.php
+    /// But if path = "phpinfo.php" the result will be https://example.com/blog/phpinfo.php
+    pub fn from_path(main_url: &str, path: &str, fetch_js: bool) -> Self {
+        let url = ""; // TODO
+        Self::new(url, fetch_js)
+    }
+}
+
+/// Represents the response returned by an HTTP reader
+pub struct UrlResponse {
+    /// The URL where the request was sent
+    url: String,
+    /// The response headers
+    headers: HashMap<String, String>,
+    /// The response body
+    body: String,
+}
+
+impl UrlResponse {
+    /// Creates a new UrlResponse
+    pub fn new(url: &str, headers: HashMap<String, String>, body: &str) -> Self {
+        UrlResponse {
+            url: url.to_string(),
+            headers,
+            body: body.to_string(),
         }
     }
 }
