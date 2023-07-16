@@ -2,7 +2,7 @@
 //! This module contains the checker used to determine if the OS
 //! can be identified.
 
-use crate::models::Finding;
+use crate::models::{Finding, Technology};
 use super::TcpChecker;
 use regex::{Match, Regex};
 
@@ -57,4 +57,8 @@ impl TcpChecker for OSChecker {
         return findings;
     }
 
+    /// This checker supports the OS
+    fn get_technology(&self) -> Technology {
+        Technology::OS
+    }
 }

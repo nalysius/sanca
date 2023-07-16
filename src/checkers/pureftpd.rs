@@ -2,7 +2,7 @@
 //! This module contains the checker used to determine if Pure-FTPd is
 //! used by the asset.
 
-use crate::models::Finding;
+use crate::models::{Finding, Technology};
 use super::TcpChecker;
 use regex::Regex;
 
@@ -56,6 +56,10 @@ impl TcpChecker for PureFTPdChecker {
             }
         }
         return findings;
-}
+    }
 
+    /// This checker supports PureFTPd
+    fn get_technology(&self) -> Technology {
+        Technology::PureFTPd
+    }
 }

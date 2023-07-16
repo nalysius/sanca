@@ -11,7 +11,7 @@ pub mod os;
 pub mod proftpd;
 pub mod pureftpd;
 
-use crate::models::Finding;
+use crate::models::{Finding, Technology};
 use crate::readers::httpreader::HttpRequestResponse;
 
 /// A common interface between all TCP checkers
@@ -20,6 +20,9 @@ pub trait TcpChecker {
     /// data will usually contain only one string (the banner), but
     /// some technologies could provide more information.
     fn check(&self, data: &[String]) -> Vec<Finding>;
+
+    /// Get the technology supported by the checker.
+    fn get_technology(&self) -> Technology;
 }
 
 /// A common interface between all HTTP checkers

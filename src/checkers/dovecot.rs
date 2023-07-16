@@ -2,7 +2,7 @@
 //! This module contains the checker used to determine if Dovecot is
 //! used by the asset.
 
-use crate::models::Finding;
+use crate::models::{Finding, Technology};
 use super::TcpChecker;
 use regex::Regex;
 
@@ -49,4 +49,8 @@ impl TcpChecker for DovecotChecker {
         return findings;
     }
 
+    /// This checker supports Dovecot
+    fn get_technology(&self) -> Technology {
+        Technology::Dovecot
+    }
 }

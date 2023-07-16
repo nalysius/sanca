@@ -2,7 +2,7 @@
 //! This module contains the checker used to determine if MariaDB is
 //! used by the asset.
 
-use crate::models::Finding;
+use crate::models::{Finding, Technology};
 use super::TcpChecker;
 use regex::Regex;
 
@@ -54,4 +54,8 @@ impl TcpChecker for MariaDBChecker {
         return findings;
     }
 
+    /// This checker supports MariaDB
+    fn get_technology(&self) -> Technology {
+        Technology::MariaDB
+    }
 }
