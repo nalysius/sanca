@@ -1,6 +1,6 @@
 //! In this module are declared the entities manipulated by this program
 
-use std::collections::HashMap;
+use std::{collections::HashMap, ops::Index};
 
 use clap::{builder::PossibleValue, ValueEnum};
 
@@ -186,7 +186,6 @@ impl ValueEnum for Technology {
 }
 
 /// Represents a request that an HTTP reader will have to handle
-#[derive(PartialEq)]
 pub struct UrlRequest {
     /// The URL where to send the HTTP request
     url: String,
@@ -197,19 +196,31 @@ pub struct UrlRequest {
 impl UrlRequest {
     /// Creates a list of UrlRequests based on a lits of technologies
     pub fn from_technologies(main_url: &str, technologies: &[Technology]) -> Vec<UrlRequest> {
-        let mut url_requests: Vec<UrlRequest> = Vec::new();
-        // For each technology, add its UrlRequests to the list
+        // Helps to avoid duplicated when building the list of UrlRequests
+        // key is URL, value is fetch_js
+        let mut url_requests_map: HashMap<String, bool> = HashMap::new();
+        // For each technology, add its UrlRequests to the list, while avoiding
+        // duplicates
         for technology in technologies {
             for url_request in technology.get_url_requests(main_url) {
-                // Avoid storing duplicates
-                if !url_requests.contains(&url_request) {
-                    url_requests.push(url_request);
+                // If the URL is not stored already
+                if !url_requests_map.contains_key(&url_request.url) {
+                    url_requests_map.insert(url_request.url, url_request.fetch_js);
+                } else if url_request.fetch_js == true {
+                    // If the URL was already in the list but the new one has
+                    // fetch_js to true, set fetch_js to true also in the list.
+                    // It might be already set to true, but that's not important.
+                    url_requests_map.insert(url_request.url, true);
                 }
             }
         }
-        // TODO: filter the list. Actually it's possible to have the same URL twice,
-        // once with fetch_js = true and the other one with fetch_js = false
-        // In this case, keep the UrlRequest only once, with fetch_js = true
+
+        // Convert the HashMap to a list of UrlRequest
+        let mut url_requests: Vec<UrlRequest> = Vec::new();
+        for (url, fetch_js) in url_requests_map.iter() {
+            url_requests.push(UrlRequest::new(url, *fetch_js));
+        }
+
         return url_requests;
     }
 
