@@ -2,14 +2,14 @@
 //! This module contains the checker used to determine if Pure-FTPd is
 //! used by the asset.
 
-use crate::models::{Finding, Technology};
 use super::TcpChecker;
+use crate::models::{Finding, Technology};
 use regex::Regex;
 
 /// The Pure-FTPd checker
 pub struct PureFTPdChecker {
     /// The regex used to recognize Pure-FTPd
-    regex: Regex
+    regex: Regex,
 }
 
 impl PureFTPdChecker {
@@ -19,12 +19,9 @@ impl PureFTPdChecker {
     pub fn new() -> Self {
         // Example: 220---------- Welcome to Pure-FTPd [name] [TLS] ----------
         let regex = Regex::new(r"Welcome to Pure-FTPd \[(?P<srvname>[a-zA-z0-9-_.]+)\]").unwrap();
-        Self {
-            regex: regex
-        }
+        Self { regex: regex }
     }
 }
-
 
 impl TcpChecker for PureFTPdChecker {
     /// Check if the asset is running Pure-FTPd.
@@ -49,7 +46,13 @@ impl TcpChecker for PureFTPdChecker {
                     evidence
                 );
 
-                return Some(Finding::new("Pure-FTPd", None, &evidence, &evidence_text, None));
+                return Some(Finding::new(
+                    "Pure-FTPd",
+                    None,
+                    &evidence,
+                    &evidence_text,
+                    None,
+                ));
             }
         }
         return None;

@@ -2,14 +2,14 @@
 //! This module contains the checker used to determine if Exim is
 //! used by the asset.
 
-use crate::models::{Finding, Technology};
 use super::TcpChecker;
+use crate::models::{Finding, Technology};
 use regex::Regex;
 
 /// The Exim checker
 pub struct EximChecker {
     /// The regex used to recognize Exim
-    regex: Regex
+    regex: Regex,
 }
 
 impl EximChecker {
@@ -20,12 +20,9 @@ impl EximChecker {
         // Example: 220 test.example.com ESMTP Exim 4.96 Mon, 10 Jul 2023 19:39:15 +0300
         // Date / time are ignored
         let regex = Regex::new(r"^\d\d\d ([a-zA-Z0-9-]+\.)?([a-zA-Z0-9-]+\.)?[a-zA-Z0-9-]+ (?P<smtpprotocol>E?SMTP) Exim (?P<eximversion>\d+\.\d+) ").unwrap();
-        Self {
-            regex: regex
-        }
+        Self { regex: regex }
     }
 }
-
 
 impl TcpChecker for EximChecker {
     /// Check if the asset is running Exim.
@@ -46,7 +43,13 @@ impl TcpChecker for EximChecker {
                     item
                 );
 
-                return Some(Finding::new("Exim", Some(&exim_version), item, &exim_evidence_text, None));
+                return Some(Finding::new(
+                    "Exim",
+                    Some(&exim_version),
+                    item,
+                    &exim_evidence_text,
+                    None,
+                ));
             }
         }
         return None;

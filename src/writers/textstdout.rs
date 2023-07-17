@@ -2,8 +2,8 @@
 //! It is the default writer, it presents the findings in a text
 //! format and prints it on STDOUT.
 
-use crate::models::Finding;
 use super::Writer;
+use crate::models::Finding;
 
 /// A writer to print the findings in the terminal.
 pub struct TextStdout {
@@ -28,12 +28,15 @@ impl TextStdout {
 impl Writer for TextStdout {
     /// Prints the findings on STDOUT
     fn write(&self, findings: Vec<Finding>) {
-
         let title;
         if self.url.is_some() {
             title = self.url.as_ref().unwrap().to_string();
         } else if self.ip_hostname.is_some() && self.port.is_some() {
-            title = format!("{}:{}", self.ip_hostname.as_ref().unwrap(), self.port.unwrap());
+            title = format!(
+                "{}:{}",
+                self.ip_hostname.as_ref().unwrap(),
+                self.port.unwrap()
+            );
         } else {
             panic!("The text writer didn't receive valid parameters");
         }
@@ -44,7 +47,10 @@ impl Writer for TextStdout {
             if finding.version.is_some() {
                 version = &finding.version.as_ref().unwrap();
             }
-            println!("[{}/{}] {}", finding.technology, version, finding.evidence_text);
+            println!(
+                "[{}/{}] {}",
+                finding.technology, version, finding.evidence_text
+            );
         }
     }
 }

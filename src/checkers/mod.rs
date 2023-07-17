@@ -31,4 +31,3 @@ pub trait HttpChecker {
     /// data will contain information about HTTP request & response.
     fn check_http(&self, data: &[HttpRequestResponse]) -> Vec<Finding>;
 }
-

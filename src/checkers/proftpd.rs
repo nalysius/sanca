@@ -2,14 +2,14 @@
 //! This module contains the checker used to determine if ProFTPd is
 //! used by the asset.
 
-use crate::models::{Finding, Technology};
 use super::TcpChecker;
+use crate::models::{Finding, Technology};
 use regex::Regex;
 
 /// The ProFTPD checker
 pub struct ProFTPDChecker {
     /// The regex used to recognize ProFTPD
-    regex: Regex
+    regex: Regex,
 }
 
 impl ProFTPDChecker {
@@ -20,12 +20,9 @@ impl ProFTPDChecker {
         // Example: 220 ProFTPD 1.3.5b Server (ProFTPD) [11.22.33.44]
         // The IP address is ignored by the regex
         let regex = Regex::new(r"^\d\d\d ProFTPD (?P<proftpdversion>\d+\.\d+\.\d+[a-z]?) Server \((?P<proftpdname>.+)\)").unwrap();
-        Self {
-            regex: regex
-        }
+        Self { regex: regex }
     }
 }
-
 
 impl TcpChecker for ProFTPDChecker {
     /// Check if the asset is running ProFTPD.
@@ -46,7 +43,13 @@ impl TcpChecker for ProFTPDChecker {
                     item
                 );
 
-                return Some(Finding::new("ProFTPD", Some(&proftpd_version), item, &proftpd_evidence_text, None));
+                return Some(Finding::new(
+                    "ProFTPD",
+                    Some(&proftpd_version),
+                    item,
+                    &proftpd_evidence_text,
+                    None,
+                ));
             }
         }
         return None;

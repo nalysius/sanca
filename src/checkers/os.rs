@@ -2,15 +2,15 @@
 //! This module contains the checker used to determine if the OS
 //! can be identified.
 
-use crate::models::{Finding, Technology};
 use super::TcpChecker;
+use crate::models::{Finding, Technology};
 use regex::{Match, Regex};
 
 /// The OS checker
 pub struct OSChecker {
     /// The regex used to recognize the OS
     /// TODO: use an array of Regex
-    regex: Regex
+    regex: Regex,
 }
 
 impl OSChecker {
@@ -21,13 +21,12 @@ impl OSChecker {
         // Example: SSH-2.0-OpenSSH_6.7p1 Debian-5
         // Note: the -5 is actually ignored. Could be handled later.
         // TODO: get the package name & version when possible
-        let regex = Regex::new(r"^SSH-\d+\.\d+-OpenSSH_\d+\.\d+([a-z]\d+)?( (?P<os>[a-zA-Z0-0]+))?").unwrap();
-        OSChecker {
-            regex: regex
-        }
+        let regex =
+            Regex::new(r"^SSH-\d+\.\d+-OpenSSH_\d+\.\d+([a-z]\d+)?( (?P<os>[a-zA-Z0-0]+))?")
+                .unwrap();
+        OSChecker { regex: regex }
     }
 }
-
 
 impl TcpChecker for OSChecker {
     /// Check what OS is running on the asset.

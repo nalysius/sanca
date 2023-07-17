@@ -2,14 +2,14 @@
 //! This module contains the checker used to determine if Dovecot is
 //! used by the asset.
 
-use crate::models::{Finding, Technology};
 use super::TcpChecker;
+use crate::models::{Finding, Technology};
 use regex::Regex;
 
 /// The Dovecot checker
 pub struct DovecotChecker {
     /// The regex used to recognize the software
-    regex: Regex
+    regex: Regex,
 }
 
 impl DovecotChecker {
@@ -20,12 +20,9 @@ impl DovecotChecker {
         // Example: * OK [CAPABILITY IMAP4rev1 SASL-IR LOGIN-REFERRALS ID ENABLE IDLE LITERAL+ STARTTLS AUTH=PLAIN AUTH=LOGIN] Dovecot (Ubuntu) ready.
         // Example: +OK Dovecot (Ubuntu) ready.
         let regex = Regex::new(r"OK \[.+\] Dovecot .* ready\.").unwrap();
-        Self {
-            regex: regex
-        }
+        Self { regex: regex }
     }
 }
-
 
 impl TcpChecker for DovecotChecker {
     /// Check if the asset is running Dovecot.

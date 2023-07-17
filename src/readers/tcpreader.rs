@@ -1,10 +1,10 @@
 //! This module declares a TCP reader. The objective is to easily read
 //! data over TCP.
 
-use std::time::Duration;
-use std::io::Result as IoResult;
 use std::io::prelude::*;
+use std::io::Result as IoResult;
 use std::net::TcpStream;
+use std::time::Duration;
 
 /// A TCP reader
 pub struct TcpReader {
@@ -40,7 +40,7 @@ impl TcpReader {
             // read, stop reading and return what we already have.
             if let Err(e) = read_result {
                 if data.len() == 0 {
-                   return Err(e);
+                    return Err(e);
                 } else {
                     break;
                 }
@@ -54,6 +54,5 @@ impl TcpReader {
 
         let from_utf8 = String::from_utf8_lossy(&data);
         return Ok(from_utf8.to_string());
-
     }
 }

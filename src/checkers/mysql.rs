@@ -2,14 +2,14 @@
 //! This module contains the checker used to determine if MySQL is
 //! used by the asset.
 
-use crate::models::{Finding, Technology};
 use super::TcpChecker;
+use crate::models::{Finding, Technology};
 use regex::Regex;
 
 /// The MySQL checker
 pub struct MySQLChecker {
     /// The regex used to recognize MySQL
-    regex: Regex
+    regex: Regex,
 }
 
 impl MySQLChecker {
@@ -20,12 +20,9 @@ impl MySQLChecker {
         // Example: S
         // 5.7.37-nmm1-logm{pX^4gw9JD]Sg4mysql_native_password
         let regex = Regex::new(r"(?P<mysqlversion>\d+\.\d+\.\d+?).+mysql_native_password").unwrap();
-        Self {
-            regex: regex
-        }
+        Self { regex: regex }
     }
 }
-
 
 impl TcpChecker for MySQLChecker {
     /// Check if the asset is running MySQL.
@@ -49,7 +46,13 @@ impl TcpChecker for MySQLChecker {
                     item
                 );
 
-                return Some(Finding::new("MySQL", Some(&version), item, &evidence_text, None));
+                return Some(Finding::new(
+                    "MySQL",
+                    Some(&version),
+                    item,
+                    &evidence_text,
+                    None,
+                ));
             }
         }
         return None;

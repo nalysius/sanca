@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 
-use clap::{ValueEnum, builder::PossibleValue};
+use clap::{builder::PossibleValue, ValueEnum};
 
 /// Represents the type of scan
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -48,13 +48,19 @@ pub struct Finding {
 
 impl Finding {
     /// Creates a new finding
-    pub fn new(technology: &str, version: Option<&str>, evidence: &str, evidence_text: &str, url_of_finding: Option<&str>) -> Self {
+    pub fn new(
+        technology: &str,
+        version: Option<&str>,
+        evidence: &str,
+        evidence_text: &str,
+        url_of_finding: Option<&str>,
+    ) -> Self {
         Finding {
             technology: technology.to_string(),
             version: version.map(|f| f.to_string()),
             evidence: evidence.to_string(),
             evidence_text: evidence_text.to_string(),
-            url_of_finding: url_of_finding.map(|f| f.to_string())
+            url_of_finding: url_of_finding.map(|f| f.to_string()),
         }
     }
 }
@@ -85,8 +91,7 @@ pub enum Technology {
     /// Apache httpd
     Httpd,
     Tomcat,
-    Nginx
-    
+    Nginx,
 }
 
 impl Technology {
@@ -122,8 +127,8 @@ impl Technology {
                     UrlRequest::from_path(main_url, "phpinfo.php", false),
                     UrlRequest::from_path(main_url, "info.php", false),
                 ]
-            },
-            Self::Httpd | Self::Tomcat | Self::Nginx  => {
+            }
+            Self::Httpd | Self::Tomcat | Self::Nginx => {
                 vec![
                     UrlRequest::new(main_url, false),
                     UrlRequest::from_path(main_url, "/pageNotFoundNotFound", false),
@@ -139,10 +144,20 @@ impl ValueEnum for Technology {
     /// Lists the variants available for clap
     fn value_variants<'a>() -> &'a [Self] {
         &[
-            Technology::Dovecot, Technology::Exim, Technology::MariaDB, Technology::MySQL,
-            Technology::OpenSSH, Technology::ProFTPD, Technology::PureFTPd, Technology::OS,
-            Technology::JS, Technology::PHP, Technology::PhpMyAdmin, Technology::WordPress,
-            Technology::Drupal, Technology::Typo3,
+            Technology::Dovecot,
+            Technology::Exim,
+            Technology::MariaDB,
+            Technology::MySQL,
+            Technology::OpenSSH,
+            Technology::ProFTPD,
+            Technology::PureFTPd,
+            Technology::OS,
+            Technology::JS,
+            Technology::PHP,
+            Technology::PhpMyAdmin,
+            Technology::WordPress,
+            Technology::Drupal,
+            Technology::Typo3,
         ]
     }
 
@@ -202,7 +217,7 @@ impl UrlRequest {
     pub fn new(url: &str, fetch_js: bool) -> Self {
         UrlRequest {
             url: url.to_string(),
-            fetch_js: fetch_js
+            fetch_js: fetch_js,
         }
     }
 
@@ -210,7 +225,7 @@ impl UrlRequest {
     ///
     /// # Example
     /// main_url = "https://example.com/blog/index.php"
-    /// 
+    ///
     /// If path = "/phpinfo.php" the result will be https://example.com/phpinfo.php
     /// But if path = "phpinfo.php" the result will be https://example.com/blog/phpinfo.php
     pub fn from_path(main_url: &str, path: &str, fetch_js: bool) -> Self {
