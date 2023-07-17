@@ -3,7 +3,6 @@
 
 use clap::{Parser, ValueEnum};
 
-use crate::checkers::TcpChecker;
 use crate::checkers::dovecot::DovecotChecker;
 use crate::checkers::exim::EximChecker;
 use crate::checkers::mariadb::MariaDBChecker;
@@ -12,11 +11,12 @@ use crate::checkers::openssh::OpenSSHChecker;
 use crate::checkers::os::OSChecker;
 use crate::checkers::proftpd::ProFTPDChecker;
 use crate::checkers::pureftpd::PureFTPdChecker;
+use crate::checkers::TcpChecker;
 use crate::models::{Finding, ScanType, Technology, UrlRequest};
 use crate::readers::httpreader::HttpReader;
 use crate::readers::tcpreader::TcpReader;
-use crate::writers::Writer;
 use crate::writers::textstdout::TextStdout;
+use crate::writers::Writer;
 
 /// Represents the application
 pub struct Application {
@@ -52,8 +52,9 @@ impl Application {
     pub fn read_argv(&mut self) {
         let mut args = Args::parse();
         // For a TCP or UDP scan these two arguments are required
-        if (args.scan_type == ScanType::Tcp || args.scan_type == ScanType::Udp) && 
-            (args.ip_hostname.is_none() || args.port.is_none())
+        // TODO: manage this with clap
+        if (args.scan_type == ScanType::Tcp || args.scan_type == ScanType::Udp)
+            && (args.ip_hostname.is_none() || args.port.is_none())
         {
             println!("Invalid parameters provided. Use sanca --help");
             panic!("To perform a TCP or UDP scan, the scan type, ip or hostname, and the port are required.");
@@ -63,23 +64,32 @@ impl Application {
             panic!("To perform a HTTP scan, the url is required.");
         } else if args.technologies.is_none() {
             // If no technologies are provided, check for all
-            let scan_type = args.scan_type;
-            // Filter on technologies supporting the given type of scan
-            // It's not needed to check for Exim or ProFTPd in a HTTP scan
-            let technologies: Vec<Technology> = Technology::value_variants()
-                                .to_vec()
-                                .iter()
-                                .filter(|i| i.supports_scan(scan_type))
-                                .map(|i| i.to_owned())
-                                .collect();
-            args.technologies = Some(technologies);
+            args.technologies = Some(Technology::value_variants().to_vec());
         }
+        // Filter on technologies supporting the given type of scan
+        // It's not needed to check for Exim or ProFTPd in a HTTP scan
+        let scan_type = args.scan_type;
+        args.technologies = Some(
+            args.technologies
+                .as_ref()
+                .unwrap()
+                .iter()
+                .filter(|i| i.supports_scan(scan_type))
+                .map(|i| i.to_owned())
+                .collect(),
+        );
 
         self.argv = Some(args);
     }
-    
+
     /// Executes a TCP or UDP scan
-    pub fn tcp_udp_scan(&self, ip_hostname: &str, port: u16, scan_type: ScanType, technologies: &[Technology]) -> Vec<Finding> {
+    pub fn tcp_udp_scan(
+        &self,
+        ip_hostname: &str,
+        port: u16,
+        scan_type: ScanType,
+        technologies: &[Technology],
+    ) -> Vec<Finding> {
         let mut findings: Vec<Finding> = Vec::new();
         if scan_type == ScanType::Tcp {
             let tcp_reader = TcpReader::new(ip_hostname, port);
@@ -109,26 +119,40 @@ impl Application {
     /// Runs the global application
     /// read_argv() MUST have been called before
     pub fn run(&self) {
-        let args = self.argv.as_ref()
-                    .expect("CLI arguments haven't been read.");
+        let args = self
+            .argv
+            .as_ref()
+            .expect("CLI arguments haven't been read.");
         let findings: Vec<Finding> = match args.scan_type {
             ScanType::Tcp | ScanType::Udp => {
                 let ip_hostname = &args.ip_hostname.clone().unwrap();
                 let port = args.port.clone().unwrap();
                 let scan_type = args.scan_type.clone();
-                self.tcp_udp_scan(&ip_hostname, port, scan_type, &args.technologies.as_ref().unwrap())
-            },
+                self.tcp_udp_scan(
+                    &ip_hostname,
+                    port,
+                    scan_type,
+                    &args.technologies.as_ref().unwrap(),
+                )
+            }
             ScanType::Http => {
-                //let url_requests = UrlRequest::from_technologies(&args.url.as_ref().unwrap(), &args.technologies.as_ref().unwrap());
-                //let http_reader = HttpReader::new();
-                //let url_responses = http_reader.read(&url_requests);
+                /*let url_requests = UrlRequest::from_technologies(
+                    &args.url.as_ref().unwrap(),
+                    &args.technologies.as_ref().unwrap(),
+                );
+                let http_reader = HttpReader::new();
+                let url_responses = http_reader.read(&url_requests);*/
                 println!("TODO: implement HTTP scan in Application::run()");
                 Vec::new()
-            },
+            }
         };
 
-        let writer = TextStdout::new(args.ip_hostname.clone(), args.port.clone(), args.url.clone());
-        writer.write(findings);           
+        let writer = TextStdout::new(
+            args.ip_hostname.clone(),
+            args.port.clone(),
+            args.url.clone(),
+        );
+        writer.write(findings);
     }
 }
 
