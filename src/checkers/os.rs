@@ -20,7 +20,8 @@ impl OSChecker {
     pub fn new() -> Self {
         // Example: SSH-2.0-OpenSSH_6.7p1 Debian-5
         // Note: the -5 is actually ignored. Could be handled later.
-        // TODO: get the package name & version when possible
+        // TODO: use the OpenSSH version & the OS name to determine which version
+        // of OS is used
         let regex =
             Regex::new(r"^SSH-\d+\.\d+-OpenSSH_\d+\.\d+([a-z]\d+)?( (?P<os>[a-zA-Z0-0]+))?")
                 .unwrap();
