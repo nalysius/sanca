@@ -1,8 +1,9 @@
 //! In this module are declared the entities manipulated by this program
 
-use std::{collections::HashMap, ops::Index};
+use std::collections::HashMap;
 
 use clap::{builder::PossibleValue, ValueEnum};
+use regex::Regex;
 
 /// Represents the type of scan
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -186,6 +187,7 @@ impl ValueEnum for Technology {
 }
 
 /// Represents a request that an HTTP reader will have to handle
+#[derive(Debug)]
 pub struct UrlRequest {
     /// The URL where to send the HTTP request
     url: String,
@@ -239,9 +241,90 @@ impl UrlRequest {
     ///
     /// If path = "/phpinfo.php" the result will be https://example.com/phpinfo.php
     /// But if path = "phpinfo.php" the result will be https://example.com/blog/phpinfo.php
-    pub fn from_path(main_url: &str, path: &str, fetch_js: bool) -> Self {
-        let url = ""; // TODO
-        Self::new(url, fetch_js)
+    pub fn from_path(main_url: &str, path_to: &str, fetch_js: bool) -> Self {
+        // Note: this regex is not exhaustive. It doesn't support the
+        // user:pass@hostname form, and it ignores the hash (#ancher1)
+        // But it should enough for what we have to do with it.
+        let url_regex = Regex::new(r"(?P<protocol>[a-z0-9]+):\/\/(?P<hostname>[^\/:]+)(:(?P<port>\d{1,5}))?(?P<path>\/[^\?]*)?(?P<querystring>\?[^#]*)?").unwrap();
+        let caps = url_regex
+            .captures(main_url)
+            .expect(&format!("Unable to parse the provided URL: {}", main_url));
+        let protocol: String = caps["protocol"].to_string();
+        let hostname: String = caps["hostname"].to_string();
+        // If the port is not provided, use the default for http / https
+        let port: String = if caps.name("port").is_some() {
+            caps.name("port").unwrap().as_str().to_string()
+        } else {
+            if protocol == "http" {
+                "80".to_string()
+            } else if protocol == "https" {
+                "443".to_string()
+            } else {
+                panic!(
+                    "Protocol {} not supported. Only http & https are supported",
+                    protocol
+                );
+            }
+        };
+        // If no path is provided, uses /
+        let path_from: String = if caps.name("path").is_some() {
+            caps.name("path").unwrap().as_str().to_string()
+        } else {
+            "/".to_string()
+        };
+        let query_string: String = if caps.name("querystring").is_some() {
+            caps.name("querystring").unwrap().as_str().to_string()
+        } else {
+            "".to_string()
+        };
+
+        let new_path: String = if path_to.starts_with("/") {
+            // If an absolute path is provided, just use it
+            path_to.to_string()
+        } else {
+            // Here handle the relative path in path_to
+            let path_parts: Vec<String> = path_from.split("/").map(|i| i.to_string()).collect();
+
+            if path_from.chars().nth(path_from.len() - 1).unwrap() == '/' {
+                // If the last char of the original path is a /, concatenate the paths
+                // Example: https://example.com/something/that/
+                // In this case, a path of "test.php" would produce the URL
+                // https://example.com/something/that/test.php
+                format!("{}{}", path_from, path_to)
+            } else if path_parts.len() <= 1 {
+                // If we were at the top of the tree, just use path_to
+                // Example: https://example.com/something
+                // In this case, a path_to of "other/index.php" would produce the URL
+                // https://example.com/other/index.php
+                path_to.to_string()
+            } else {
+                // If we have an original path with several parts and not ending with a /,
+                // just remove the last part.
+                // Example: https://example.com/this/that.php
+                // In this case, a path of "index.php" would produce the URL
+                // https://example.com/this/index.php
+                let mut np = "/".to_string();
+                let mut part_counter = 0;
+                for part in path_parts.iter() {
+                    // We take all parts except the last one
+                    if part_counter < path_parts.len() - 1 {
+                        np.push_str(part);
+                    }
+                    part_counter += 1;
+                }
+                np.push_str(&format!("/{}", path_to));
+                np
+            }
+        };
+
+        // Avoid sending requests with a '?' if no query string is provided
+        let qs = if query_string.is_empty() {
+            "".to_string()
+        } else {
+            format!("?{}", query_string)
+        };
+        let url = format!("{}://{}:{}{}{}", protocol, hostname, port, new_path, qs);
+        Self::new(&url, fetch_js)
     }
 }
 
