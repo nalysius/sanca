@@ -136,13 +136,27 @@ impl Application {
                 )
             }
             ScanType::Http => {
-                /*let url_requests = UrlRequest::from_technologies(
+                let tk_runtime = tokio::runtime::Builder::new_current_thread()
+                    .enable_all()
+                    .build()
+                    .unwrap();
+
+                let url_requests = UrlRequest::from_technologies(
                     &args.url.as_ref().unwrap(),
                     &args.technologies.as_ref().unwrap(),
                 );
+
                 let http_reader = HttpReader::new();
-                let url_responses = http_reader.read(&url_requests);*/
-                println!("TODO: implement HTTP scan in Application::run()");
+                // Note: if in the future Sanca has to scan a whole website recursively,
+                // block_on() will be called on each http_reader.read() call.
+                // So, all requests from the current pool will be sent in parallel, and we'll
+                // wait to get all the responses (and the new URLs to fetch) to fetch the next
+                // pool.
+                let url_responses = tk_runtime.block_on(http_reader.read(&url_requests));
+                for url_response in url_responses {
+                    println!("URL:{}", url_response.url);
+                    println!("BODY: {}", url_response.body);
+                }
                 Vec::new()
             }
         };

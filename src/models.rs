@@ -190,9 +190,9 @@ impl ValueEnum for Technology {
 #[derive(Debug)]
 pub struct UrlRequest {
     /// The URL where to send the HTTP request
-    url: String,
+    pub url: String,
     /// Whether to fetch the JavaScript files found in the response from url
-    fetch_js: bool,
+    pub fetch_js: bool,
 }
 
 impl UrlRequest {
@@ -331,11 +331,11 @@ impl UrlRequest {
 /// Represents the response returned by an HTTP reader
 pub struct UrlResponse {
     /// The URL where the request was sent
-    url: String,
+    pub url: String,
     /// The response headers
-    headers: HashMap<String, String>,
+    pub headers: HashMap<String, String>,
     /// The response body
-    body: String,
+    pub body: String,
 }
 
 impl UrlResponse {
@@ -346,5 +346,13 @@ impl UrlResponse {
             headers,
             body: body.to_string(),
         }
+    }
+}
+
+impl PartialEq for UrlResponse {
+    /// Two UrlResponse are considered equal if their URLs
+    /// are identical. It is to avoid duplicate.
+    fn eq(&self, other: &Self) -> bool {
+        self.url == other.url
     }
 }
