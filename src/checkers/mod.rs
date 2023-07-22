@@ -7,6 +7,7 @@ pub mod exim;
 pub mod httpd;
 pub mod mariadb;
 pub mod mysql;
+pub mod nginx;
 pub mod openssh;
 pub mod os;
 pub mod proftpd;
