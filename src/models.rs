@@ -159,6 +159,7 @@ impl ValueEnum for Technology {
             Technology::WordPress,
             Technology::Drupal,
             Technology::Typo3,
+            Technology::Httpd,
         ]
     }
 

@@ -95,7 +95,9 @@ impl HttpReader {
         let mut headers: HashMap<String, String> = HashMap::new();
         for (header_name, header_value) in response.headers().iter() {
             headers.insert(
-                header_name.to_string(),
+                // Convert to lowercase to avoid missing a header in checkers
+                // because of case sensitivity
+                header_name.to_string().to_lowercase(),
                 header_value.to_str().unwrap_or("").to_string(),
             );
         }
@@ -104,20 +106,4 @@ impl HttpReader {
 
         Ok(UrlResponse::new(&url_request.url, headers, &body))
     }
-}
-
-/// A struct to represent the result of an HTTP reader.
-/// It contains everything that a checker could need.
-pub struct HttpRequestResponse {
-    /// The full URL where the HTTP request has been sent
-    pub request_url: String,
-    /// The HTTP headers of the response
-    pub response_headers: HashMap<String, String>,
-    /// The body of the HTTP response
-    pub response_body: String,
-    /// Whether it was the main request or a subsequent URL.
-    /// In the body of /index.php we could find a lot of JavaScript files
-    /// and decide to fetch them too. The JavaScript files would be subsequent
-    /// requests, not main ones.
-    pub is_main_request: bool,
 }

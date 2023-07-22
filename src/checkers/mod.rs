@@ -4,6 +4,7 @@
 
 pub mod dovecot;
 pub mod exim;
+pub mod httpd;
 pub mod mariadb;
 pub mod mysql;
 pub mod openssh;
@@ -11,8 +12,7 @@ pub mod os;
 pub mod proftpd;
 pub mod pureftpd;
 
-use crate::models::{Finding, Technology};
-use crate::readers::httpreader::HttpRequestResponse;
+use crate::models::{Finding, Technology, UrlResponse};
 
 /// A common interface between all TCP checkers
 pub trait TcpChecker {
@@ -29,5 +29,8 @@ pub trait TcpChecker {
 pub trait HttpChecker {
     /// Checks data to determine if a given technology matches.
     /// data will contain information about HTTP request & response.
-    fn check_http(&self, data: &[HttpRequestResponse]) -> Vec<Finding>;
+    fn check_http(&self, data: &[UrlResponse]) -> Option<Finding>;
+
+    /// Get the technology supported by the checker.
+    fn get_technology(&self) -> Technology;
 }

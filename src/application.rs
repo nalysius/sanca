@@ -5,13 +5,14 @@ use clap::{Parser, ValueEnum};
 
 use crate::checkers::dovecot::DovecotChecker;
 use crate::checkers::exim::EximChecker;
+use crate::checkers::httpd::ApacheHttpdChecker;
 use crate::checkers::mariadb::MariaDBChecker;
 use crate::checkers::mysql::MySQLChecker;
 use crate::checkers::openssh::OpenSSHChecker;
 use crate::checkers::os::OSChecker;
 use crate::checkers::proftpd::ProFTPDChecker;
 use crate::checkers::pureftpd::PureFTPdChecker;
-use crate::checkers::TcpChecker;
+use crate::checkers::{HttpChecker, TcpChecker};
 use crate::models::{Finding, ScanType, Technology, UrlRequest};
 use crate::readers::httpreader::HttpReader;
 use crate::readers::tcpreader::TcpReader;
@@ -22,7 +23,9 @@ use crate::writers::Writer;
 pub struct Application {
     /// The list of TCP checkers available to the application.
     tcp_checkers: Vec<Box<dyn TcpChecker>>,
-    /// The arguments given on the command line
+    /// The list of HTTP checkers available to the application.
+    http_checkers: Vec<Box<dyn HttpChecker>>,
+    /// The arguments given on the command line.
     argv: Option<Args>,
 }
 
@@ -42,8 +45,11 @@ impl Application {
             Box::new(OSChecker::new()),
         ];
 
+        let http_checkers: Vec<Box<dyn HttpChecker>> = vec![Box::new(ApacheHttpdChecker::new())];
+
         Application {
             tcp_checkers,
+            http_checkers,
             argv: None,
         }
     }
@@ -116,6 +122,31 @@ impl Application {
         return findings;
     }
 
+    /// Performs a HTTP scan on a given set of UrlRequest
+    fn http_scan(&self, url_requests: &[UrlRequest], technologies: &[Technology]) -> Vec<Finding> {
+        let tk_runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+
+        let http_reader = HttpReader::new();
+        // Wait for all the HTTP requests to be finished
+        let url_responses = tk_runtime.block_on(http_reader.read(&url_requests));
+
+        let mut findings = Vec::new();
+        for http_checker in &self.http_checkers {
+            // Only use the current checker if it checks for one of the
+            // technologies we're looking for
+            if technologies.contains(&http_checker.get_technology()) {
+                let finding = http_checker.check_http(&url_responses);
+                if finding.is_some() {
+                    findings.push(finding.unwrap());
+                }
+            }
+        }
+        findings
+    }
+
     /// Runs the global application
     /// read_argv() MUST have been called before
     pub fn run(&self) {
@@ -136,28 +167,11 @@ impl Application {
                 )
             }
             ScanType::Http => {
-                let tk_runtime = tokio::runtime::Builder::new_current_thread()
-                    .enable_all()
-                    .build()
-                    .unwrap();
-
                 let url_requests = UrlRequest::from_technologies(
                     &args.url.as_ref().unwrap(),
                     &args.technologies.as_ref().unwrap(),
                 );
-
-                let http_reader = HttpReader::new();
-                // Note: if in the future Sanca has to scan a whole website recursively,
-                // block_on() will be called on each http_reader.read() call.
-                // So, all requests from the current pool will be sent in parallel, and we'll
-                // wait to get all the responses (and the new URLs to fetch) to fetch the next
-                // pool.
-                let url_responses = tk_runtime.block_on(http_reader.read(&url_requests));
-                for url_response in url_responses {
-                    println!("URL:{}", url_response.url);
-                    println!("BODY: {}", url_response.body);
-                }
-                Vec::new()
+                self.http_scan(&url_requests, &args.technologies.as_ref().unwrap())
             }
         };
 
