@@ -32,8 +32,7 @@ impl<'a> OpenSSHChecker<'a> {
 
 impl<'a> TcpChecker for OpenSSHChecker<'a> {
     /// Check if the asset is running OpenSSH.
-    /// It looks for the OpenSSH banner. It can create two findings,
-    /// one for OpenSSH and one for the OS if present.
+    /// It looks for the OpenSSH banner.
     fn check_tcp(&self, data: &[String]) -> Option<Finding> {
         // For each item, check if it's an OpenSSH banner
         for item in data {
