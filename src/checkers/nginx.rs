@@ -94,6 +94,6 @@ impl<'a> HttpChecker for NginxChecker<'a> {
 
     /// This checker supports Apache httpd
     fn get_technology(&self) -> Technology {
-        Technology::Httpd
+        Technology::Nginx
     }
 }
