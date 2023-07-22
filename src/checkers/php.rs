@@ -78,6 +78,6 @@ impl<'a> HttpChecker for PHPChecker<'a> {
 
     /// This checker supports Apache httpd
     fn get_technology(&self) -> Technology {
-        Technology::Httpd
+        Technology::PHP
     }
 }
