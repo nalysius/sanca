@@ -221,7 +221,16 @@ impl UrlRequest {
         // Convert the HashMap to a list of UrlRequest
         let mut url_requests: Vec<UrlRequest> = Vec::new();
         for (url, fetch_js) in url_requests_map.iter() {
-            url_requests.push(UrlRequest::new(url, *fetch_js));
+            // The objective is to keep the main URL always in first position.
+            // When possible, it's better to manage the main URL first, it will
+            // be clearer for the user.
+            if url == main_url {
+                let mut tmp = vec![UrlRequest::new(url, *fetch_js)];
+                tmp.extend(url_requests);
+                url_requests = tmp;
+            } else {
+                url_requests.push(UrlRequest::new(url, *fetch_js));
+            }
         }
 
         return url_requests;
