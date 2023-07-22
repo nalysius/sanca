@@ -77,17 +77,8 @@ impl<'a> TcpChecker for OSChecker<'a> {
 impl<'a> HttpChecker for OSChecker<'a> {
     fn check_http(&self, data: &[crate::models::UrlResponse]) -> Option<Finding> {
         for url_response in data {
-            let headers = &url_response.headers;
-            let mut headers_to_check = HashMap::new();
-            let server_header = headers.get("server");
-            if server_header.is_some() {
-                headers_to_check.insert("Server", server_header.unwrap());
-            }
-
-            let x_powered_by_header = headers.get("x-powered-by");
-            if x_powered_by_header.is_some() {
-                headers_to_check.insert("X-Powered-By", x_powered_by_header.unwrap());
-            }
+            let headers_to_check =
+                url_response.get_headers(&vec!["Server".to_string(), "X-powered-by".to_string()]);
 
             // Check in the headers to check that were present in this UrlResponse
             for (header_name, header_value) in headers_to_check {
@@ -100,7 +91,6 @@ impl<'a> HttpChecker for OSChecker<'a> {
                 if caps_result.is_some() {
                     let caps = caps_result.unwrap();
                     let osname = caps["osname"].to_string();
-
                     let evidence = &format!("{}: {}", header_name, header_value);
                     let evidence_text = format!(
                         "The operating system {} has been identified using the HTTP header \"{}\" returned at the following URL: {}",

@@ -37,7 +37,7 @@ impl<'a> HttpChecker for ApacheHttpdChecker<'a> {
         for url_response in data {
             // Check the HTTP headers of each UrlResponse
             let headers_to_check =
-                url_response.get_headers(&vec!["server".to_string(), "x-powered-by".to_string()]);
+                url_response.get_headers(&vec!["Server".to_string(), "X-powered-by".to_string()]);
 
             // Check in the headers to check that were present in this UrlResponse
             for (header_name, header_value) in headers_to_check {

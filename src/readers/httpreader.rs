@@ -94,10 +94,15 @@ impl HttpReader {
         let response = response_result.unwrap();
         let mut headers: HashMap<String, String> = HashMap::new();
         for (header_name, header_value) in response.headers().iter() {
+            // Only the first letter of the header name is in uppercase
+            // It will avoid struggling with the case later
+            let mut header_name_text = header_name.to_string().to_lowercase();
+            header_name_text
+                .get_mut(0..1)
+                .unwrap()
+                .make_ascii_uppercase();
             headers.insert(
-                // Convert to lowercase to avoid missing a header in checkers
-                // because of case sensitivity
-                header_name.to_string().to_lowercase(),
+                header_name_text,
                 header_value.to_str().unwrap_or("").to_string(),
             );
         }
