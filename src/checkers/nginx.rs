@@ -23,7 +23,7 @@ impl<'a> NginxChecker<'a> {
         // Example: nginx/1.22.3 (Debian)
         let header_regex = Regex::new(r"^nginx(\/(?P<nginxversion>\d+\.\d+(\.\d+)?))?").unwrap();
         regexes.insert("http-header", header_regex);
-        NginxChecker { regexes: regexes }
+        Self { regexes: regexes }
     }
 }
 
@@ -53,15 +53,14 @@ impl<'a> HttpChecker for NginxChecker<'a> {
                     let evidence = &format!("{}: {}", header_name, header_value);
                     let nginx_version_match: Option<Match> = caps.name("nginxversion");
                     let mut nginx_version: Option<&str> = None;
+                    let mut nginx_version_text = String::new();
                     if nginx_version_match.is_some() {
                         nginx_version = Some(nginx_version_match.unwrap().as_str());
-                    }
-                    let mut nginx_version_text = String::new();
-                    if nginx_version.is_some() {
                         // Add a space in the version, so in the evidence text we
                         // avoid a double space if the version is not found
                         nginx_version_text = format!(" {}", nginx_version.unwrap());
                     }
+
                     let evidence_text = format!(
                         "Nginx{} has been identified using the HTTP header \"{}\" returned at the following URL: {}",
                         nginx_version_text,

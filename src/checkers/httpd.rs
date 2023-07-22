@@ -23,7 +23,7 @@ impl<'a> ApacheHttpdChecker<'a> {
         // Example: Apache/2.4.52 (Debian)
         let header_regex = Regex::new(r"^Apache(\/(?P<httpdversion>\d+\.\d+\.\d+))?").unwrap();
         regexes.insert("http-header", header_regex);
-        ApacheHttpdChecker { regexes: regexes }
+        Self { regexes: regexes }
     }
 }
 
@@ -53,15 +53,14 @@ impl<'a> HttpChecker for ApacheHttpdChecker<'a> {
                     let evidence = &format!("{}: {}", header_name, header_value);
                     let httpd_version_match: Option<Match> = caps.name("httpdversion");
                     let mut httpd_version: Option<&str> = None;
+                    let mut httpd_version_text = String::new();
                     if httpd_version_match.is_some() {
                         httpd_version = Some(httpd_version_match.unwrap().as_str());
-                    }
-                    let mut httpd_version_text = String::new();
-                    if httpd_version.is_some() {
                         // Add a space in the version, so in the evidence text we
                         // avoid a double space if the version is not found
                         httpd_version_text = format!(" {}", httpd_version.unwrap());
                     }
+
                     let evidence_text = format!(
                         "Apache httpd{} has been identified using the HTTP header \"{}\" returned at the following URL: {}",
                         httpd_version_text,
