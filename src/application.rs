@@ -8,6 +8,7 @@ use crate::checkers::exim::EximChecker;
 use crate::checkers::httpd::ApacheHttpdChecker;
 use crate::checkers::mariadb::MariaDBChecker;
 use crate::checkers::mysql::MySQLChecker;
+use crate::checkers::nginx::NginxChecker;
 use crate::checkers::openssh::OpenSSHChecker;
 use crate::checkers::os::OSChecker;
 use crate::checkers::proftpd::ProFTPDChecker;
@@ -45,7 +46,11 @@ impl Application {
             Box::new(OSChecker::new()),
         ];
 
-        let http_checkers: Vec<Box<dyn HttpChecker>> = vec![Box::new(ApacheHttpdChecker::new())];
+        let http_checkers: Vec<Box<dyn HttpChecker>> = vec![
+            Box::new(ApacheHttpdChecker::new()),
+            Box::new(OSChecker::new()),
+            Box::new(NginxChecker::new()),
+        ];
 
         Application {
             tcp_checkers,
