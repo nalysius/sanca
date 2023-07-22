@@ -10,6 +10,7 @@ pub mod mysql;
 pub mod nginx;
 pub mod openssh;
 pub mod os;
+pub mod php;
 pub mod proftpd;
 pub mod pureftpd;
 

@@ -11,6 +11,7 @@ use crate::checkers::mysql::MySQLChecker;
 use crate::checkers::nginx::NginxChecker;
 use crate::checkers::openssh::OpenSSHChecker;
 use crate::checkers::os::OSChecker;
+use crate::checkers::php::PHPChecker;
 use crate::checkers::proftpd::ProFTPDChecker;
 use crate::checkers::pureftpd::PureFTPdChecker;
 use crate::checkers::{HttpChecker, TcpChecker};
@@ -50,6 +51,7 @@ impl Application {
             Box::new(ApacheHttpdChecker::new()),
             Box::new(OSChecker::new()),
             Box::new(NginxChecker::new()),
+            Box::new(PHPChecker::new()),
         ];
 
         Application {
