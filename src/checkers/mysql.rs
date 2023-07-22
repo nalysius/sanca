@@ -2,29 +2,33 @@
 //! This module contains the checker used to determine if MySQL is
 //! used by the asset.
 
+use std::collections::HashMap;
+
 use super::TcpChecker;
 use crate::models::{Finding, Technology};
 use regex::Regex;
 
 /// The MySQL checker
-pub struct MySQLChecker {
-    /// The regex used to recognize MySQL
-    regex: Regex,
+pub struct MySQLChecker<'a> {
+    /// The regexes used to recognize MySQL
+    regexes: HashMap<&'a str, Regex>,
 }
 
-impl MySQLChecker {
+impl<'a> MySQLChecker<'a> {
     /// Creates a new MySQLChecker.
     /// By doing so, the regex will is compiled once and the checker can be
     /// reused.
     pub fn new() -> Self {
+        let mut regexes = HashMap::new();
         // Example: S
         // 5.7.37-nmm1-logm{pX^4gw9JD]Sg4mysql_native_password
         let regex = Regex::new(r"(?P<mysqlversion>\d+\.\d+\.\d+?).+mysql_native_password").unwrap();
-        Self { regex: regex }
+        regexes.insert("mysql-banner", regex);
+        Self { regexes: regexes }
     }
 }
 
-impl TcpChecker for MySQLChecker {
+impl<'a> TcpChecker for MySQLChecker<'a> {
     /// Check if the asset is running MySQL.
     /// It looks for the MySQL banner.
     fn check_tcp(&self, data: &[String]) -> Option<Finding> {
@@ -35,7 +39,11 @@ impl TcpChecker for MySQLChecker {
                 continue;
             }
 
-            let caps_result = self.regex.captures(item);
+            let caps_result = self
+                .regexes
+                .get("mysql-banner")
+                .expect("Regex \"mysql-banner\" not found")
+                .captures(item);
             // The regex matches
             if caps_result.is_some() {
                 let caps = caps_result.unwrap();

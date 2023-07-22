@@ -2,37 +2,46 @@
 //! This module contains the checker used to determine if OpenSSH is
 //! used by the asset.
 
+use std::collections::HashMap;
+
 use super::TcpChecker;
 use crate::models::{Finding, Technology};
 use regex::Regex;
 
 /// The OpenSSH checker
-pub struct OpenSSHChecker {
-    /// The regex used to recognize OpenSSH
-    regex: Regex,
+pub struct OpenSSHChecker<'a> {
+    /// The regexes used to recognize OpenSSH
+    regexes: HashMap<&'a str, Regex>,
 }
 
-impl OpenSSHChecker {
+impl<'a> OpenSSHChecker<'a> {
     /// Creates a new OpenSSHChecker.
     /// By doing so, the regex will is compiled once and the checker can be
     /// reused.
     pub fn new() -> Self {
+        let mut regexes = HashMap::new();
         // Example: SSH-2.0-OpenSSH_6.7p1 Debian-5
+        // SSH-2.0-OpenSSH_6.7p1 Debian-5+deb8u2
         // Note: the -5 is actually ignored. Could be handled later.
         // TODO: get the package name & version when possible
-        let regex = Regex::new(r"^SSH-(?P<sshversion>\d+\.\d+)-OpenSSH_(?P<opensshversion>\d+\.\d+([a-z]\d+)?)( (?P<os>[a-zA-Z0-0]+))?").unwrap();
-        OpenSSHChecker { regex: regex }
+        let regex = Regex::new(r"^SSH-(?P<sshversion>\d+\.\d+)-OpenSSH_(?P<opensshversion>\d+\.\d+([a-z]\d+)?)( [a-zA-Z0-0]+)?").unwrap();
+        regexes.insert("banner", regex);
+        OpenSSHChecker { regexes: regexes }
     }
 }
 
-impl TcpChecker for OpenSSHChecker {
+impl<'a> TcpChecker for OpenSSHChecker<'a> {
     /// Check if the asset is running OpenSSH.
     /// It looks for the OpenSSH banner. It can create two findings,
     /// one for OpenSSH and one for the OS if present.
     fn check_tcp(&self, data: &[String]) -> Option<Finding> {
         // For each item, check if it's an OpenSSH banner
         for item in data {
-            let caps_result = self.regex.captures(item);
+            let caps_result = self
+                .regexes
+                .get("banner")
+                .expect("Regex \"banner\" not found.")
+                .captures(item);
             // The regex matches
             if caps_result.is_some() {
                 let caps = caps_result.unwrap();

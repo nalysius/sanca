@@ -2,35 +2,43 @@
 //! This module contains the checker used to determine if Exim is
 //! used by the asset.
 
+use std::collections::HashMap;
+
 use super::TcpChecker;
 use crate::models::{Finding, Technology};
 use regex::Regex;
 
 /// The Exim checker
-pub struct EximChecker {
-    /// The regex used to recognize Exim
-    regex: Regex,
+pub struct EximChecker<'a> {
+    /// The regexes used to recognize Exim
+    regexes: HashMap<&'a str, Regex>,
 }
 
-impl EximChecker {
+impl<'a> EximChecker<'a> {
     /// Creates a new EximChecker.
     /// By doing so, the regex will is compiled once and the checker can be
     /// reused.
     pub fn new() -> Self {
+        let mut regexes = HashMap::new();
         // Example: 220 test.example.com ESMTP Exim 4.96 Mon, 10 Jul 2023 19:39:15 +0300
         // Date / time are ignored
         let regex = Regex::new(r"^\d\d\d ([a-zA-Z0-9-]+\.)?([a-zA-Z0-9-]+\.)?[a-zA-Z0-9-]+ (?P<smtpprotocol>E?SMTP) Exim (?P<eximversion>\d+\.\d+) ").unwrap();
-        Self { regex: regex }
+        regexes.insert("exim-banner", regex);
+        Self { regexes: regexes }
     }
 }
 
-impl TcpChecker for EximChecker {
+impl<'a> TcpChecker for EximChecker<'a> {
     /// Check if the asset is running Exim.
     /// It looks for the Exim banner.
     fn check_tcp(&self, data: &[String]) -> Option<Finding> {
         // For each item, check if it's an Exim banner
         for item in data {
-            let caps_result = self.regex.captures(item);
+            let caps_result = self
+                .regexes
+                .get("exim-banner")
+                .expect("Regex \"exim-banner\" not found.")
+                .captures(item);
             // The regex matches
             if caps_result.is_some() {
                 let caps = caps_result.unwrap();

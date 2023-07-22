@@ -2,34 +2,42 @@
 //! This module contains the checker used to determine if Pure-FTPd is
 //! used by the asset.
 
+use std::collections::HashMap;
+
 use super::TcpChecker;
 use crate::models::{Finding, Technology};
 use regex::Regex;
 
 /// The Pure-FTPd checker
-pub struct PureFTPdChecker {
-    /// The regex used to recognize Pure-FTPd
-    regex: Regex,
+pub struct PureFTPdChecker<'a> {
+    /// The regexes used to recognize Pure-FTPd
+    regexes: HashMap<&'a str, Regex>,
 }
 
-impl PureFTPdChecker {
+impl<'a> PureFTPdChecker<'a> {
     /// Creates a new PureFTPdChecker.
     /// By doing so, the regex will is compiled once and the checker can be
     /// reused.
     pub fn new() -> Self {
+        let mut regexes = HashMap::new();
         // Example: 220---------- Welcome to Pure-FTPd [name] [TLS] ----------
         let regex = Regex::new(r"Welcome to Pure-FTPd \[(?P<srvname>[a-zA-z0-9-_.]+)\]").unwrap();
-        Self { regex: regex }
+        regexes.insert("pureftpd-banner", regex);
+        Self { regexes: regexes }
     }
 }
 
-impl TcpChecker for PureFTPdChecker {
+impl<'a> TcpChecker for PureFTPdChecker<'a> {
     /// Check if the asset is running Pure-FTPd.
     /// It looks for the Pure-FTPd banner.
     fn check_tcp(&self, data: &[String]) -> Option<Finding> {
         // For each item, check if it's an Pure-FTPd banner
         for item in data {
-            let caps_result = self.regex.captures(item);
+            let caps_result = self
+                .regexes
+                .get("pureftpd-banner")
+                .expect("Regex \"pureftpd-banner\" not found.")
+                .captures(item);
             // The regex matches
             if caps_result.is_some() {
                 let caps = caps_result.unwrap();
