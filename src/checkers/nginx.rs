@@ -21,7 +21,7 @@ impl<'a> NginxChecker<'a> {
     pub fn new() -> Self {
         let mut regexes = HashMap::new();
         // Example: nginx/1.22.3 (Debian)
-        let header_regex = Regex::new(r"^nginx(\/(?P<nginxversion>\d+\.\d+(\.\d+)?))?").unwrap();
+        let header_regex = Regex::new(r"^nginx(\/(?P<nginxversion>\d+(\.\d+(\.\d+)?)?))?").unwrap();
         regexes.insert("http-header", header_regex);
         Self { regexes: regexes }
     }

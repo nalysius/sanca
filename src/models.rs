@@ -160,6 +160,7 @@ impl ValueEnum for Technology {
             Technology::Drupal,
             Technology::Typo3,
             Technology::Httpd,
+            Technology::Nginx,
         ]
     }
 

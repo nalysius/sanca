@@ -21,7 +21,7 @@ impl<'a> ApacheHttpdChecker<'a> {
     pub fn new() -> Self {
         let mut regexes = HashMap::new();
         // Example: Apache/2.4.52 (Debian)
-        let header_regex = Regex::new(r"^Apache(\/(?P<httpdversion>\d+\.\d+\.\d+))?").unwrap();
+        let header_regex = Regex::new(r"^Apache(\/(?P<httpdversion>\d+(\.\d+(\.\d+)?)?))?").unwrap();
         regexes.insert("http-header", header_regex);
         Self { regexes: regexes }
     }
