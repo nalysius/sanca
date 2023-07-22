@@ -36,20 +36,10 @@ impl<'a> HttpChecker for NginxChecker<'a> {
     fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
         for url_response in data {
             // Check the HTTP headers of each UrlResponse
-            let headers = &url_response.headers;
-            let mut headers_to_check = HashMap::new();
+            let headers_to_check =
+                url_response.get_headers(&vec!["server".to_string(), "x-powered-by".to_string()]);
 
-            let server_header = headers.get("server");
-            if server_header.is_some() {
-                headers_to_check.insert("Server", server_header.unwrap());
-            }
-
-            let x_powered_by_header = headers.get("x-powered-by");
-            if x_powered_by_header.is_some() {
-                headers_to_check.insert("X-Powered-By", x_powered_by_header.unwrap());
-            }
-
-            // Check in the headers to check that were present in this UrlResponse
+            // Check in the headers to check present in this UrlResponse
             for (header_name, header_value) in headers_to_check {
                 let caps_result = self
                     .regexes

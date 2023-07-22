@@ -348,6 +348,19 @@ impl UrlResponse {
             body: body.to_string(),
         }
     }
+
+    /// Return a HashMap with only the headers given in parameter.
+    /// Any non-existing header is ignored.
+    pub fn get_headers(&self, header_names: &[String]) -> HashMap<String, String> {
+        let mut headers: HashMap<String, String> = HashMap::new();
+        for header_name in header_names {
+            let header_option = self.headers.get(header_name);
+            if header_option.is_some() {
+                headers.insert(header_name.to_owned(), header_option.unwrap().to_owned());
+            }
+        }
+        headers
+    }
 }
 
 impl PartialEq for UrlResponse {
