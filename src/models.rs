@@ -93,6 +93,7 @@ pub enum Technology {
     Httpd,
     Tomcat,
     Nginx,
+    OpenSSL,
 }
 
 impl Technology {
@@ -106,6 +107,7 @@ impl Technology {
             Self::JS | Self::PHP | Self::PhpMyAdmin => vec![ScanType::Http],
             Self::WordPress | Self::Drupal | Self::Typo3 => vec![ScanType::Http],
             Self::Httpd | Self::Tomcat | Self::Nginx => vec![ScanType::Http],
+            Self::OpenSSL => vec![ScanType::Http],
         }
     }
 
@@ -116,7 +118,11 @@ impl Technology {
 
     /// Get the HTTP paths to request for a given technology
     pub fn get_url_requests(&self, main_url: &str) -> Vec<UrlRequest> {
-        // At least loads the main URL
+        // Non-HTTP technologies don't need any paths
+        if !self.supports_scan(ScanType::Http) {
+            return Vec::new();
+        }
+
         match self {
             // Loads only the main URL, but fetch the JavaScript files
             Self::JS => vec![UrlRequest::new(main_url, true)],
@@ -127,16 +133,18 @@ impl Technology {
                     UrlRequest::from_path(main_url, "/info.php", false),
                     UrlRequest::from_path(main_url, "phpinfo.php", false),
                     UrlRequest::from_path(main_url, "info.php", false),
+                    UrlRequest::from_path(main_url, "/pageNotFoundNotFound", false),
                 ]
             }
-            Self::Httpd | Self::Tomcat | Self::Nginx => {
+            Self::Httpd | Self::Tomcat | Self::Nginx | Self::OpenSSL => {
                 vec![
                     UrlRequest::new(main_url, false),
                     UrlRequest::from_path(main_url, "/pageNotFoundNotFound", false),
                 ]
             }
-            // Non-HTTP technologies don't need any paths
-            _ => Vec::new(),
+            // By default, loads only the main page, without fetching the
+            // JavaScript files
+            _ => vec![UrlRequest::new(main_url, false)],
         }
     }
 }
@@ -161,6 +169,7 @@ impl ValueEnum for Technology {
             Technology::Typo3,
             Technology::Httpd,
             Technology::Nginx,
+            Technology::OpenSSL,
         ]
     }
 
@@ -184,6 +193,7 @@ impl ValueEnum for Technology {
             Technology::Httpd => Some(PossibleValue::new("httpd")),
             Technology::Tomcat => Some(PossibleValue::new("tomcat")),
             Technology::Nginx => Some(PossibleValue::new("nginx")),
+            Technology::OpenSSL => Some(PossibleValue::new("openssl")),
         }
     }
 }

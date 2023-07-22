@@ -10,6 +10,7 @@ use crate::checkers::mariadb::MariaDBChecker;
 use crate::checkers::mysql::MySQLChecker;
 use crate::checkers::nginx::NginxChecker;
 use crate::checkers::openssh::OpenSSHChecker;
+use crate::checkers::openssl::OpenSSLChecker;
 use crate::checkers::os::OSChecker;
 use crate::checkers::php::PHPChecker;
 use crate::checkers::proftpd::ProFTPDChecker;
@@ -52,6 +53,7 @@ impl Application {
             Box::new(OSChecker::new()),
             Box::new(NginxChecker::new()),
             Box::new(PHPChecker::new()),
+            Box::new(OpenSSLChecker::new()),
         ];
 
         Application {

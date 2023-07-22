@@ -9,6 +9,7 @@ pub mod mariadb;
 pub mod mysql;
 pub mod nginx;
 pub mod openssh;
+pub mod openssl;
 pub mod os;
 pub mod php;
 pub mod proftpd;
