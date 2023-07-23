@@ -38,19 +38,19 @@ impl Application {
         // When a new checker is created, it has to be instanciated here
         // to be used.
         let tcp_checkers: Vec<Box<dyn TcpChecker>> = vec![
-            Box::new(OpenSSHChecker::new()),
+            Box::new(OSChecker::new()),
             Box::new(ProFTPDChecker::new()),
+            Box::new(PureFTPdChecker::new()),
+            Box::new(OpenSSHChecker::new()),
             Box::new(EximChecker::new()),
+            Box::new(DovecotChecker::new()),
             Box::new(MySQLChecker::new()),
             Box::new(MariaDBChecker::new()),
-            Box::new(DovecotChecker::new()),
-            Box::new(PureFTPdChecker::new()),
-            Box::new(OSChecker::new()),
         ];
 
         let http_checkers: Vec<Box<dyn HttpChecker>> = vec![
-            Box::new(ApacheHttpdChecker::new()),
             Box::new(OSChecker::new()),
+            Box::new(ApacheHttpdChecker::new()),
             Box::new(NginxChecker::new()),
             Box::new(PHPChecker::new()),
             Box::new(OpenSSLChecker::new()),
