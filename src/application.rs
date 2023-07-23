@@ -5,6 +5,7 @@ use clap::{Parser, ValueEnum};
 
 use crate::checkers::dovecot::DovecotChecker;
 use crate::checkers::exim::EximChecker;
+use crate::checkers::handlebars::HandlebarsChecker;
 use crate::checkers::httpd::ApacheHttpdChecker;
 use crate::checkers::jquery::JQueryChecker;
 use crate::checkers::mariadb::MariaDBChecker;
@@ -56,6 +57,7 @@ impl Application {
             Box::new(PHPChecker::new()),
             Box::new(OpenSSLChecker::new()),
             Box::new(JQueryChecker::new()),
+            Box::new(HandlebarsChecker::new()),
         ];
 
         Application {
