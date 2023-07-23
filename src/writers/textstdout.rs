@@ -41,14 +41,14 @@ impl Writer for TextStdout {
             panic!("The text writer didn't receive valid parameters");
         }
 
-        println!("----------{}----------", title);
+        println!("----------{}----------\n", title);
         for finding in findings {
             let mut version = "unknown";
             if finding.version.is_some() {
                 version = &finding.version.as_ref().unwrap();
             }
             println!(
-                "[{}/{}] {}",
+                "[{}/{}] {}\n",
                 finding.technology, version, finding.evidence_text
             );
         }
