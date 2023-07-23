@@ -5,7 +5,7 @@
 use std::collections::HashMap;
 
 use super::{HttpChecker, TcpChecker};
-use crate::models::{Finding, Technology};
+use crate::models::{Finding, Technology, UrlResponse};
 use regex::{Match, Regex};
 
 /// The OS checker
@@ -32,10 +32,80 @@ impl<'a> OSChecker<'a> {
         let header_regex =
             Regex::new(r"^(Apache|nginx)\/(?P<version>\d+\.\d+\.\d+)( \((?P<osname>[^\)]+)\))")
                 .unwrap();
+        // Example: <address>Apache/2.4.52 (Debian) Server at localhost Port 80</address>
+        let body_regex = Regex::new(r"<address>(?P<wholematch>(Apache|nginx)\/(\d+\.\d+\.\d+)( \((?P<osname>[^\)]+)\)) Server at [a-zA-Z0-9-.]+ Port \d+)</address>").unwrap();
 
         regexes.insert("openssh-banner", openssh_regex);
         regexes.insert("http-header", header_regex);
+        regexes.insert("http-body", body_regex);
         OSChecker { regexes: regexes }
+    }
+
+    /// Check for the technology in HTTP headers.
+    fn check_http_headers(&self, url_response: &UrlResponse) -> Option<Finding> {
+        let headers_to_check =
+            url_response.get_headers(&vec!["Server".to_string(), "X-powered-by".to_string()]);
+
+        // Check in the headers to check that were present in this UrlResponse
+        for (header_name, header_value) in headers_to_check {
+            let caps_result = self
+                .regexes
+                .get("http-header")
+                .expect("Regex \"http-header\" not found.")
+                .captures(&header_value);
+            // The regex matches
+            if caps_result.is_some() {
+                let caps = caps_result.unwrap();
+                let osname = caps["osname"].to_string();
+                let evidence = &format!("{}: {}", header_name, header_value);
+                let evidence_text = format!(
+                        "The operating system {} has been identified using the HTTP header \"{}\" returned at the following URL: {}",
+                        osname,
+                        evidence,
+                        url_response.url,
+                    );
+                return Some(Finding::new(
+                    "OS",
+                    Some(&osname),
+                    evidence,
+                    &evidence_text,
+                    Some(&url_response.url),
+                ));
+            }
+        }
+        None
+    }
+
+    /// Check for the technology in the body.
+    fn check_http_body(&self, url_response: &UrlResponse) -> Option<Finding> {
+        let caps_result = self
+            .regexes
+            .get("http-body")
+            .expect("Regex \"http-body\" not found.")
+            .captures(&url_response.body);
+
+        // The regex matches
+        if caps_result.is_some() {
+            let caps = caps_result.unwrap();
+            let evidence = caps["wholematch"].to_string();
+            let version = caps["osname"].to_string();
+
+            let evidence_text = format!(
+                    "The operating system {} has been identified by looking at the web server's signature \"{}\" at this page: {}",
+                    version,
+                    evidence,
+                    url_response.url
+                );
+
+            return Some(Finding::new(
+                "OS",
+                Some(&version),
+                &evidence,
+                &evidence_text,
+                Some(&url_response.url),
+            ));
+        }
+        None
     }
 }
 
@@ -75,37 +145,17 @@ impl<'a> TcpChecker for OSChecker<'a> {
 }
 
 impl<'a> HttpChecker for OSChecker<'a> {
-    fn check_http(&self, data: &[crate::models::UrlResponse]) -> Option<Finding> {
+    fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
         for url_response in data {
-            let headers_to_check =
-                url_response.get_headers(&vec!["Server".to_string(), "X-powered-by".to_string()]);
-
-            // Check in the headers to check that were present in this UrlResponse
-            for (header_name, header_value) in headers_to_check {
-                let caps_result = self
-                    .regexes
-                    .get("http-header")
-                    .expect("Regex \"http-header\" not found.")
-                    .captures(&header_value);
-                // The regex matches
-                if caps_result.is_some() {
-                    let caps = caps_result.unwrap();
-                    let osname = caps["osname"].to_string();
-                    let evidence = &format!("{}: {}", header_name, header_value);
-                    let evidence_text = format!(
-                        "The operating system {} has been identified using the HTTP header \"{}\" returned at the following URL: {}",
-                        osname,
-                        evidence,
-                        url_response.url,
-                    );
-                    return Some(Finding::new(
-                        "OS",
-                        Some(&osname),
-                        evidence,
-                        &evidence_text,
-                        Some(&url_response.url),
-                    ));
-                }
+            // Check in HTTP headers first
+            let header_finding = self.check_http_headers(url_response);
+            if header_finding.is_some() {
+                return header_finding;
+            }
+            // Check in response body then
+            let body_finding = self.check_http_body(url_response);
+            if body_finding.is_some() {
+                return body_finding;
             }
         }
         None
