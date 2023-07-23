@@ -4,17 +4,24 @@
 use std::collections::HashMap;
 
 use futures::future::join_all;
+use regex::Regex;
 use reqwest::Client;
 
 use crate::models::{UrlRequest, UrlResponse};
 
 /// A HTTP reader
-pub struct HttpReader {}
+pub struct HttpReader {
+    /// The regex to find URLs
+    url_regex: Regex,
+}
 
 impl HttpReader {
     /// Creates a new HttpReader
     pub fn new() -> Self {
-        HttpReader {}
+        let url_regex = Regex::new(
+            r#"src\s*=\s*"\s*(?P<url>((?P<protocol>[a-z0-9]+):\/\/(?P<hostname>[^\/:]+)(:(?P<port>\d{1,5}))?)?(?P<path>\/?[a-zA-Z0-9\/._ %-]*(?P<extension>\.[a-zA-Z0-9_-]+))?(?P<querystring>\?[^#\s"]*)?(#[^"\s]*)?)\s*"\s*>"#
+        ).unwrap();
+        HttpReader { url_regex }
     }
 
     /// Reads via HTTP(S)
@@ -61,11 +68,33 @@ impl HttpReader {
             return Err(e);
         }
 
-        responses.push(main_response_result.unwrap());
+        let main_response = main_response_result.unwrap();
+        let main_response_body = main_response.body.clone();
+        responses.push(main_response);
 
         if url_request.fetch_js {
-            // TODO: extract all JS files and fetch them
-            // Avoid duplicates by checking if the Url is already known in our responses
+            let url_requests_js =
+                self.extract_urls(&url_request.url, &main_response_body, Some(".js"));
+
+            // Here we store all the Futures of the http requests
+            // They will be handled all together in parallel
+            let url_responses_futures = url_requests_js.iter().map(|i| {
+                let response_future = self.http_request(&i, &http_client);
+                response_future
+            });
+
+            // Send all the HTTP requests, and wait for the result
+            let responses_results = join_all(url_responses_futures).await;
+            // Add each successfull response to the list
+            // responses_results is a Vec<Result<Vec<UrlResponse>, String>>
+            // so we have to unpack each Result and concatenate all the
+            // Vec<UrlResponse>
+            for response_result in responses_results {
+                if response_result.is_ok() {
+                    let response = response_result.unwrap();
+                    responses.push(response);
+                }
+            }
         }
 
         Ok(responses)
@@ -110,5 +139,40 @@ impl HttpReader {
         let body = response.text().await.unwrap_or("".to_string());
 
         Ok(UrlResponse::new(&url_request.url, headers, &body))
+    }
+
+    /// Extract all URLs from a given string, and return them optionnally
+    /// filtered on the given extension.
+    /// It can be used to extract only JavaScript or CSS files.
+    ///
+    /// Note: the extension MUST contain the dot: ".js", ".css" etc
+    pub fn extract_urls(
+        &self,
+        request_url: &str,
+        data: &str,
+        extension: Option<&str>,
+    ) -> Vec<UrlRequest> {
+        let mut url_requests: Vec<UrlRequest> = Vec::new();
+        let caps = self.url_regex.captures_iter(data);
+        for rmatch in caps {
+            let url_or_path = rmatch.name("url").unwrap().as_str();
+            let path_extension_match = rmatch.name("extension");
+            let mut path_extension = "";
+            if path_extension_match.is_some() {
+                path_extension = path_extension_match.unwrap().as_str();
+            }
+
+            // If an extension has been provided, ignore the other ones
+            if extension.is_some() && extension.unwrap() != path_extension {
+                continue;
+            }
+
+            if url_or_path.starts_with("https://") || url_or_path.starts_with("http://") {
+                url_requests.push(UrlRequest::new(url_or_path, false));
+            } else {
+                url_requests.push(UrlRequest::from_path(request_url, url_or_path, false));
+            }
+        }
+        url_requests
     }
 }

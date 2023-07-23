@@ -82,8 +82,6 @@ pub enum Technology {
     PureFTPd,
     /// OS is generic for all OSes.
     OS,
-    /// JS is generic for all JavaScript libraries.
-    JS,
     PHP,
     PhpMyAdmin,
     Typo3,
@@ -94,6 +92,11 @@ pub enum Technology {
     Tomcat,
     Nginx,
     OpenSSL,
+    JQuery,
+    ReactJS,
+    Handlebars,
+    Lodash,
+    AngularJS,
 }
 
 impl Technology {
@@ -104,10 +107,9 @@ impl Technology {
             Self::MariaDB | Self::MySQL => vec![ScanType::Tcp],
             Self::OpenSSH | Self::ProFTPD | Self::PureFTPd => vec![ScanType::Tcp],
             Self::OS => vec![ScanType::Tcp, ScanType::Http],
-            Self::JS | Self::PHP | Self::PhpMyAdmin => vec![ScanType::Http],
-            Self::WordPress | Self::Drupal | Self::Typo3 => vec![ScanType::Http],
-            Self::Httpd | Self::Tomcat | Self::Nginx => vec![ScanType::Http],
-            Self::OpenSSL => vec![ScanType::Http],
+            // Most technologies are about HTTP, so specify only the TCP, UDP
+            // or multiple scan types, the rest will be HTTP-only
+            _ => vec![ScanType::Http],
         }
     }
 
@@ -124,8 +126,6 @@ impl Technology {
         }
 
         match self {
-            // Loads only the main URL, but fetch the JavaScript files
-            Self::JS => vec![UrlRequest::new(main_url, true)],
             Self::PHP => {
                 vec![
                     UrlRequest::new(main_url, false),
@@ -142,9 +142,7 @@ impl Technology {
                     UrlRequest::from_path(main_url, "/pageNotFoundNotFound", false),
                 ]
             }
-            // By default, loads only the main page, without fetching the
-            // JavaScript files
-            _ => vec![UrlRequest::new(main_url, false)],
+            _ => vec![UrlRequest::new(main_url, true)],
         }
     }
 }
@@ -161,7 +159,6 @@ impl ValueEnum for Technology {
             Technology::ProFTPD,
             Technology::PureFTPd,
             Technology::OS,
-            Technology::JS,
             Technology::PHP,
             Technology::PhpMyAdmin,
             Technology::WordPress,
@@ -170,6 +167,11 @@ impl ValueEnum for Technology {
             Technology::Httpd,
             Technology::Nginx,
             Technology::OpenSSL,
+            Technology::JQuery,
+            Technology::ReactJS,
+            Technology::Handlebars,
+            Technology::Lodash,
+            Technology::AngularJS,
         ]
     }
 
@@ -184,8 +186,7 @@ impl ValueEnum for Technology {
             Technology::ProFTPD => Some(PossibleValue::new("proftpd")),
             Technology::PureFTPd => Some(PossibleValue::new("pureftpd")),
             Technology::OS => Some(PossibleValue::new("os")),
-            Technology::JS => Some(PossibleValue::new("js")),
-            Technology::PHP => Some(PossibleValue::new("PHP")),
+            Technology::PHP => Some(PossibleValue::new("php")),
             Technology::PhpMyAdmin => Some(PossibleValue::new("phpmyadmin")),
             Technology::WordPress => Some(PossibleValue::new("wordpress")),
             Technology::Drupal => Some(PossibleValue::new("drupal")),
@@ -194,6 +195,11 @@ impl ValueEnum for Technology {
             Technology::Tomcat => Some(PossibleValue::new("tomcat")),
             Technology::Nginx => Some(PossibleValue::new("nginx")),
             Technology::OpenSSL => Some(PossibleValue::new("openssl")),
+            Technology::JQuery => Some(PossibleValue::new("jquery")),
+            Technology::ReactJS => Some(PossibleValue::new("reactjs")),
+            Technology::Handlebars => Some(PossibleValue::new("handlebars")),
+            Technology::Lodash => Some(PossibleValue::new("lodash")),
+            Technology::AngularJS => Some(PossibleValue::new("angularjs")),
         }
     }
 }
@@ -266,7 +272,7 @@ impl UrlRequest {
         // Note: this regex is not exhaustive. It doesn't support the
         // user:pass@hostname form, and it ignores the hash (#ancher1)
         // But it should enough for what we have to do with it.
-        let url_regex = Regex::new(r"(?P<protocol>[a-z0-9]+):\/\/(?P<hostname>[^\/:]+)(:(?P<port>\d{1,5}))?(?P<path>\/[^\?]*)?(?P<querystring>\?[^#]*)?").unwrap();
+        let url_regex = Regex::new(r"(?P<protocol>[a-z0-9]+):\/\/(?P<hostname>[^\/:]+)(:(?P<port>\d{1,5}))?(?P<path>\/[^\?]*)?(?P<querystring>\?[^#]*)?(#.*)?").unwrap();
         let caps = url_regex
             .captures(main_url)
             .expect(&format!("Unable to parse the provided URL: {}", main_url));
