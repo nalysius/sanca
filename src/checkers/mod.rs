@@ -7,6 +7,7 @@ pub mod exim;
 pub mod handlebars;
 pub mod httpd;
 pub mod jquery;
+pub mod lodash;
 pub mod mariadb;
 pub mod mysql;
 pub mod nginx;

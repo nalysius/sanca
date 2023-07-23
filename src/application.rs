@@ -8,6 +8,7 @@ use crate::checkers::exim::EximChecker;
 use crate::checkers::handlebars::HandlebarsChecker;
 use crate::checkers::httpd::ApacheHttpdChecker;
 use crate::checkers::jquery::JQueryChecker;
+use crate::checkers::lodash::LodashChecker;
 use crate::checkers::mariadb::MariaDBChecker;
 use crate::checkers::mysql::MySQLChecker;
 use crate::checkers::nginx::NginxChecker;
@@ -58,6 +59,7 @@ impl Application {
             Box::new(OpenSSLChecker::new()),
             Box::new(JQueryChecker::new()),
             Box::new(HandlebarsChecker::new()),
+            Box::new(LodashChecker::new()),
         ];
 
         Application {
