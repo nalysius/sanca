@@ -57,7 +57,6 @@ impl<'a> LodashChecker<'a> {
 
         // The regex matches
         if caps_result.is_some() {
-            println!("Lodash found");
             let caps = caps_result.unwrap();
             let evidence = caps["wholematch"].to_string();
             let version = caps["version"].to_string();
