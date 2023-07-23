@@ -47,7 +47,7 @@ impl<'a> HandlebarsChecker<'a> {
             let version_text = format!(" {}", version);
 
             let evidence_text = format!(
-                    "Handlebars{} has been identified by looking at the comment \"{}\" fount at this url: {}",
+                    "Handlebars{} has been identified by looking at the comment \"{}\" found at this url: {}",
                     version_text,
                     evidence,
                     url_response.url

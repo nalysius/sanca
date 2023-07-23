@@ -49,7 +49,7 @@ impl<'a> JQueryChecker<'a> {
             let version_text = format!(" {}", version);
 
             let evidence_text = format!(
-                    "jQuery{} has been identified by looking at the comment \"{}\" fount at this url: {}",
+                    "jQuery{} has been identified by looking at the comment \"{}\" found at this url: {}",
                     version_text,
                     evidence,
                     url_response.url
