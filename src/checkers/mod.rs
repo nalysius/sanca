@@ -5,6 +5,7 @@
 pub mod dovecot;
 pub mod exim;
 pub mod httpd;
+pub mod jquery;
 pub mod mariadb;
 pub mod mysql;
 pub mod nginx;
