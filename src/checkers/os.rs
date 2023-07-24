@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 use super::{HttpChecker, TcpChecker};
 use crate::models::{Finding, Technology, UrlResponse};
-use regex::{Match, Regex};
+use regex::Regex;
 
 /// The OS checker
 pub struct OSChecker<'a> {
@@ -26,7 +26,7 @@ impl<'a> OSChecker<'a> {
         // Also use the OpenSSH version & the OS name to determine which version
         // of OS is used
         let openssh_regex =
-            Regex::new(r"^SSH-\d+\.\d+-OpenSSH_\d+\.\d+([a-z]\d+)?( (?P<os>[a-zA-Z0-0]+))?")
+            Regex::new(r"^SSH-\d+\.\d+-OpenSSH_\d+\.\d+([a-z]\d+)?( (?P<os>[a-zA-Z0-9]+))?")
                 .unwrap();
         // Example: Apache/2.4.52 (Debian)
         let header_regex =
@@ -123,16 +123,13 @@ impl<'a> TcpChecker for OSChecker<'a> {
             // The regex matches
             if caps_result.is_some() {
                 let caps = caps_result.unwrap();
-                let os: Option<Match> = caps.name("os");
+                let os: String = caps["os"].to_string();
 
-                // The OS has been found
-                if os.is_some() {
-                    let os_evidence_text = format!(
+                let os_evidence_text = format!(
                         "The operating system {} has been identified using the banner presented by OpenSSH.",
-                        os.unwrap().as_str()
+                        os
                     );
-                    return Some(Finding::new("OS", None, item, &os_evidence_text, None));
-                }
+                return Some(Finding::new("OS", Some(&os), item, &os_evidence_text, None));
             }
         }
         return None;
