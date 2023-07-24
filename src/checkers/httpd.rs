@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 use super::HttpChecker;
 use crate::models::{Finding, Technology, UrlResponse};
-use regex::{Match, Regex};
+use regex::Regex;
 
 /// The Apache httpd checker
 pub struct ApacheHttpdChecker<'a> {
@@ -21,7 +21,7 @@ impl<'a> ApacheHttpdChecker<'a> {
     pub fn new() -> Self {
         let mut regexes = HashMap::new();
         // Example: Apache/2.4.52 (Debian)
-        let header_regex = Regex::new(r"^Apache(\/(?P<version>\d+(\.\d+(\.\d+)?)?))?").unwrap();
+        let header_regex = Regex::new(r"^(?P<wholematch>.*Apache(\/(?P<version>\d+(\.\d+(\.\d+)?)?))?.*)").unwrap();
         // Example: <address>Apache/2.4.52 (Debian) Server at localhost Port 80</address>
         let body_regex = Regex::new(r"<address>(?P<wholematch>Apache((\/(?P<version>\d+\.\d+\.\d+)( \([^\)]+\)))? Server at (<a href=.[a-zA-Z0-9.@:+_-]*.>)?[a-zA-Z0-9-.]+(</a>)? Port \d+)?)</address>").unwrap();
 
@@ -47,31 +47,7 @@ impl<'a> ApacheHttpdChecker<'a> {
             // The regex matches
             if caps_result.is_some() {
                 let caps = caps_result.unwrap();
-                let evidence = &format!("{}: {}", header_name, header_value);
-                let version_match: Option<Match> = caps.name("version");
-                let mut version: Option<&str> = None;
-                let mut version_text = String::new();
-                if version_match.is_some() {
-                    version = Some(version_match.unwrap().as_str());
-                    // Add a space in the version, so in the evidence text we
-                    // avoid a double space if the version is not found
-                    version_text = format!(" {}", version.unwrap());
-                }
-
-                let evidence_text = format!(
-                    "Apache httpd{} has been identified using the HTTP header \"{}\" returned at the following URL: {}",
-                    version_text,
-                    evidence,
-                    url_response.url
-                );
-
-                return Some(Finding::new(
-                    "Apache httpd",
-                    version,
-                    &evidence,
-                    &evidence_text,
-                    Some(&url_response.url),
-                ));
+                return Some(self.extract_finding_from_captures(caps, url_response, 40, 40, "Apache httpd", &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)));
             }
         }
         None
@@ -88,31 +64,7 @@ impl<'a> ApacheHttpdChecker<'a> {
         // The regex matches
         if caps_result.is_some() {
             let caps = caps_result.unwrap();
-            let evidence = caps["wholematch"].to_string();
-            let version_match: Option<Match> = caps.name("version");
-            let mut version: Option<&str> = None;
-            let mut version_text = String::new();
-            if version_match.is_some() {
-                version = Some(version_match.unwrap().as_str());
-                // Add a space in the version, so in the evidence text we
-                // avoid a double space if the version is not found
-                version_text = format!(" {}", version.unwrap());
-            }
-
-            let evidence_text = format!(
-                    "Apache httpd{} has been identified by looking at its signature \"{}\" at this page: {}",
-                    version_text,
-                    evidence,
-                    url_response.url
-                );
-
-            return Some(Finding::new(
-                "Apache httpd",
-                version,
-                &evidence,
-                &evidence_text,
-                Some(&url_response.url),
-            ));
+            return Some(self.extract_finding_from_captures(caps, url_response, 40, 40, "Apache httpd", "$techno_name$$techno_version$ has been identified by looking at its signature \"$evidence\" at this page: $url"));
         }
         None
     }

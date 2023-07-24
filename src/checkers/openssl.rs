@@ -22,7 +22,7 @@ impl<'a> OpenSSLChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: OpenSSL/1.0.2k-fips
         let header_regex =
-            Regex::new(r"OpenSSL\/(?P<version>\d+\.\d+\.\d+([a-z])?(-[a-z]+)?)").unwrap();
+            Regex::new(r"(?P<wholematch>.*OpenSSL\/(?P<version>\d+\.\d+\.\d+([a-z])?(-[a-z]+)?).*)").unwrap();
         regexes.insert("http-header", header_regex);
         Self { regexes: regexes }
     }
@@ -44,26 +44,7 @@ impl<'a> OpenSSLChecker<'a> {
             // The regex matches
             if caps_result.is_some() {
                 let caps = caps_result.unwrap();
-                let evidence = &format!("{}: {}", header_name, header_value);
-                let version = caps["version"].to_string();
-                // Add a space in the version, so in the evidence text we
-                // avoid a double space if the version is not found
-                let version_text = format!(" {}", version);
-
-                let evidence_text = format!(
-                "OpenSSL{} has been identified using the HTTP header \"{}\" returned at the following URL: {}",
-                version_text,
-                evidence,
-                url_response.url
-            );
-
-                return Some(Finding::new(
-                    "OpenSSL",
-                    Some(&version),
-                    &evidence,
-                    &evidence_text,
-                    Some(&url_response.url),
-                ));
+                return Some(self.extract_finding_from_captures(caps, url_response, 40, 40, "OpenSSL", &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)));
             }
         }
         None

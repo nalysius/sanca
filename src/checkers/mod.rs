@@ -46,11 +46,10 @@ pub trait HttpChecker {
     /// it's easier to defined it here.
     ///
     /// Actually it searches for the regex groups "wholematch" and "version".
-    /// "version" & "wholematch" MUST be present. It may change in the future.
-    /// TODO: make the code more flexible, so other web checkers will be able to use it
-    /// too.
+    /// "wholematch" MUST be present. It is used as the evidence, and is
+    /// truncated if needed.
     ///
-    /// If evidence is longer than evidence_first_chars + evidence_last_chars,
+    /// If the evidence (wholematch) is longer than evidence_first_chars + evidence_last_chars,
     /// it will be cut in the middle. So, only the given number of chars will
     /// remains at the beginning, and the other given number for the end.
     fn extract_finding_from_captures(
@@ -60,6 +59,7 @@ pub trait HttpChecker {
         evidence_first_chars: usize,
         evidence_last_chars: usize,
         technology_name: &str,
+        evidence_text_templace: &str,
     ) -> Finding {
         let mut evidence = captures["wholematch"].to_string();
         let evidence_length = evidence.len();
@@ -69,19 +69,25 @@ pub trait HttpChecker {
             evidence = format!("{}[...]{}", evidencep1, evidencep2);
         }
 
-        let version = captures["version"].to_string();
-        // Add a space in the version, so in the evidence text we
-        // avoid a double space if the version is not found
-        let version_text = format!(" {}", version);
+        let mut version = None;
+        let mut version_text = String::new();
+        let version_match = captures.name("version");
+        if version_match.is_some() {
+            version = Some(version_match.unwrap().as_str());
+            // Add a space in the version, so in the evidence text we
+            // avoid a double space if the version is not found
+            version_text = format!(" {}", version.unwrap());
+        }
 
-        let evidence_text = format!(
-            "{}{} has been identified because we found \"{}\" at this url: {}",
-            technology_name, version_text, evidence, url_response.url
-        );
+        let evidence_text = evidence_text_templace
+            .replace("$techno_name$", technology_name)
+            .replace("$techno_version$", &version_text)
+            .replace("$evidence$", &evidence)
+            .replace("$url_of_finding$", &url_response.url);
 
         return Finding::new(
             technology_name,
-            Some(&version),
+            version,
             &evidence,
             &evidence_text,
             Some(&url_response.url),

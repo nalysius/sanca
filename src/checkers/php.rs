@@ -21,7 +21,8 @@ impl<'a> PHPChecker<'a> {
     pub fn new() -> Self {
         let mut regexes = HashMap::new();
         // Example: PHP/7.1.33.12
-        let header_regex = Regex::new(r"PHP\/(?P<version>\d+\.\d+(\.\d+(\.\d+)?)?)").unwrap();
+        let header_regex =
+            Regex::new(r"(?P<wholematch>.*PHP\/(?P<version>\d+\.\d+(\.\d+(\.\d+)?)?).*)").unwrap();
         regexes.insert("http-header", header_regex);
         Self { regexes: regexes }
     }
@@ -43,26 +44,16 @@ impl<'a> PHPChecker<'a> {
             // The regex matches
             if caps_result.is_some() {
                 let caps = caps_result.unwrap();
-                let evidence = &format!("{}: {}", header_name, header_value);
-                let version = caps["version"].to_string();
-                // Add a space in the version, so in the evidence text we
-                // avoid a double space if the version is not found
-                let version_text = format!(" {}", version);
-
-                let evidence_text = format!(
-                "PHP{} has been identified using the HTTP header \"{}\" returned at the following URL: {}",
-                version_text,
-                evidence,
-                url_response.url
-            );
-
-                return Some(Finding::new(
-                    "PHP",
-                    Some(&version),
-                    &evidence,
-                    &evidence_text,
-                    Some(&url_response.url),
-                ));
+                return Some(
+                    self.extract_finding_from_captures(
+                        caps,
+                        url_response,
+                        40,
+                        40,
+                        "PHP",
+                        &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)
+                    )
+                );
             }
         }
         None

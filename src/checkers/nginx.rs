@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 use super::HttpChecker;
 use crate::models::{Finding, Technology, UrlResponse};
-use regex::{Match, Regex};
+use regex::Regex;
 
 /// The Nginx checker
 pub struct NginxChecker<'a> {
@@ -21,7 +21,7 @@ impl<'a> NginxChecker<'a> {
     pub fn new() -> Self {
         let mut regexes = HashMap::new();
         // Example: nginx/1.22.3 (Debian)
-        let header_regex = Regex::new(r"^nginx(\/(?P<nginxversion>\d+(\.\d+(\.\d+)?)?))?").unwrap();
+        let header_regex = Regex::new(r"^(?P<wholematch>nginx(\/(?P<nginxversion>\d+(\.\d+(\.\d+)?)?))?)").unwrap();
         // Example: <address>Apache/2.4.52 (Debian) Server at localhost Port 80</address>
         let body_regex = Regex::new(r"<hr><center>(?P<wholematch>nginx(\/(?P<version>\d+\.\d+\.\d+)( \([^\)]+\)))?)</center>").unwrap();
 
@@ -47,31 +47,7 @@ impl<'a> NginxChecker<'a> {
             // The regex matches
             if caps_result.is_some() {
                 let caps = caps_result.unwrap();
-                let evidence = &format!("{}: {}", header_name, header_value);
-                let nginx_version_match: Option<Match> = caps.name("nginxversion");
-                let mut nginx_version: Option<&str> = None;
-                let mut nginx_version_text = String::new();
-                if nginx_version_match.is_some() {
-                    nginx_version = Some(nginx_version_match.unwrap().as_str());
-                    // Add a space in the version, so in the evidence text we
-                    // avoid a double space if the version is not found
-                    nginx_version_text = format!(" {}", nginx_version.unwrap());
-                }
-
-                let evidence_text = format!(
-                "Nginx{} has been identified using the HTTP header \"{}\" returned at the following URL: {}",
-                nginx_version_text,
-                evidence,
-                url_response.url
-            );
-
-                return Some(Finding::new(
-                    "Nginx",
-                    nginx_version,
-                    &evidence,
-                    &evidence_text,
-                    Some(&url_response.url),
-                ));
+                return Some(self.extract_finding_from_captures(caps, url_response, 40, 40, "Nginx", &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)));
             }
         }
         None
@@ -88,29 +64,7 @@ impl<'a> NginxChecker<'a> {
         // The regex matches
         if caps_result.is_some() {
             let caps = caps_result.unwrap();
-            let evidence = caps["wholematch"].to_string();
-            let version_match: Option<Match> = caps.name("version");
-            let mut version: Option<&str> = None;
-            let mut version_text = String::new();
-            if version_match.is_some() {
-                version = Some(version_match.unwrap().as_str());
-                // Add a space in the version, so in the evidence text we
-                // avoid a double space if the version is not found
-                version_text = format!(" {}", version.unwrap());
-            }
-
-            let evidence_text = format!(
-                "Nginx{} has been identified by looking at its signature \"{}\" at this page: {}",
-                version_text, evidence, url_response.url
-            );
-
-            return Some(Finding::new(
-                "Nginx",
-                version,
-                &evidence,
-                &evidence_text,
-                Some(&url_response.url),
-            ));
+            return Some(self.extract_finding_from_captures(caps, url_response, 10, 15, "Nginx", "$techno_name$$techno_version$ has been identified by looking at its signature \"$evidence$\" at this page: $url_of_finding$"));
         }
         None
     }

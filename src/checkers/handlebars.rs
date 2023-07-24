@@ -49,6 +49,7 @@ impl<'a> HandlebarsChecker<'a> {
                 40,
                 40,
                 "Handlebars",
+                "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
         }
 
@@ -67,6 +68,7 @@ impl<'a> HandlebarsChecker<'a> {
                 30,
                 30,
                 "Handlebars",
+                "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
         }
         None

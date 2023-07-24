@@ -67,7 +67,7 @@ impl<'a> LodashChecker<'a> {
         // The regex matches
         if caps_result.is_some() {
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "Lodash"));
+            return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "Lodash", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
 
         let caps_result = self
@@ -79,7 +79,7 @@ impl<'a> LodashChecker<'a> {
         // The regex matches
         if caps_result.is_some() {
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response, 10, 30, "Lodash"));
+            return Some(self.extract_finding_from_captures(caps, url_response, 10, 30, "Lodash", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
         None
     }
