@@ -21,8 +21,10 @@ impl<'a> OpenSSLChecker<'a> {
     pub fn new() -> Self {
         let mut regexes = HashMap::new();
         // Example: OpenSSL/1.0.2k-fips
-        let header_regex =
-            Regex::new(r"(?P<wholematch>.*OpenSSL\/(?P<version>\d+\.\d+\.\d+([a-z])?(-[a-z]+)?).*)").unwrap();
+        let header_regex = Regex::new(
+            r"(?P<wholematch>.*OpenSSL\/(?P<version>\d+\.\d+\.\d+([a-z])?(-[a-z]+)?).*)",
+        )
+        .unwrap();
         regexes.insert("http-header", header_regex);
         Self { regexes: regexes }
     }

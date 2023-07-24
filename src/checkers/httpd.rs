@@ -21,7 +21,9 @@ impl<'a> ApacheHttpdChecker<'a> {
     pub fn new() -> Self {
         let mut regexes = HashMap::new();
         // Example: Apache/2.4.52 (Debian)
-        let header_regex = Regex::new(r"^(?P<wholematch>.*Apache(\/(?P<version>\d+(\.\d+(\.\d+)?)?))?.*)").unwrap();
+        let header_regex =
+            Regex::new(r"^(?P<wholematch>.*Apache(\/(?P<version>\d+(\.\d+(\.\d+)?)?))?.*)")
+                .unwrap();
         // Example: <address>Apache/2.4.52 (Debian) Server at localhost Port 80</address>
         let body_regex = Regex::new(r"<address>(?P<wholematch>Apache((\/(?P<version>\d+\.\d+\.\d+)( \([^\)]+\)))? Server at (<a href=.[a-zA-Z0-9.@:+_-]*.>)?[a-zA-Z0-9-.]+(</a>)? Port \d+)?)</address>").unwrap();
 
