@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 use super::HttpChecker;
 use crate::models::{Finding, Technology, UrlResponse};
-use regex::Regex;
+use regex::{Captures, Regex};
 
 /// The checker
 pub struct HandlebarsChecker<'a> {
@@ -25,8 +25,47 @@ impl<'a> HandlebarsChecker<'a> {
             r"\/\*\*![\s\*]+@license\s+(?P<wholematch>handlebars (v(?P<version>\d\.\d\.\d)))",
         )
         .unwrap();
+        let source_code_regex = Regex::new(r#"(?P<wholematch>HandlebarsEnvironment;.*[a-zA-Z0-9]="(?P<version>\d+\.\d+\.\d+)";[a-zA-Z0-9]+\.VERSION=[a-zA-Z0-9]+;)"#).unwrap();
+
         regexes.insert("http-body-comment", comment_regex);
+        regexes.insert("http-body-source", source_code_regex);
         Self { regexes: regexes }
+    }
+
+    /// Extract a finding from captures
+    /// It is used to avoid duplicating this for each regex.
+    fn extract_finding_from_captures(
+        &self,
+        captures: Captures,
+        url_response: &UrlResponse,
+    ) -> Finding {
+        let mut evidence = captures["wholematch"].to_string();
+        let evidence_length = evidence.len();
+        if evidence_length > 100 {
+            let evidencep1 = evidence[0..30].to_string();
+            let evidencep2 = evidence[evidence_length - 30..].to_string();
+            evidence = format!("{}[...]{}", evidencep1, evidencep2);
+        }
+
+        let version = captures["version"].to_string();
+        // Add a space in the version, so in the evidence text we
+        // avoid a double space if the version is not found
+        let version_text = format!(" {}", version);
+
+        let evidence_text = format!(
+                    "Handlebars{} has been identified because we found \"{}\" at this url: {}",
+                    version_text,
+                    evidence,
+                    url_response.url
+                );
+
+        return Finding::new(
+            "Handlebars",
+            Some(&version),
+            &evidence,
+            &evidence_text,
+            Some(&url_response.url),
+        );
     }
 
     /// Checks in HTTP response body.
@@ -40,26 +79,19 @@ impl<'a> HandlebarsChecker<'a> {
         // The regex matches
         if caps_result.is_some() {
             let caps = caps_result.unwrap();
-            let evidence = caps["wholematch"].to_string();
-            let version = caps["version"].to_string();
-            // Add a space in the version, so in the evidence text we
-            // avoid a double space if the version is not found
-            let version_text = format!(" {}", version);
+            return Some(self.extract_finding_from_captures(caps, url_response));
+        }
 
-            let evidence_text = format!(
-                    "Handlebars{} has been identified by looking at the comment \"{}\" found at this url: {}",
-                    version_text,
-                    evidence,
-                    url_response.url
-                );
+        let caps_result = self
+            .regexes
+            .get("http-body-source")
+            .expect("Regex \"http-body-source\" not found.")
+            .captures(&url_response.body);
 
-            return Some(Finding::new(
-                "Handlebars",
-                Some(&version),
-                &evidence,
-                &evidence_text,
-                Some(&url_response.url),
-            ));
+        // The regex matches
+        if caps_result.is_some() {
+            let caps = caps_result.unwrap();
+            return Some(self.extract_finding_from_captures(caps, url_response));
         }
         None
     }
