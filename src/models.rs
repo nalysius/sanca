@@ -330,15 +330,17 @@ impl UrlRequest {
                 // Example: https://example.com/this/that.php
                 // In this case, a path of "index.php" would produce the URL
                 // https://example.com/this/index.php
-                let mut np = "/".to_string();
+                let mut np = "".to_string();
                 let mut part_counter = 0;
+
                 for part in path_parts.iter() {
                     // We take all parts except the last one
-                    if part_counter < path_parts.len() - 1 {
-                        np.push_str(part);
+                    if part_counter < path_parts.len() - 1 && !part.is_empty() {
+                        np.push_str(&format!("/{}", part));
                     }
                     part_counter += 1;
                 }
+
                 np.push_str(&format!("/{}", path_to));
                 np
             }
