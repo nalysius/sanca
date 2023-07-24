@@ -19,7 +19,7 @@ impl HttpReader {
     /// Creates a new HttpReader
     pub fn new() -> Self {
         let url_regex = Regex::new(
-            r#"src\s*=\s*"\s*(?P<url>((?P<protocol>[a-z0-9]+):\/\/(?P<hostname>[^\/:]+)(:(?P<port>\d{1,5}))?)?(?P<path>\/?[a-zA-Z0-9\/._ %-]*(?P<extension>\.[a-zA-Z0-9_-]+))?(?P<querystring>\?[^#\s"]*)?(#[^"\s]*)?)\s*"\s*>"#
+            r#"src\s*=\s*["']\s*(?P<url>((?P<protocol>[a-z0-9]+):\/\/(?P<hostname>[^\/:]+)(:(?P<port>\d{1,5}))?)?(?P<path>\/?[a-zA-Z0-9\/._ %-]*(?P<extension>\.[a-zA-Z0-9_-]+)?)?(?P<querystring>\?[^#\s"]*)?(#[^"\s]*)?)\s*["']"#
         ).unwrap();
         HttpReader { url_regex }
     }
@@ -77,7 +77,8 @@ impl HttpReader {
 
         if url_request.fetch_js {
             let url_requests_js =
-                self.extract_urls(&url_request.url, &main_response_body, Some(".js"));
+                // Don't provide extension here, some scripts don't use the .js
+                self.extract_urls(&url_request.url, &main_response_body, None);
 
             // Here we store all the Futures of the http requests
             // They will be handled all together in parallel
