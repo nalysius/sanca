@@ -28,7 +28,10 @@ impl HttpReader {
     /// Sends HTTP requests to each URL to fetch the response, and
     /// optionally requests the JavaScript files found in the response body.
     pub async fn read(&self, url_requests: &[UrlRequest]) -> Vec<UrlResponse> {
-        let http_client = Client::new();
+        let http_client = Client::builder()
+            .danger_accept_invalid_certs(true)
+            .build()
+            .expect("Unable to create an HTTP client.");
 
         // Here we store all the Futures of the http requests
         // They will be handled all together in parallel
