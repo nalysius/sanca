@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 use super::HttpChecker;
 use crate::models::{Finding, Technology, UrlResponse};
-use regex::{Captures, Regex};
+use regex::Regex;
 
 /// The checker
 pub struct HandlebarsChecker<'a> {
@@ -32,42 +32,6 @@ impl<'a> HandlebarsChecker<'a> {
         Self { regexes: regexes }
     }
 
-    /// Extract a finding from captures
-    /// It is used to avoid duplicating this for each regex.
-    fn extract_finding_from_captures(
-        &self,
-        captures: Captures,
-        url_response: &UrlResponse,
-    ) -> Finding {
-        let mut evidence = captures["wholematch"].to_string();
-        let evidence_length = evidence.len();
-        if evidence_length > 100 {
-            let evidencep1 = evidence[0..30].to_string();
-            let evidencep2 = evidence[evidence_length - 30..].to_string();
-            evidence = format!("{}[...]{}", evidencep1, evidencep2);
-        }
-
-        let version = captures["version"].to_string();
-        // Add a space in the version, so in the evidence text we
-        // avoid a double space if the version is not found
-        let version_text = format!(" {}", version);
-
-        let evidence_text = format!(
-                    "Handlebars{} has been identified because we found \"{}\" at this url: {}",
-                    version_text,
-                    evidence,
-                    url_response.url
-                );
-
-        return Finding::new(
-            "Handlebars",
-            Some(&version),
-            &evidence,
-            &evidence_text,
-            Some(&url_response.url),
-        );
-    }
-
     /// Checks in HTTP response body.
     fn check_http_body(&self, url_response: &UrlResponse) -> Option<Finding> {
         let caps_result = self
@@ -79,7 +43,13 @@ impl<'a> HandlebarsChecker<'a> {
         // The regex matches
         if caps_result.is_some() {
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response));
+            return Some(self.extract_finding_from_captures(
+                caps,
+                url_response,
+                40,
+                40,
+                "Handlebars",
+            ));
         }
 
         let caps_result = self
@@ -91,7 +61,13 @@ impl<'a> HandlebarsChecker<'a> {
         // The regex matches
         if caps_result.is_some() {
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response));
+            return Some(self.extract_finding_from_captures(
+                caps,
+                url_response,
+                30,
+                30,
+                "Handlebars",
+            ));
         }
         None
     }

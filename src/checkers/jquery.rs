@@ -42,26 +42,7 @@ impl<'a> JQueryChecker<'a> {
         // The regex matches
         if caps_result.is_some() {
             let caps = caps_result.unwrap();
-            let evidence = caps["wholematch"].to_string();
-            let version = caps["version"].to_string();
-            // Add a space in the version, so in the evidence text we
-            // avoid a double space if the version is not found
-            let version_text = format!(" {}", version);
-
-            let evidence_text = format!(
-                    "jQuery{} has been identified by looking at the comment \"{}\" found at this url: {}",
-                    version_text,
-                    evidence,
-                    url_response.url
-                );
-
-            return Some(Finding::new(
-                "jQuery",
-                Some(&version),
-                &evidence,
-                &evidence_text,
-                Some(&url_response.url),
-            ));
+            return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "jQuery"));
         }
         None
     }
