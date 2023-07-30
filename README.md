@@ -17,7 +17,7 @@ Options:
   -i, --ip-hostname <IP_HOSTNAME>    The IP or hostname to connect on
   -p, --port <PORT>                  The port to connect on
   -s, --scan-type <SCAN_TYPE>        The type of scan [possible values: tcp, http, udp]
-  -t, --technologies <TECHNOLOGIES>  [possible values: dovecot, exim, mariadb, mysql, openssh, proftpd, pureftpd, os, js, PHP, phpmyadmin, wordpress, drupal, typo3]
+  -t, --technologies <TECHNOLOGIES>  [possible values: dovecot, exim, mariadb, mysql, openssh, proftpd, pureftpd, os, php, phpmyadmin, wordpress, drupal, typo3, httpd, nginx, openssl, jquery, reactjs, handlebars, lodash, angularjs]
   -h, --help                         Print help
   -V, --version                      Print version
 ```
