@@ -24,7 +24,10 @@ impl<'a> PHPChecker<'a> {
         // Example: PHP/7.1.33.12
         let header_regex =
             Regex::new(r"(?P<wholematch>.*PHP\/(?P<version>\d+\.\d+(\.\d+(\.\d+)?)?).*)").unwrap();
+        let body_regex = Regex::new(r#"(?P<wholematch><h1 class="p">PHP Version (?P<version>\d+\.\d+\.\d+(-[a-z0-9._-]+)?)</h1>)"#).unwrap();
+
         regexes.insert("http-header", header_regex);
+        regexes.insert("http-body", body_regex);
         Self { regexes: regexes }
     }
 
@@ -65,6 +68,27 @@ impl<'a> PHPChecker<'a> {
         }
         None
     }
+
+    /// Check for the technology in the body
+    fn check_http_body(&self, url_response: &UrlResponse) -> Option<Finding> {
+        trace!(
+            "Running PHPChecker::check_http_body() on {}",
+            url_response.url
+        );
+        let caps_result = self
+            .regexes
+            .get("http-body")
+            .expect("Regex \"http-body\" not found.")
+            .captures(&url_response.body);
+
+        // The regex matches
+        if caps_result.is_some() {
+            info!("Regex PHP/http-body matches");
+            let caps = caps_result.unwrap();
+            return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "PHP", "$techno_name$$techno_version$ has been identified by looking at the phpinfo()'s output \"$evidence$\" at this page: $url_of_finding$"));
+        }
+        None
+    }
 }
 
 impl<'a> HttpChecker for PHPChecker<'a> {
@@ -76,9 +100,14 @@ impl<'a> HttpChecker for PHPChecker<'a> {
     fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
         trace!("Running PHPChecker::check_http()");
         for url_response in data {
-            let response = self.check_http_headers(url_response);
-            if response.is_some() {
-                return response;
+            let header_finding = self.check_http_headers(url_response);
+            if header_finding.is_some() {
+                return header_finding;
+            }
+
+            let body_finding = self.check_http_body(url_response);
+            if body_finding.is_some() {
+                return body_finding;
             }
         }
         return None;
