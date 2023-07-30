@@ -19,6 +19,7 @@ pub mod proftpd;
 pub mod pureftpd;
 
 use crate::models::{Finding, Technology, UrlResponse};
+use log::trace;
 use regex::Captures;
 
 /// A common interface between all TCP checkers
@@ -61,12 +62,16 @@ pub trait HttpChecker {
         technology_name: &str,
         evidence_text_templace: &str,
     ) -> Finding {
+        trace!("Running HttpChecker::extract_finding_from_captures()");
         let mut evidence = captures["wholematch"].to_string();
+        trace!("Evidence: {}", evidence);
         let evidence_length = evidence.len();
         if evidence_length > evidence_first_chars + evidence_last_chars {
+            trace!("Evidence is too long, truncate it");
             let evidencep1 = evidence[0..evidence_first_chars].to_string();
             let evidencep2 = evidence[evidence_length - evidence_last_chars..].to_string();
             evidence = format!("{}[...]{}", evidencep1, evidencep2);
+            trace!("New evidence: {}", evidence);
         }
 
         let mut version = None;
@@ -77,6 +82,7 @@ pub trait HttpChecker {
             // Add a space in the version, so in the evidence text we
             // avoid a double space if the version is not found
             version_text = format!(" {}", version.unwrap());
+            trace!("Version: {}", version_text);
         }
 
         let evidence_text = evidence_text_templace
@@ -84,6 +90,8 @@ pub trait HttpChecker {
             .replace("$techno_version$", &version_text)
             .replace("$evidence$", &evidence)
             .replace("$url_of_finding$", &url_response.url);
+
+        trace!("Evidence text: {}", evidence_text);
 
         return Finding::new(
             technology_name,

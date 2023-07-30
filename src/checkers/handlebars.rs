@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 use super::HttpChecker;
 use crate::models::{Finding, Technology, UrlResponse};
+use log::{info, trace};
 use regex::Regex;
 
 /// The checker
@@ -34,6 +35,10 @@ impl<'a> HandlebarsChecker<'a> {
 
     /// Checks in HTTP response body.
     fn check_http_body(&self, url_response: &UrlResponse) -> Option<Finding> {
+        trace!(
+            "Running HandlebarsChecker::check_http_body() on {}",
+            url_response.url
+        );
         let caps_result = self
             .regexes
             .get("http-body-comment")
@@ -42,6 +47,7 @@ impl<'a> HandlebarsChecker<'a> {
 
         // The regex matches
         if caps_result.is_some() {
+            info!("Regex Handlebars/http-body-comment matches");
             let caps = caps_result.unwrap();
             return Some(self.extract_finding_from_captures(
                 caps,
@@ -61,6 +67,7 @@ impl<'a> HandlebarsChecker<'a> {
 
         // The regex matches
         if caps_result.is_some() {
+            info!("Regex Handlebars/http-body-source matches");
             let caps = caps_result.unwrap();
             return Some(self.extract_finding_from_captures(
                 caps,
@@ -78,6 +85,7 @@ impl<'a> HandlebarsChecker<'a> {
 impl<'a> HttpChecker for HandlebarsChecker<'a> {
     /// Check for a HTTP scan.
     fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
+        trace!("Running HandlebarsChecker::check_http()");
         for url_response in data {
             let response = self.check_http_body(&url_response);
             if response.is_some() {

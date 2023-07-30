@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 use super::TcpChecker;
 use crate::models::{Finding, Technology};
+use log::{info, trace};
 use regex::Regex;
 
 /// The Dovecot checker
@@ -32,8 +33,10 @@ impl<'a> TcpChecker for DovecotChecker<'a> {
     /// Check if the asset is running Dovecot.
     /// It looks for the Dovecot banner.
     fn check_tcp(&self, data: &[String]) -> Option<Finding> {
+        trace!("Running DovecotChecker::check_tcp()");
         // For each item, check if it's a Dovecot banner
         for item in data {
+            trace!("Checking item: {}", item);
             // The regex matches
             if self
                 .regexes
@@ -41,6 +44,7 @@ impl<'a> TcpChecker for DovecotChecker<'a> {
                 .expect("Regex \"dovecot-banner\" not found.")
                 .is_match(item)
             {
+                info!("Regex Dovecot/dovecot-banner matches");
                 let evidence_text = format!(
                     "Dovecot has been identified using the banner it presents after initiating a TCP connection: {}",
                     item

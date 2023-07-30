@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 use super::TcpChecker;
 use crate::models::{Finding, Technology};
+use log::{info, trace};
 use regex::Regex;
 
 /// The MariaDB checker
@@ -33,8 +34,10 @@ impl<'a> TcpChecker for MariaDBChecker<'a> {
     /// Check if the asset is running MariaDB.
     /// It looks for the MariaDB banner.
     fn check_tcp(&self, data: &[String]) -> Option<Finding> {
+        trace!("Running MariaDBChecker::check_tcp()");
         // For each item, check if it's an MariaDB banner
         for item in data {
+            trace!("Checking item: {}", item);
             let caps_result = self
                 .regexes
                 .get("mariadb-banner")
@@ -42,6 +45,7 @@ impl<'a> TcpChecker for MariaDBChecker<'a> {
                 .captures(item);
             // The regex matches
             if caps_result.is_some() {
+                info!("Regex MariaDB/mariadb-banner matches");
                 let caps = caps_result.unwrap();
                 let version: String = caps["mariadbversion"].to_string();
                 let evidence_text = format!(

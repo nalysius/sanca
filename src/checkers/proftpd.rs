@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 use super::TcpChecker;
 use crate::models::{Finding, Technology};
+use log::{info, trace};
 use regex::Regex;
 
 /// The ProFTPD checker
@@ -32,8 +33,10 @@ impl<'a> TcpChecker for ProFTPDChecker<'a> {
     /// Check if the asset is running ProFTPD.
     /// It looks for the ProFTPD banner.
     fn check_tcp(&self, data: &[String]) -> Option<Finding> {
+        trace!("Running ProFTPDChecker::check_tcp()");
         // For each item, check if it's an ProFTPD banner
         for item in data {
+            trace!("Checking item: {}", item);
             let caps_result = self
                 .regexes
                 .get("proftpd-banner")
@@ -41,6 +44,7 @@ impl<'a> TcpChecker for ProFTPDChecker<'a> {
                 .captures(item);
             // The regex matches
             if caps_result.is_some() {
+                info!("Regex ProFTPD/proftpd-banner matches");
                 let caps = caps_result.unwrap();
                 let proftpd_version: String = caps["proftpdversion"].to_string();
                 let proftpd_name: String = caps["proftpdname"].to_string();

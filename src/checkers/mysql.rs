@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 use super::TcpChecker;
 use crate::models::{Finding, Technology};
+use log::{info, trace};
 use regex::Regex;
 
 /// The MySQL checker
@@ -32,10 +33,13 @@ impl<'a> TcpChecker for MySQLChecker<'a> {
     /// Check if the asset is running MySQL.
     /// It looks for the MySQL banner.
     fn check_tcp(&self, data: &[String]) -> Option<Finding> {
+        trace!("Running MySQLChecker::check_tcp()");
         // For each item, check if it's an MySQL banner
         for item in data {
+            trace!("Checking item: {}", item);
             // Avoid false positive when MariaDB is present in the banner
             if item.clone().to_lowercase().contains("mariadb") {
+                trace!("Item contains \"mariadb\", ignored");
                 continue;
             }
 
@@ -46,6 +50,7 @@ impl<'a> TcpChecker for MySQLChecker<'a> {
                 .captures(item);
             // The regex matches
             if caps_result.is_some() {
+                info!("Regex MySQL/mysql-banner matches");
                 let caps = caps_result.unwrap();
                 let version: String = caps["mysqlversion"].to_string();
                 let evidence_text = format!(

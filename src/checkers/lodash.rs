@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 use super::HttpChecker;
 use crate::models::{Finding, Technology, UrlResponse};
+use log::{info, trace};
 use regex::{Regex, RegexBuilder};
 
 /// The checker
@@ -58,6 +59,10 @@ impl<'a> LodashChecker<'a> {
 
     /// Checks in HTTP response body.
     fn check_http_body(&self, url_response: &UrlResponse) -> Option<Finding> {
+        trace!(
+            "Running LodashChecker::check_http_body() on {}",
+            url_response.url
+        );
         let caps_result = self
             .regexes
             .get("http-body")
@@ -66,6 +71,7 @@ impl<'a> LodashChecker<'a> {
 
         // The regex matches
         if caps_result.is_some() {
+            info!("Regex Lodash/http-body matches");
             let caps = caps_result.unwrap();
             return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "Lodash", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
@@ -78,6 +84,7 @@ impl<'a> LodashChecker<'a> {
 
         // The regex matches
         if caps_result.is_some() {
+            info!("Regex Lodash/http-body-minified matches");
             let caps = caps_result.unwrap();
             return Some(self.extract_finding_from_captures(caps, url_response, 10, 30, "Lodash", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }

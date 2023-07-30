@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 use super::TcpChecker;
 use crate::models::{Finding, Technology};
+use log::{info, trace};
 use regex::Regex;
 
 /// The OpenSSH checker
@@ -25,7 +26,7 @@ impl<'a> OpenSSHChecker<'a> {
         // Note: the -5 is actually ignored. Could be handled later.
         // TODO: get the package name & version when possible
         let regex = Regex::new(r"^SSH-(?P<sshversion>\d+\.\d+)-OpenSSH_(?P<opensshversion>\d+\.\d+([a-z]\d+)?)( [a-zA-Z0-0]+)?").unwrap();
-        regexes.insert("banner", regex);
+        regexes.insert("openssh-banner", regex);
         OpenSSHChecker { regexes: regexes }
     }
 }
@@ -34,15 +35,18 @@ impl<'a> TcpChecker for OpenSSHChecker<'a> {
     /// Check if the asset is running OpenSSH.
     /// It looks for the OpenSSH banner.
     fn check_tcp(&self, data: &[String]) -> Option<Finding> {
+        trace!("Running OpenSSHChecker::check_tcp()");
         // For each item, check if it's an OpenSSH banner
         for item in data {
+            trace!("Checking item: {}", item);
             let caps_result = self
                 .regexes
                 .get("banner")
-                .expect("Regex \"banner\" not found.")
+                .expect("Regex \"openssh-banner\" not found.")
                 .captures(item);
             // The regex matches
             if caps_result.is_some() {
+                info!("Regex OpenSSH/openssh-banner matches");
                 let caps = caps_result.unwrap();
                 //let ssh_version: String = caps["sshversion"].to_string();
                 let openssh_version: String = caps["opensshversion"].to_string();

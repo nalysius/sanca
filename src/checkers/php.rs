@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 use super::HttpChecker;
 use crate::models::{Finding, Technology, UrlResponse};
+use log::{info, trace};
 use regex::Regex;
 
 /// The PHP checker
@@ -29,12 +30,17 @@ impl<'a> PHPChecker<'a> {
 
     /// Check in the HTTP headers.
     fn check_http_headers(&self, url_response: &UrlResponse) -> Option<Finding> {
+        trace!(
+            "Running PHPChecker::check_http_headers() on {}",
+            url_response.url
+        );
         // Check the HTTP headers of each UrlResponse
         let headers_to_check =
             url_response.get_headers(&vec!["Server".to_string(), "X-powered-by".to_string()]);
 
         // Check in the headers to check that were present in this UrlResponse
         for (header_name, header_value) in headers_to_check {
+            trace!("Checking header: {} / {}", header_name, header_value);
             let caps_result = self
                 .regexes
                 .get("http-header")
@@ -43,6 +49,7 @@ impl<'a> PHPChecker<'a> {
 
             // The regex matches
             if caps_result.is_some() {
+                info!("Regex PHP/http-header matches");
                 let caps = caps_result.unwrap();
                 return Some(
                     self.extract_finding_from_captures(
@@ -67,6 +74,7 @@ impl<'a> HttpChecker for PHPChecker<'a> {
     /// - X-Powered-By
     /// and in the "not found" page content
     fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
+        trace!("Running PHPChecker::check_http()");
         for url_response in data {
             let response = self.check_http_headers(url_response);
             if response.is_some() {

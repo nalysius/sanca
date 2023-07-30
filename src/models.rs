@@ -3,6 +3,7 @@
 use std::collections::HashMap;
 
 use clap::{builder::PossibleValue, ValueEnum};
+use log::{error, trace};
 use regex::Regex;
 
 /// Represents the type of scan
@@ -216,17 +217,23 @@ pub struct UrlRequest {
 impl UrlRequest {
     /// Creates a list of UrlRequests based on a lits of technologies
     pub fn from_technologies(main_url: &str, technologies: &[Technology]) -> Vec<UrlRequest> {
+        trace!("Running UrlRequest::from_technologies()");
         // Helps to avoid duplicated when building the list of UrlRequests
         // key is URL, value is fetch_js
         let mut url_requests_map: HashMap<String, bool> = HashMap::new();
+        trace!("Looping over provided technologies");
         // For each technology, add its UrlRequests to the list, while avoiding
         // duplicates
         for technology in technologies {
+            trace!("Checking {:?}", technology);
             for url_request in technology.get_url_requests(main_url) {
+                trace!("Handling UrlRequest {:?}", url_request);
                 // If the URL is not stored already
                 if !url_requests_map.contains_key(&url_request.url) {
+                    trace!("UrlRequest is not already in the list, add it");
                     url_requests_map.insert(url_request.url, url_request.fetch_js);
                 } else if url_request.fetch_js == true {
+                    trace!("UrlRequest already in the list, but this time fetch_js is true, update the already stored value");
                     // If the URL was already in the list but the new one has
                     // fetch_js to true, set fetch_js to true also in the list.
                     // It might be already set to true, but that's not important.
@@ -235,6 +242,7 @@ impl UrlRequest {
             }
         }
 
+        trace!("Converting the HashMap of UrlRequests to a Vec");
         // Convert the HashMap to a list of UrlRequest
         let mut url_requests: Vec<UrlRequest> = Vec::new();
         for (url, fetch_js) in url_requests_map.iter() {
@@ -242,10 +250,12 @@ impl UrlRequest {
             // When possible, it's better to manage the main URL first, it will
             // be clearer for the user.
             if url == main_url {
+                trace!("The URL is the main, add it in the first position");
                 let mut tmp = vec![UrlRequest::new(url, *fetch_js)];
                 tmp.extend(url_requests);
                 url_requests = tmp;
             } else {
+                trace!("Pushing UrlRequest {} / {} to the list", url, fetch_js);
                 url_requests.push(UrlRequest::new(url, *fetch_js));
             }
         }
@@ -269,6 +279,7 @@ impl UrlRequest {
     /// If path = "/phpinfo.php" the result will be https://example.com/phpinfo.php
     /// But if path = "phpinfo.php" the result will be https://example.com/blog/phpinfo.php
     pub fn from_path(main_url: &str, path_to: &str, fetch_js: bool) -> Self {
+        trace!("Running UrlRequest::from_path()");
         // Note: this regex is not exhaustive. It doesn't support the
         // user:pass@hostname form, and it ignores the hash (#ancher1)
         // But it should enough for what we have to do with it.
@@ -278,15 +289,25 @@ impl UrlRequest {
             .expect(&format!("Unable to parse the provided URL: {}", main_url));
         let protocol: String = caps["protocol"].to_string();
         let hostname: String = caps["hostname"].to_string();
+        trace!(
+            "Handling main_url. Protocol = {}, hostname = {}",
+            protocol,
+            hostname
+        );
         // If the port is not provided, use the default for http / https
         let port: String = if caps.name("port").is_some() {
+            trace!("Port = {}", caps.name("port").unwrap().as_str());
             caps.name("port").unwrap().as_str().to_string()
         } else {
+            trace!("Port not provided");
             if protocol == "http" {
+                trace!("Protocol is HTTP, use port 80");
                 "80".to_string()
             } else if protocol == "https" {
+                trace!("Protocol is HTTPS, use port 443");
                 "443".to_string()
             } else {
+                error!("Unknwon protocol provided: {}", protocol);
                 panic!(
                     "Protocol {} not supported. Only http & https are supported",
                     protocol
@@ -295,13 +316,23 @@ impl UrlRequest {
         };
         // If no path is provided, uses /
         let path_from: String = if caps.name("path").is_some() {
+            trace!(
+                "Found a path in the main URL: {}",
+                caps.name("path").unwrap().as_str()
+            );
             caps.name("path").unwrap().as_str().to_string()
         } else {
+            trace!("No path found in the main URL, use /");
             "/".to_string()
         };
         let query_string: String = if caps.name("querystring").is_some() {
+            trace!(
+                "Found a query string in the main URL: {}",
+                caps.name("querystring").unwrap().as_str()
+            );
             caps.name("querystring").unwrap().as_str().to_string()
         } else {
+            trace!("No query string found in the main URL");
             "".to_string()
         };
 
@@ -309,22 +340,28 @@ impl UrlRequest {
             // If an absolute path is provided, just use it
             path_to.to_string()
         } else {
+            trace!("The path found in the main URL is relative, compute the new path");
             // Here handle the relative path in path_to
             let path_parts: Vec<String> = path_from.split("/").map(|i| i.to_string()).collect();
 
             if path_from.chars().nth(path_from.len() - 1).unwrap() == '/' {
+                trace!("The last char of the main URL path is a /");
                 // If the last char of the original path is a /, concatenate the paths
                 // Example: https://example.com/something/that/
                 // In this case, a path of "test.php" would produce the URL
                 // https://example.com/something/that/test.php
                 format!("{}{}", path_from, path_to)
             } else if path_parts.len() <= 1 {
+                trace!("The main URL path has only one part (/something), just use the new one");
                 // If we were at the top of the tree, just use path_to
                 // Example: https://example.com/something
                 // In this case, a path_to of "other/index.php" would produce the URL
                 // https://example.com/other/index.php
                 path_to.to_string()
             } else {
+                trace!(
+                    "The main URL path has several parts and doesn't end with a / (/some/thing)"
+                );
                 // If we have an original path with several parts and not ending with a /,
                 // just remove the last part.
                 // Example: https://example.com/this/that.php
@@ -333,14 +370,18 @@ impl UrlRequest {
                 let mut np = "".to_string();
                 let mut part_counter = 0;
 
+                trace!("Loop over each path part to remove the last one");
                 for part in path_parts.iter() {
+                    trace!("Checking path part {}", part);
                     // We take all parts except the last one
                     if part_counter < path_parts.len() - 1 && !part.is_empty() {
+                        trace!("Part is not the last one, use it");
                         np.push_str(&format!("/{}", part));
                     }
                     part_counter += 1;
                 }
 
+                trace!("The last part of the original path has been removed, add the new one");
                 np.push_str(&format!("/{}", path_to));
                 np
             }

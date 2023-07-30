@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 use super::TcpChecker;
 use crate::models::{Finding, Technology};
+use log::{info, trace};
 use regex::Regex;
 
 /// The Exim checker
@@ -32,8 +33,10 @@ impl<'a> TcpChecker for EximChecker<'a> {
     /// Check if the asset is running Exim.
     /// It looks for the Exim banner.
     fn check_tcp(&self, data: &[String]) -> Option<Finding> {
+        trace!("Running EximChecker::check_tcp()");
         // For each item, check if it's an Exim banner
         for item in data {
+            trace!("Checking item: {}", item);
             let caps_result = self
                 .regexes
                 .get("exim-banner")
@@ -41,6 +44,7 @@ impl<'a> TcpChecker for EximChecker<'a> {
                 .captures(item);
             // The regex matches
             if caps_result.is_some() {
+                info!("Regex Exim/exim-banner matches");
                 let caps = caps_result.unwrap();
                 let exim_smtp_protocol: String = caps["smtpprotocol"].to_string();
                 let exim_version: String = caps["eximversion"].to_string();

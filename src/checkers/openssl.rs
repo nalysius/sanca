@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 use super::HttpChecker;
 use crate::models::{Finding, Technology, UrlResponse};
+use log::{info, trace};
 use regex::Regex;
 
 /// The OpenSSL checker
@@ -31,12 +32,17 @@ impl<'a> OpenSSLChecker<'a> {
 
     /// Checks in the HTTP headers.
     fn check_http_headers(&self, url_response: &UrlResponse) -> Option<Finding> {
+        trace!(
+            "Running OpenSSLChecker::check_http_headers() on {}",
+            url_response.url
+        );
         // Check the HTTP headers of each UrlResponse
         let headers_to_check =
             url_response.get_headers(&vec!["Server".to_string(), "X-powered-by".to_string()]);
 
         // Check in the headers to check that were present in this UrlResponse
         for (header_name, header_value) in headers_to_check {
+            trace!("Checking header: {} / {}", header_name, header_value);
             let caps_result = self
                 .regexes
                 .get("http-header")
@@ -45,6 +51,7 @@ impl<'a> OpenSSLChecker<'a> {
 
             // The regex matches
             if caps_result.is_some() {
+                info!("Regex OpenSSH/http-header matches");
                 let caps = caps_result.unwrap();
                 return Some(self.extract_finding_from_captures(caps, url_response, 40, 40, "OpenSSL", &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)));
             }

@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 use super::TcpChecker;
 use crate::models::{Finding, Technology};
+use log::{info, trace};
 use regex::Regex;
 
 /// The Pure-FTPd checker
@@ -31,8 +32,10 @@ impl<'a> TcpChecker for PureFTPdChecker<'a> {
     /// Check if the asset is running Pure-FTPd.
     /// It looks for the Pure-FTPd banner.
     fn check_tcp(&self, data: &[String]) -> Option<Finding> {
+        trace!("Running PureFTPdChecker::check_tcp()");
         // For each item, check if it's an Pure-FTPd banner
         for item in data {
+            trace!("Checker item: {}", item);
             let caps_result = self
                 .regexes
                 .get("pureftpd-banner")
@@ -40,13 +43,15 @@ impl<'a> TcpChecker for PureFTPdChecker<'a> {
                 .captures(item);
             // The regex matches
             if caps_result.is_some() {
+                info!("Regex PureFTPd/pureftpd-banner matches");
                 let caps = caps_result.unwrap();
                 let srvname: String = caps["srvname"].to_string();
                 // The banner can be several line long, so truncate it and take only the first one
                 let mut evidence = item[0..item.find("\r\n").unwrap_or(item.len() - 1)].to_string();
                 // If the banner has been trucated, say it
                 if evidence.len() < item.len() {
-                    evidence.push_str("[truncated]");
+                    trace!("Truncate evidence");
+                    evidence.push_str("[...]");
                 }
                 let evidence_text = format!(
                     "Pure-FTPd has been found under the name \"{}\" using the banner it presents after initiating a TCP connection: {}",

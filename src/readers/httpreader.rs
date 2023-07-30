@@ -4,6 +4,7 @@
 use std::collections::HashMap;
 
 use futures::future::join_all;
+use log::{debug, error, trace};
 use regex::Regex;
 use reqwest::Client;
 
@@ -28,6 +29,7 @@ impl HttpReader {
     /// Sends HTTP requests to each URL to fetch the response, and
     /// optionally requests the JavaScript files found in the response body.
     pub async fn read(&self, url_requests: &[UrlRequest]) -> Vec<UrlResponse> {
+        trace!("Running HttpReader::read()");
         let http_client = Client::builder()
             .danger_accept_invalid_certs(true)
             .build()
@@ -38,11 +40,18 @@ impl HttpReader {
         let mut url_responses_futures = Vec::new();
 
         for url_request in url_requests {
+            trace!(
+                "Pushing {} / fetch_js = {} to the list of UrlRequests to fetch",
+                url_request.url,
+                url_request.fetch_js
+            );
             url_responses_futures.push(self.read_one_page(url_request, &http_client));
         }
 
+        trace!("Waiting for all the UrlRequests to be handled");
         // Send all the HTTP requests, and wait for the result
         let responses_results = join_all(url_responses_futures).await;
+        trace!("All UrlRequests handled");
         let mut responses_clean: Vec<UrlResponse> = Vec::new();
         // Add each successfull response to the list
         // responses_results is a Vec<Result<Vec<UrlResponse>, String>>
@@ -65,20 +74,29 @@ impl HttpReader {
         url_request: &UrlRequest,
         http_client: &Client,
     ) -> Result<Vec<UrlResponse>, String> {
+        trace!("Running HttpChecker::read_one_page()");
+        debug!("Sending HTTP request for URL {}", url_request.url);
         let mut responses: Vec<UrlResponse> = Vec::new();
         let main_response_result = self.http_request(&url_request, http_client).await;
         if let Err(e) = main_response_result {
+            error!("An error occured while reading one page: {:?}", e);
             return Err(e);
         }
 
+        trace!("Pushing the HTTP response to the list");
         let main_response = main_response_result.unwrap();
         let main_response_body = main_response.body.clone();
         responses.push(main_response);
 
         if url_request.fetch_js {
+            debug!("Fetch JS is true for URL {}", url_request.url);
             let url_requests_js =
                 // Don't provide extension here, some scripts don't use the .js
                 self.extract_urls(&url_request.url, &main_response_body, None);
+            trace!(
+                "The following URLs have been found in the response body: {:?}",
+                url_requests_js
+            );
 
             // Here we store all the Futures of the http requests
             // They will be handled all together in parallel
@@ -87,8 +105,10 @@ impl HttpReader {
                 response_future
             });
 
+            trace!("Waiting for all the subsequent HTTP requests to be handled");
             // Send all the HTTP requests, and wait for the result
             let responses_results = join_all(url_responses_futures).await;
+            trace!("Subsequent HTTP requests handled");
             // Add each successfull response to the list
             // responses_results is a Vec<Result<Vec<UrlResponse>, String>>
             // so we have to unpack each Result and concatenate all the
@@ -110,6 +130,7 @@ impl HttpReader {
         url_request: &UrlRequest,
         http_client: &Client,
     ) -> Result<UrlResponse, String> {
+        trace!("Running HttpReader::http_request()");
         let response_result = http_client
             .get(&url_request.url)
             .header("User-Agent", "Sanca")
@@ -118,6 +139,10 @@ impl HttpReader {
             .await;
 
         if let Err(e) = response_result {
+            error!(
+                "An error occured in the HTTP request to {}: {:?}",
+                url_request.url, e
+            );
             return Err(format!(
                 "Error while sending an HTTP request to {}: {:?}",
                 url_request.url, e
@@ -126,6 +151,7 @@ impl HttpReader {
 
         let response = response_result.unwrap();
         let mut headers: HashMap<String, String> = HashMap::new();
+        trace!("Extrating HTTP headers");
         for (header_name, header_value) in response.headers().iter() {
             // Only the first letter of the header name is in uppercase
             // It will avoid struggling with the case later
