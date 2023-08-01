@@ -19,6 +19,7 @@ use crate::checkers::php::PHPChecker;
 use crate::checkers::phpmyadmin::PhpMyAdminChecker;
 use crate::checkers::proftpd::ProFTPDChecker;
 use crate::checkers::pureftpd::PureFTPdChecker;
+use crate::checkers::typo3::Typo3Checker;
 use crate::checkers::{HttpChecker, TcpChecker};
 use crate::models::{Finding, ScanType, Technology, UrlRequest, Writers};
 use crate::readers::http::HttpReader;
@@ -68,6 +69,7 @@ impl Application {
             Box::new(HandlebarsChecker::new()),
             Box::new(LodashChecker::new()),
             Box::new(PhpMyAdminChecker::new()),
+            Box::new(Typo3Checker::new()),
         ];
 
         trace!("Returning the Application");

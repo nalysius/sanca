@@ -149,7 +149,17 @@ impl Technology {
                     UrlRequest::from_path(main_url, "/phpmyadmin/doc/html/index.html", false),
                     UrlRequest::from_path(main_url, "/mysql/doc/html/index.html", false),
                     UrlRequest::from_path(main_url, "ChangeLog", false),
-                    ]
+                ]
+            }
+            Self::Typo3 => {
+                vec![
+                    UrlRequest::from_path(main_url, "typo3/sysext/install/composer.json", false),
+                    UrlRequest::from_path(
+                        main_url,
+                        "typo3/sysext/linkvalidator/composer.json",
+                        false,
+                    ),
+                ]
             }
             _ => vec![UrlRequest::new(main_url, true)],
         }

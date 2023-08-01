@@ -18,6 +18,7 @@ pub mod php;
 pub mod phpmyadmin;
 pub mod proftpd;
 pub mod pureftpd;
+pub mod typo3;
 
 use crate::models::{Finding, Technology, UrlResponse};
 use log::trace;
