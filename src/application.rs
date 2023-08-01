@@ -19,10 +19,11 @@ use crate::checkers::php::PHPChecker;
 use crate::checkers::proftpd::ProFTPDChecker;
 use crate::checkers::pureftpd::PureFTPdChecker;
 use crate::checkers::{HttpChecker, TcpChecker};
-use crate::models::{Finding, ScanType, Technology, UrlRequest};
-use crate::readers::httpreader::HttpReader;
-use crate::readers::tcpreader::TcpReader;
-use crate::writers::textstdout::TextStdout;
+use crate::models::{Finding, ScanType, Technology, UrlRequest, Writers};
+use crate::readers::http::HttpReader;
+use crate::readers::tcp::TcpReader;
+use crate::writers::csv::CsvWriter;
+use crate::writers::textstdout::TextStdoutWriter;
 use crate::writers::Writer;
 
 use log::{debug, error, info, trace};
@@ -208,7 +209,7 @@ impl Application {
         trace!("Checking args.scan_type");
         let findings: Vec<Finding> = match args.scan_type {
             ScanType::Tcp | ScanType::Udp => {
-                trace!("Scan type is TCP or UDP");
+                info!("Scan type is TCP or UDP");
                 let ip_hostname = &args.ip_hostname.clone().unwrap();
                 let port = args.port.clone().unwrap();
                 let scan_type = args.scan_type.clone();
@@ -226,22 +227,29 @@ impl Application {
                 )
             }
             ScanType::Http => {
-                trace!("Scan type is HTTP");
+                info!("Scan type is HTTP");
                 let url_requests = UrlRequest::from_technologies(
                     &args.url.as_ref().unwrap(),
                     &args.technologies.as_ref().unwrap(),
                 );
-                trace!("URL requests: {:?}", url_requests);
+                debug!("URL requests: {:?}", url_requests);
                 self.http_scan(&url_requests, &args.technologies.as_ref().unwrap())
             }
         };
 
-        trace!("Scan finished, writing output");
-        let writer = TextStdout::new(
-            args.ip_hostname.clone(),
-            args.port.clone(),
-            args.url.clone(),
-        );
+        info!("Scan finished, writing output");
+        let writer: Box<dyn Writer> = match args.writer {
+            Writers::TextStdout => Box::new(TextStdoutWriter::new(
+                args.ip_hostname.clone(),
+                args.port.clone(),
+                args.url.clone(),
+            )),
+            Writers::Csv => Box::new(CsvWriter::new(
+                args.ip_hostname.clone(),
+                args.port.clone(),
+                args.url.clone(),
+            )),
+        };
         writer.write(findings);
     }
 }
@@ -262,6 +270,10 @@ struct Args {
     /// The type of scan
     #[arg(short, long, value_name = "SCAN_TYPE")]
     pub scan_type: ScanType,
+    /// The technologies to check
     #[arg(short, long, value_name = "TECHNOLOGIES")]
     pub technologies: Option<Vec<Technology>>,
+    /// The writer to use
+    #[arg(short, long, value_name = "WRITER", default_value = "textstdout")]
+    pub writer: Writers,
 }

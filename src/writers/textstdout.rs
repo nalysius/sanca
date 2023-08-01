@@ -6,7 +6,7 @@ use super::Writer;
 use crate::models::Finding;
 
 /// A writer to print the findings in the terminal.
-pub struct TextStdout {
+pub struct TextStdoutWriter {
     /// The IP of hostname scanned
     ip_hostname: Option<String>,
     /// The port scanned
@@ -15,17 +15,16 @@ pub struct TextStdout {
     url: Option<String>,
 }
 
-impl TextStdout {
-    pub fn new(ip_hostname: Option<String>, port: Option<u16>, url: Option<String>) -> Self {
-        TextStdout {
+impl Writer for TextStdoutWriter {
+    /// Create a new TextStdoutWriter
+    fn new(ip_hostname: Option<String>, port: Option<u16>, url: Option<String>) -> Self {
+        Self {
             ip_hostname,
             port,
             url,
         }
     }
-}
 
-impl Writer for TextStdout {
     /// Prints the findings on STDOUT
     fn write(&self, findings: Vec<Finding>) {
         let title;

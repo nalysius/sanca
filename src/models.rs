@@ -297,22 +297,10 @@ impl UrlRequest {
         // If the port is not provided, use the default for http / https
         let port: String = if caps.name("port").is_some() {
             trace!("Port = {}", caps.name("port").unwrap().as_str());
-            caps.name("port").unwrap().as_str().to_string()
+            format!(":{}", caps.name("port").unwrap().as_str().to_string())
         } else {
-            trace!("Port not provided");
-            if protocol == "http" {
-                trace!("Protocol is HTTP, use port 80");
-                "80".to_string()
-            } else if protocol == "https" {
-                trace!("Protocol is HTTPS, use port 443");
-                "443".to_string()
-            } else {
-                error!("Unknwon protocol provided: {}", protocol);
-                panic!(
-                    "Protocol {} not supported. Only http & https are supported",
-                    protocol
-                );
-            }
+            trace!("Port not provided. 80 is default for HTTP & 443 default for HTTPS");
+            "".to_string()
         };
         // If no path is provided, uses /
         let path_from: String = if caps.name("path").is_some() {
@@ -393,8 +381,36 @@ impl UrlRequest {
         } else {
             format!("?{}", query_string)
         };
-        let url = format!("{}://{}:{}{}{}", protocol, hostname, port, new_path, qs);
+        let url = format!("{}://{}{}{}{}", protocol, hostname, port, new_path, qs);
         Self::new(&url, fetch_js)
+    }
+
+    /// Get the IP or hostname & the port of the URL
+    pub fn get_hostname_port(&self) -> (String, u16) {
+        // Note: this regex is not exhaustive. It doesn't support the
+        // user:pass@hostname form, and it ignores the hash (#ancher1)
+        // But it should enough for what we have to do with it.
+        let url_regex =
+            Regex::new(r"(?P<protocol>[a-z0-9]+):\/\/(?P<hostname>[^\/:]+)(:(?P<port>\d{1,5}))?")
+                .unwrap();
+        let caps = url_regex
+            .captures(&self.url)
+            .expect(&format!("Unable to parse the provided URL: {}", self.url));
+        let protocol: String = caps["protocol"].to_string();
+        let hostname: String = caps["hostname"].to_string();
+        let port = if caps.name("port").is_some() {
+            caps["port"].to_string()
+        } else {
+            if protocol == "https" {
+                "443".to_string()
+            } else if protocol == "http" {
+                "80".to_string()
+            } else {
+                error!("Unknown protocol: {}", protocol);
+                panic!("Unknown protocol: {}", protocol);
+            }
+        };
+        (hostname, str::parse::<u16>(&port).unwrap())
     }
 }
 
@@ -437,5 +453,29 @@ impl PartialEq for UrlResponse {
     /// are identical. It is to avoid duplicate.
     fn eq(&self, other: &Self) -> bool {
         self.url == other.url
+    }
+}
+
+/// An enum to match the available writers
+#[derive(Clone, Debug)]
+pub enum Writers {
+    /// StdoutWriter
+    TextStdout,
+    /// CsvWriter
+    Csv,
+}
+
+impl ValueEnum for Writers {
+    /// Lists the variants available for clap
+    fn value_variants<'a>() -> &'a [Self] {
+        &[Self::TextStdout, Self::Csv]
+    }
+
+    /// Map each value to a possible value in clap
+    fn to_possible_value(&self) -> Option<PossibleValue> {
+        match &self {
+            Self::TextStdout => Some(PossibleValue::new("textstdout")),
+            Self::Csv => Some(PossibleValue::new("csv")),
+        }
     }
 }
