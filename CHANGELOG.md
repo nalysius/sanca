@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - A CSV writer to get the findings in CSV
 
+### Fixed
+
+- Evidences found in HTTP headers are truncated in the same way. The 45 first and
+  45 last chars are conserved. Affects checkers OpenSSL, PHP, Nginx, Apache httpd,
+  and OS.
+
 ## [0.1.0]
 
 ### Added
