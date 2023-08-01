@@ -58,8 +58,8 @@ impl<'a> PHPChecker<'a> {
                     self.extract_finding_from_captures(
                         caps,
                         url_response,
-                        40,
-                        40,
+                        45,
+                        45,
                         "PHP",
                         &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)
                     )

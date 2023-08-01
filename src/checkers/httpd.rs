@@ -56,7 +56,7 @@ impl<'a> ApacheHttpdChecker<'a> {
             if caps_result.is_some() {
                 info!("Regex ApacheHttpd/http-header matches");
                 let caps = caps_result.unwrap();
-                return Some(self.extract_finding_from_captures(caps, url_response, 40, 40, "Apache httpd", &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)));
+                return Some(self.extract_finding_from_captures(caps, url_response, 45, 45, "Apache httpd", &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)));
             }
         }
         None
@@ -78,7 +78,7 @@ impl<'a> ApacheHttpdChecker<'a> {
         if caps_result.is_some() {
             info!("Regex ApacheHttpd/http-body matches");
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response, 40, 40, "Apache httpd", "$techno_name$$techno_version$ has been identified by looking at its signature \"$evidence\" at this page: $url"));
+            return Some(self.extract_finding_from_captures(caps, url_response, 45, 45, "Apache httpd", "$techno_name$$techno_version$ has been identified by looking at its signature \"$evidence\" at this page: $url"));
         }
         None
     }

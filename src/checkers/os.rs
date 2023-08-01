@@ -31,10 +31,10 @@ impl<'a> OSChecker<'a> {
                 .unwrap();
         // Example: Apache/2.4.52 (Debian)
         let header_regex =
-            Regex::new(r"^(Apache|nginx)\/(?P<version>\d+\.\d+\.\d+)( \((?P<osname>[^\)]+)\))")
+            Regex::new(r"^(Apache|nginx)\/(?P<version>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\))")
                 .unwrap();
         // Example: <address>Apache/2.4.52 (Debian) Server at localhost Port 80</address>
-        let body_regex = Regex::new(r"<address>(?P<wholematch>(Apache|nginx)\/(\d+\.\d+\.\d+)( \((?P<osname>[^\)]+)\)) Server at [a-zA-Z0-9-.]+ Port \d+)</address>").unwrap();
+        let body_regex = Regex::new(r"<address>(?P<wholematch>(Apache|nginx)\/(\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\)) Server at [a-zA-Z0-9-.]+ Port \d+)</address>").unwrap();
 
         regexes.insert("openssh-banner", openssh_regex);
         regexes.insert("http-header", header_regex);
@@ -63,17 +63,18 @@ impl<'a> OSChecker<'a> {
             if caps_result.is_some() {
                 info!("Regex OS/http-header matches");
                 let caps = caps_result.unwrap();
-                let osname = caps["osname"].to_string();
-                let evidence = &format!("{}: {}", header_name, header_value);
+                let osname = caps["os"].to_string();
+                let evidence = &header_value;
                 let evidence_text = format!(
-                        "The operating system {} has been identified using the HTTP header \"{}\" returned at the following URL: {}",
+                        "The operating system {} has been identified using the HTTP header \"{}: {}\" returned at the following URL: {}",
                         osname,
+                        header_name,
                         evidence,
                         url_response.url,
                     );
                 return Some(Finding::new(
-                    "OS",
-                    Some(&osname),
+                    &osname,
+                    None,
                     evidence,
                     &evidence_text,
                     Some(&url_response.url),
@@ -100,18 +101,18 @@ impl<'a> OSChecker<'a> {
             info!("Regex OS/http-body matches");
             let caps = caps_result.unwrap();
             let evidence = caps["wholematch"].to_string();
-            let version = caps["osname"].to_string();
+            let osname = caps["os"].to_string();
 
             let evidence_text = format!(
                     "The operating system {} has been identified by looking at the web server's signature \"{}\" at this page: {}",
-                    version,
+                    osname,
                     evidence,
                     url_response.url
                 );
 
             return Some(Finding::new(
-                "OS",
-                Some(&version),
+                &osname,
+                None,
                 &evidence,
                 &evidence_text,
                 Some(&url_response.url),
@@ -138,13 +139,13 @@ impl<'a> TcpChecker for OSChecker<'a> {
             if caps_result.is_some() {
                 info!("Regex OS/openssh-banner matches");
                 let caps = caps_result.unwrap();
-                let os: String = caps["os"].to_string();
+                let osname: String = caps["os"].to_string();
 
                 let os_evidence_text = format!(
                         "The operating system {} has been identified using the banner presented by OpenSSH.",
-                        os
+                        osname
                     );
-                return Some(Finding::new("OS", Some(&os), item, &os_evidence_text, None));
+                return Some(Finding::new(&osname, None, item, &os_evidence_text, None));
             }
         }
         return None;
