@@ -16,6 +16,7 @@ use crate::checkers::openssh::OpenSSHChecker;
 use crate::checkers::openssl::OpenSSLChecker;
 use crate::checkers::os::OSChecker;
 use crate::checkers::php::PHPChecker;
+use crate::checkers::phpmyadmin::PhpMyAdminChecker;
 use crate::checkers::proftpd::ProFTPDChecker;
 use crate::checkers::pureftpd::PureFTPdChecker;
 use crate::checkers::{HttpChecker, TcpChecker};
@@ -66,6 +67,7 @@ impl Application {
             Box::new(JQueryChecker::new()),
             Box::new(HandlebarsChecker::new()),
             Box::new(LodashChecker::new()),
+            Box::new(PhpMyAdminChecker::new()),
         ];
 
         trace!("Returning the Application");

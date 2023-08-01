@@ -143,6 +143,14 @@ impl Technology {
                     UrlRequest::from_path(main_url, "/pageNotFoundNotFound", false),
                 ]
             }
+            Self::PhpMyAdmin => {
+                vec![
+                    UrlRequest::from_path(main_url, "doc/html/index.html", false),
+                    UrlRequest::from_path(main_url, "/phpmyadmin/doc/html/index.html", false),
+                    UrlRequest::from_path(main_url, "/mysql/doc/html/index.html", false),
+                    UrlRequest::from_path(main_url, "ChangeLog", false),
+                    ]
+            }
             _ => vec![UrlRequest::new(main_url, true)],
         }
     }

@@ -15,6 +15,7 @@ pub mod openssh;
 pub mod openssl;
 pub mod os;
 pub mod php;
+pub mod phpmyadmin;
 pub mod proftpd;
 pub mod pureftpd;
 
