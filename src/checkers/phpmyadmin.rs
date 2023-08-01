@@ -27,8 +27,11 @@ impl<'a> PhpMyAdminChecker<'a> {
         // Example: <title>Welcome to phpMyAdmin’s documentation! &#8212; phpMyAdmin 4.4.15.10 documentation</title>
         let documentation_regex = Regex::new(r"<title>Welcome to phpMyAdmin.+(?P<wholematch>phpMyAdmin (?P<version>\d+\.\d+\.\d+(\.\d+)?)) documentation</title>").unwrap();
         // Example: 5.2.0 (2022-05-10)
-        // The first version encountered in the ChangeLog is the last one
-        let changelog_regex = Regex::new(r"(?P<wholematch>(?P<version>\d+\.\d+\.\d+(\.\d+)?) \(\d\d\d\d-\d\d-\d\d\))").unwrap();
+        // The first version encountered in the ChangeLog is the latest
+        let changelog_regex = Regex::new(
+            r"^(?P<wholematch>(?P<version>\d+\.\d+\.\d+(\.\d+)?) \(\d\d\d\d-\d\d-\d\d\))",
+        )
+        .unwrap();
         regexes.insert("http-body-documentation", documentation_regex);
         regexes.insert("http-body-changelog", changelog_regex);
         Self { regexes: regexes }
@@ -52,19 +55,23 @@ impl<'a> PhpMyAdminChecker<'a> {
             return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "phpMyAdmin", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
 
-        let caps_result = self
-            .regexes
-            .get("http-body-changelog")
-            .expect("Regex \"http-body-changelog\" not found.")
-            .captures(&url_response.body);
+        // This regex is not restrictive and could generate false positive
+        // results, so restrict its usage on URLs containing /ChangeLog
+        if url_response.url.contains("/ChangeLog") {
+            let caps_result = self
+                .regexes
+                .get("http-body-changelog")
+                .expect("Regex \"http-body-changelog\" not found.")
+                .captures(&url_response.body);
 
-        // The regex matches
-        if caps_result.is_some() {
-            info!("Regex phpMyAdmin/http-body-changelog matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "phpMyAdmin", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+            // The regex matches
+            if caps_result.is_some() {
+                info!("Regex phpMyAdmin/http-body-changelog matches");
+                let caps = caps_result.unwrap();
+                return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "phpMyAdmin", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+            }
         }
-        
+
         None
     }
 }
