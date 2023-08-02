@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use super::HttpChecker;
 use crate::models::{Finding, Technology, UrlResponse};
 use log::{info, trace};
-use regex::{Regex, RegexBuilder};
+use regex::Regex;
 
 /// The checker
 pub struct LodashChecker<'a> {
@@ -33,23 +33,17 @@ impl<'a> LodashChecker<'a> {
         //   * @license
         //   * Lodash lodash.com/license | Underscore.js 1.8.3 underscorejs.org/LICENSE
         //   */
-        //  [...truncated...]
-        // ,An.VERSION="4.17.15"
+        //  [...]
+        // lodash[...],An.VERSION="4.17.15"
         //
-        // TODO: make the match multi-lines, to use the license header. It would help
-        // to avoid false positive.
-        let body_regex = RegexBuilder::new(
+        let body_regex = Regex::new(
             r#"lodash.+(?P<wholematch>(var )?VERSION ?= ?['"](?P<version>\d+\.\d+\.\d+)['"])[;,]?"#,
         )
-        .multi_line(true)
-        .build()
         .unwrap();
 
-        let body_minified_regex = RegexBuilder::new(
+        let body_minified_regex = Regex::new(
             r#"(?P<wholematch>VERSION ?= ?[a-zA-Z0-9]+[,;].+[a-zA-Z0-9]+=['"](?P<version>\d+\.\d+\.\d+)['"]).+lodash_placeholder"#,
         )
-        .multi_line(true)
-        .build()
         .unwrap();
 
         regexes.insert("http-body", body_regex);
