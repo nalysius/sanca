@@ -23,10 +23,6 @@ impl<'a> GsapChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: /*!
         //           * PixiPlugin 3.11.1
-        //
-        // or
-        //
-        // gsap)&&f.r[...],i,c,y,v,h,r={version:"3.11.1"
         let gsap_plugins = "CSSRulePlugin|CustomEase|Draggable|EaselPlugin|EasePack|Flip|GSAP|MotionPathPlugin|Observer|PixiPlugin|ScrollToPlugin|ScrollTrigger|TextPlugin";
         let comment_regex = Regex::new(&format!(
             r"^\s+\*\s+(?P<wholematch>({})\s+(?P<version>\d+\.\d+\.\d+))",
@@ -34,6 +30,7 @@ impl<'a> GsapChecker<'a> {
         ))
         .unwrap();
 
+        // Example: gsap)&&f.r[...],i,c,y,v,h,r={version:"3.11.1"
         let body_minified_regex =
             Regex::new(r#"(?P<wholematch>gsap.+version[=:]['"](?P<version>\d+\.\d+\.\d+)['"])"#)
                 .unwrap();
