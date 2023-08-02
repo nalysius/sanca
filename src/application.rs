@@ -5,6 +5,7 @@ use clap::{Parser, ValueEnum};
 
 use crate::checkers::dovecot::DovecotChecker;
 use crate::checkers::exim::EximChecker;
+use crate::checkers::gsap::GsapChecker;
 use crate::checkers::handlebars::HandlebarsChecker;
 use crate::checkers::httpd::ApacheHttpdChecker;
 use crate::checkers::jquery::JQueryChecker;
@@ -70,6 +71,7 @@ impl Application {
             Box::new(LodashChecker::new()),
             Box::new(PhpMyAdminChecker::new()),
             Box::new(Typo3Checker::new()),
+            Box::new(GsapChecker::new()),
         ];
 
         trace!("Returning the Application");

@@ -4,6 +4,7 @@
 
 pub mod dovecot;
 pub mod exim;
+pub mod gsap;
 pub mod handlebars;
 pub mod httpd;
 pub mod jquery;

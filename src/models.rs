@@ -98,6 +98,7 @@ pub enum Technology {
     Handlebars,
     Lodash,
     AngularJS,
+    Gsap,
 }
 
 impl Technology {
@@ -191,6 +192,7 @@ impl ValueEnum for Technology {
             Technology::Handlebars,
             Technology::Lodash,
             Technology::AngularJS,
+            Technology::Gsap,
         ]
     }
 
@@ -219,6 +221,7 @@ impl ValueEnum for Technology {
             Technology::Handlebars => Some(PossibleValue::new("handlebars")),
             Technology::Lodash => Some(PossibleValue::new("lodash")),
             Technology::AngularJS => Some(PossibleValue::new("angularjs")),
+            Technology::Gsap => Some(PossibleValue::new("gsap")),
         }
     }
 }
