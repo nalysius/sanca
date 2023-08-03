@@ -23,6 +23,7 @@ use crate::checkers::proftpd::ProFTPDChecker;
 use crate::checkers::pureftpd::PureFTPdChecker;
 use crate::checkers::tomcat::TomcatChecker;
 use crate::checkers::typo3::Typo3Checker;
+use crate::checkers::wordpress::WordPressChecker;
 use crate::checkers::{HttpChecker, TcpChecker};
 use crate::models::{Finding, ScanType, Technology, UrlRequest, Writers};
 use crate::readers::http::HttpReader;
@@ -69,13 +70,14 @@ impl Application {
             Box::new(TomcatChecker::new()),
             Box::new(PHPChecker::new()),
             Box::new(OpenSSLChecker::new()),
+            Box::new(PhpMyAdminChecker::new()),
+            Box::new(Typo3Checker::new()),
+            Box::new(WordPressChecker::new()),
             Box::new(AngularJSChecker::new()),
             Box::new(GsapChecker::new()),
             Box::new(JQueryChecker::new()),
             Box::new(HandlebarsChecker::new()),
             Box::new(LodashChecker::new()),
-            Box::new(PhpMyAdminChecker::new()),
-            Box::new(Typo3Checker::new()),
         ];
 
         trace!("Returning the Application");

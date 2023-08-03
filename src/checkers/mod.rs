@@ -22,6 +22,7 @@ pub mod proftpd;
 pub mod pureftpd;
 pub mod tomcat;
 pub mod typo3;
+pub mod wordpress;
 
 use crate::models::{Finding, Technology, UrlResponse};
 use log::trace;
