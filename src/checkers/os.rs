@@ -37,11 +37,16 @@ impl<'a> OSChecker<'a> {
         )
         .unwrap();
         // Example: <address>Apache/2.4.52 (Debian) Server at localhost Port 80</address>
+        // TODO: if available, handle the OpenSSL version
         let body_apache_regex = Regex::new(r"<address>(?P<wholematch>Apache\/(?P<version>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\)) Server at [a-zA-Z0-9-.]+ Port \d+)</address>").unwrap();
+
+        // Example: <hr><center>nginx/1.22.3</center>
+        let body_nginx_regex = Regex::new(r"<hr><center>(?P<wholematch>nginx(\/(?P<version>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\)))?)</center>").unwrap();
 
         regexes.insert("openssh-banner", openssh_regex);
         regexes.insert("http-header", header_regex);
         regexes.insert("http-body-apache", body_apache_regex);
+        regexes.insert("http-body-nginx", body_nginx_regex);
         OSChecker { regexes: regexes }
     }
 
@@ -110,6 +115,37 @@ impl<'a> OSChecker<'a> {
             let os_name = caps["os"].to_string();
             let software_version = caps["version"].to_string();
             let os_version = self.get_os_version(&os_name, "apache", &software_version);
+
+            let evidence_text = format!(
+                    "The operating system {} has been identified by looking at the web server's signature \"{}\" at this page: {}",
+                    os_name,
+                    evidence,
+                    url_response.url
+                );
+
+            return Some(Finding::new(
+                &os_name,
+                os_version,
+                &evidence,
+                &evidence_text,
+                Some(&url_response.url),
+            ));
+        }
+
+        let caps_result = self
+            .regexes
+            .get("http-body-nginx")
+            .expect("Regex \"http-body-nginx\" not found.")
+            .captures(&url_response.body);
+
+        // The regex matches
+        if caps_result.is_some() {
+            info!("Regex OS/http-body-nginx matches");
+            let caps = caps_result.unwrap();
+            let evidence = caps["wholematch"].to_string();
+            let os_name = caps["os"].to_string();
+            let software_version = caps["version"].to_string();
+            let os_version = self.get_os_version(&os_name, "nginx", &software_version);
 
             let evidence_text = format!(
                     "The operating system {} has been identified by looking at the web server's signature \"{}\" at this page: {}",
