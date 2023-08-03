@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 use super::{HttpChecker, TcpChecker};
 use crate::models::{Finding, Technology, UrlResponse};
-use log::{info, trace};
+use log::{debug, info, trace};
 use regex::Regex;
 
 /// The OS checker
@@ -26,13 +26,16 @@ impl<'a> OSChecker<'a> {
         // TODO: use the deb8u2 part.
         // Also use the OpenSSH version & the OS name to determine which version
         // of OS is used
-        let openssh_regex =
-            Regex::new(r"^SSH-\d+\.\d+-OpenSSH_\d+\.\d+([a-z]\d+)?( (?P<os>[a-zA-Z0-9]+))?")
-                .unwrap();
+        let openssh_regex = Regex::new(
+            r"^SSH-\d+\.\d+-OpenSSH_(?P<version>\d+\.\d+)([a-z]\d+)?( (?P<os>[a-zA-Z0-9]+))?",
+        )
+        .unwrap();
         // Example: Apache/2.4.52 (Debian)
-        let header_regex =
-            Regex::new(r"^(Apache|nginx)\/(?P<version>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\))")
-                .unwrap();
+        // TODO: if available, handle the OpenSSL version
+        let header_regex = Regex::new(
+            r"^(?P<software>Apache|nginx)\/(?P<version>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\))",
+        )
+        .unwrap();
         // Example: <address>Apache/2.4.52 (Debian) Server at localhost Port 80</address>
         let body_regex = Regex::new(r"<address>(?P<wholematch>(Apache|nginx)\/(\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\)) Server at [a-zA-Z0-9-.]+ Port \d+)</address>").unwrap();
 
@@ -63,18 +66,21 @@ impl<'a> OSChecker<'a> {
             if caps_result.is_some() {
                 info!("Regex OS/http-header matches");
                 let caps = caps_result.unwrap();
-                let osname = caps["os"].to_string();
+                let os_name = caps["os"].to_string();
+                let software = caps["software"].to_string();
+                let software_version = caps["version"].to_string();
+                let os_version = self.get_os_version(&os_name, &software, &software_version);
                 let evidence = &header_value;
                 let evidence_text = format!(
                         "The operating system {} has been identified using the HTTP header \"{}: {}\" returned at the following URL: {}",
-                        osname,
+                        os_name,
                         header_name,
                         evidence,
                         url_response.url,
                     );
                 return Some(Finding::new(
-                    &osname,
-                    None,
+                    &os_name,
+                    os_version,
                     evidence,
                     &evidence_text,
                     Some(&url_response.url),
@@ -120,6 +126,65 @@ impl<'a> OSChecker<'a> {
         }
         None
     }
+
+    /// Get the OS version according to the OS name, the software name and version.
+    /// Example: Ubuntu 18.04 comes with Apache httpd 2.4.29
+    ///
+    /// TODO: handle backports to avoid false positive
+    fn get_os_version(
+        &self,
+        os_name: &str,
+        software_name: &str,
+        software_version: &str,
+    ) -> Option<&str> {
+        trace!("Running OSChecker::get_os_version");
+        let os = os_name.to_lowercase();
+        let software = software_name.to_lowercase();
+        let version = software_version.to_lowercase();
+
+        debug!("Trying to guess OS version with the following values: OS name = {}, Software = {}, Software version = {}", os, software, version);
+
+        // List the known versions of software
+        let mut versions: HashMap<(&str, &str, &str), &str> = HashMap::new();
+        // Ubuntu / Apache httpd
+        versions.insert(("ubuntu", "apache", "2.4.29"), "18.04");
+        versions.insert(("ubuntu", "apache", "2.4.41"), "20.04");
+        versions.insert(("ubuntu", "apache", "2.4.52"), "22.04");
+        versions.insert(("ubuntu", "apache", "2.4.54"), "22.10");
+        versions.insert(("ubuntu", "apache", "2.4.55"), "23.04");
+
+        // Ubuntu / Nginx
+        versions.insert(("ubuntu", "nginx", "1.14.0"), "18.04");
+        versions.insert(("ubuntu", "nginx", "1.18.0"), "20.04|22.04");
+        versions.insert(("ubuntu", "nginx", "1.22.0"), "22.10|23.04");
+
+        // Ubuntu / OpenSSH
+        versions.insert(("ubuntu", "openssh", "7.6"), "18.04");
+        versions.insert(("ubuntu", "openssh", "8.2"), "20.04");
+        versions.insert(("ubuntu", "openssh", "8.9"), "22.04");
+        versions.insert(("ubuntu", "openssh", "9.0"), "22.10|23.04");
+
+        // Debian / Apache httpd
+        versions.insert(("debian", "apache", "2.4.25"), "9");
+        versions.insert(("debian", "apache", "2.4.38"), "10");
+        versions.insert(("debian", "apache", "2.4.54"), "11");
+        versions.insert(("debian", "apache", "2.4.57"), "12");
+
+        // Debian / Nginx
+        versions.insert(("debian", "nginx", "1.14.2"), "10");
+        versions.insert(("debian", "nginx", "1.18.0"), "11");
+        versions.insert(("debian", "nginx", "1.22.1"), "12");
+
+        // Debian / OpenSSH
+        versions.insert(("debian", "openssh", "7.9"), "10");
+        versions.insert(("debian", "openssh", "8.4"), "11");
+        versions.insert(("debian", "openssh", "9.2"), "12");
+
+        // Oracle / OpenSSL
+        versions.insert(("oracle", "openssl", "3.0.1"), "9.1");
+
+        versions.get(&(&os, &software, &version)).copied()
+    }
 }
 
 impl<'a> TcpChecker for OSChecker<'a> {
@@ -139,13 +204,21 @@ impl<'a> TcpChecker for OSChecker<'a> {
             if caps_result.is_some() {
                 info!("Regex OS/openssh-banner matches");
                 let caps = caps_result.unwrap();
-                let osname: String = caps["os"].to_string();
+                let os_name = caps["os"].to_string();
+                let software_version = caps["version"].to_string();
+                let version = self.get_os_version(&os_name, "openssh", &software_version);
 
                 let os_evidence_text = format!(
                         "The operating system {} has been identified using the banner presented by OpenSSH.",
-                        osname
+                        os_name
                     );
-                return Some(Finding::new(&osname, None, item, &os_evidence_text, None));
+                return Some(Finding::new(
+                    &os_name,
+                    version,
+                    item,
+                    &os_evidence_text,
+                    None,
+                ));
             }
         }
         return None;

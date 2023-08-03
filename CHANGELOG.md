@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   45 last chars are conserved. Affects checkers OpenSSL, PHP, Nginx, Apache httpd,
   and OS.
 
+### Changed
+
+- OS detection determines the OS version based on the software version.
+
 ## [0.1.0]
 
 ### Added
