@@ -138,11 +138,18 @@ impl Technology {
                     UrlRequest::from_path(main_url, "/pageNotFoundNotFound", false),
                 ]
             }
-            Self::Httpd | Self::Tomcat | Self::Nginx | Self::OpenSSL => {
+            Self::Httpd | Self::Nginx | Self::OpenSSL => {
                 vec![
                     UrlRequest::new(main_url, false),
                     UrlRequest::from_path(main_url, "/pageNotFoundNotFound", false),
                 ]
+            }
+            Self::Tomcat => {
+                vec![UrlRequest::from_path(
+                    main_url,
+                    "/pageNotFoundNotFound",
+                    false,
+                )]
             }
             Self::PhpMyAdmin => {
                 vec![
@@ -193,6 +200,7 @@ impl ValueEnum for Technology {
             Technology::Lodash,
             Technology::AngularJS,
             Technology::Gsap,
+            Technology::Tomcat,
         ]
     }
 

@@ -20,6 +20,7 @@ pub mod php;
 pub mod phpmyadmin;
 pub mod proftpd;
 pub mod pureftpd;
+pub mod tomcat;
 pub mod typo3;
 
 use crate::models::{Finding, Technology, UrlResponse};
