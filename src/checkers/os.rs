@@ -5,7 +5,7 @@
 use std::collections::HashMap;
 
 use super::{HttpChecker, TcpChecker};
-use crate::models::{Finding, Technology, UrlResponse};
+use crate::models::{Finding, Technology, UrlRequestType, UrlResponse};
 use log::{debug, info, trace};
 use regex::Regex;
 
@@ -37,11 +37,11 @@ impl<'a> OSChecker<'a> {
         )
         .unwrap();
         // Example: <address>Apache/2.4.52 (Debian) Server at localhost Port 80</address>
-        let body_regex = Regex::new(r"<address>(?P<wholematch>(Apache|nginx)\/(\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\)) Server at [a-zA-Z0-9-.]+ Port \d+)</address>").unwrap();
+        let body_apache_regex = Regex::new(r"<address>(?P<wholematch>Apache\/(?P<version>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\)) Server at [a-zA-Z0-9-.]+ Port \d+)</address>").unwrap();
 
         regexes.insert("openssh-banner", openssh_regex);
         regexes.insert("http-header", header_regex);
-        regexes.insert("http-body", body_regex);
+        regexes.insert("http-body-apache", body_apache_regex);
         OSChecker { regexes: regexes }
     }
 
@@ -98,27 +98,29 @@ impl<'a> OSChecker<'a> {
         );
         let caps_result = self
             .regexes
-            .get("http-body")
-            .expect("Regex \"http-body\" not found.")
+            .get("http-body-apache")
+            .expect("Regex \"http-body-apache\" not found.")
             .captures(&url_response.body);
 
         // The regex matches
         if caps_result.is_some() {
-            info!("Regex OS/http-body matches");
+            info!("Regex OS/http-body-apache matches");
             let caps = caps_result.unwrap();
             let evidence = caps["wholematch"].to_string();
-            let osname = caps["os"].to_string();
+            let os_name = caps["os"].to_string();
+            let software_version = caps["version"].to_string();
+            let os_version = self.get_os_version(&os_name, "apache", &software_version);
 
             let evidence_text = format!(
                     "The operating system {} has been identified by looking at the web server's signature \"{}\" at this page: {}",
-                    osname,
+                    os_name,
                     evidence,
                     url_response.url
                 );
 
             return Some(Finding::new(
-                &osname,
-                None,
+                &os_name,
+                os_version,
                 &evidence,
                 &evidence_text,
                 Some(&url_response.url),
@@ -234,6 +236,12 @@ impl<'a> HttpChecker for OSChecker<'a> {
     fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
         trace!("Running OSChecker::check_http()");
         for url_response in data {
+            // JavaScript files could be hosted on a different server
+            // Don't check the JavaScript files to avoid false positive,
+            // Check only the "main" requests.
+            if url_response.request_type != UrlRequestType::Default {
+                continue;
+            }
             // Check in HTTP headers first
             let header_finding = self.check_http_headers(url_response);
             if header_finding.is_some() {

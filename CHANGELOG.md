@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Some technologies (e.g. PHP) were identified from other servers with
+  JavaScript files.
 - The Nginx version wasn't extracted from HTTP headers.
 - In the evidence text when Apache httpd was identified using its signature, the
   variables like evidence and url of finding were not replaced by their values.

@@ -5,7 +5,7 @@
 use std::collections::HashMap;
 
 use super::HttpChecker;
-use crate::models::{Finding, Technology, UrlResponse};
+use crate::models::{Finding, Technology, UrlRequestType, UrlResponse};
 use log::{info, trace};
 use regex::Regex;
 
@@ -65,6 +65,13 @@ impl<'a> HttpChecker for TomcatChecker<'a> {
     fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
         trace!("Running TomcatChecker::check_http()");
         for url_response in data {
+            // JavaScript files could be hosted on a different server
+            // Don't check the JavaScript files to avoid false positive,
+            // Check only the "main" requests.
+            if url_response.request_type != UrlRequestType::Default {
+                continue;
+            }
+
             trace!("Checking {}", url_response.url);
             // Check in response body
             let body_finding = self.check_http_body(url_response);

@@ -457,15 +457,25 @@ pub struct UrlResponse {
     pub headers: HashMap<String, String>,
     /// The response body
     pub body: String,
+    /// The request type.
+    /// Was it a "main" request, of a subsequent one to download
+    /// a JavaScript file?
+    pub request_type: UrlRequestType,
 }
 
 impl UrlResponse {
     /// Creates a new UrlResponse
-    pub fn new(url: &str, headers: HashMap<String, String>, body: &str) -> Self {
+    pub fn new(
+        url: &str,
+        headers: HashMap<String, String>,
+        body: &str,
+        request_type: UrlRequestType,
+    ) -> Self {
         UrlResponse {
             url: url.to_string(),
             headers,
             body: body.to_string(),
+            request_type,
         }
     }
 
@@ -489,6 +499,18 @@ impl PartialEq for UrlResponse {
     fn eq(&self, other: &Self) -> bool {
         self.url == other.url
     }
+}
+
+/// Represents the type of a UrlRequest.
+/// It is about a main URL, or a JavaScript one.
+#[derive(PartialEq)]
+pub enum UrlRequestType {
+    /// The default UrlRequest type.
+    /// Used for "main" requests, not for subsequent
+    /// requests like fetching JavaScript.
+    Default,
+    /// The UrlRequest is the one of a JavaScript file.
+    JavaScript,
 }
 
 /// An enum to match the available writers

@@ -8,7 +8,7 @@ use log::{debug, error, trace};
 use regex::Regex;
 use reqwest::Client;
 
-use crate::models::{UrlRequest, UrlResponse};
+use crate::models::{UrlRequest, UrlRequestType, UrlResponse};
 
 /// A HTTP reader
 pub struct HttpReader {
@@ -77,7 +77,9 @@ impl HttpReader {
         trace!("Running HttpChecker::read_one_page()");
         debug!("Sending HTTP request for URL {}", url_request.url);
         let mut responses: Vec<UrlResponse> = Vec::new();
-        let main_response_result = self.http_request(&url_request, http_client).await;
+        let main_response_result = self
+            .http_request(&url_request, http_client, UrlRequestType::Default)
+            .await;
         if let Err(e) = main_response_result {
             error!("An error occured while reading one page: {:?}", e);
             return Err(e);
@@ -101,7 +103,8 @@ impl HttpReader {
             // Here we store all the Futures of the http requests
             // They will be handled all together in parallel
             let url_responses_futures = url_requests_js.iter().map(|i| {
-                let response_future = self.http_request(&i, &http_client);
+                let response_future =
+                    self.http_request(&i, &http_client, UrlRequestType::JavaScript);
                 response_future
             });
 
@@ -129,6 +132,7 @@ impl HttpReader {
         &self,
         url_request: &UrlRequest,
         http_client: &Client,
+        request_type: UrlRequestType,
     ) -> Result<UrlResponse, String> {
         trace!("Running HttpReader::http_request()");
         let response_result = http_client
@@ -168,7 +172,12 @@ impl HttpReader {
 
         let body = response.text().await.unwrap_or("".to_string());
 
-        Ok(UrlResponse::new(&url_request.url, headers, &body))
+        Ok(UrlResponse::new(
+            &url_request.url,
+            headers,
+            &body,
+            request_type,
+        ))
     }
 
     /// Extract all URLs from a given string, and return them optionnally

@@ -5,7 +5,7 @@
 use std::collections::HashMap;
 
 use super::HttpChecker;
-use crate::models::{Finding, Technology, UrlResponse};
+use crate::models::{Finding, Technology, UrlRequestType, UrlResponse};
 use log::{info, trace};
 use regex::Regex;
 
@@ -63,6 +63,13 @@ impl<'a> HttpChecker for Typo3Checker<'a> {
     fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
         trace!("Running Typo3Checker::check_http()");
         for url_response in data {
+            // JavaScript files could be hosted on a different server
+            // Don't check the JavaScript files to avoid false positive,
+            // Check only the "main" requests.
+            if url_response.request_type != UrlRequestType::Default {
+                continue;
+            }
+
             let response = self.check_http_body(&url_response);
             if response.is_some() {
                 return response;
