@@ -41,7 +41,7 @@ impl<'a> TcpChecker for OpenSSHChecker<'a> {
             trace!("Checking item: {}", item);
             let caps_result = self
                 .regexes
-                .get("banner")
+                .get("openssh-banner")
                 .expect("Regex \"openssh-banner\" not found.")
                 .captures(item);
             // The regex matches

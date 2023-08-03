@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- OpenSSH detection crashed the program
 - Evidences found in HTTP headers are truncated in the same way. The 45 first and
   45 last chars are conserved. Affects checkers OpenSSL, PHP, Nginx, Apache httpd,
   and OS.
