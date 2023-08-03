@@ -23,9 +23,8 @@ impl<'a> NginxChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: nginx/1.22.3 (Debian)
         let header_regex =
-            Regex::new(r"^(?P<wholematch>nginx(\/(?P<nginxversion>\d+(\.\d+(\.\d+)?)?))?)")
-                .unwrap();
-        // Example: <address>Apache/2.4.52 (Debian) Server at localhost Port 80</address>
+            Regex::new(r"^(?P<wholematch>nginx(\/(?P<version>\d+(\.\d+(\.\d+)?)?))?)").unwrap();
+        // Example: <hr><center>nginx/1.22.3</center>
         let body_regex = Regex::new(r"<hr><center>(?P<wholematch>nginx(\/(?P<version>\d+\.\d+\.\d+)( \([^\)]+\)))?)</center>").unwrap();
 
         regexes.insert("http-header", header_regex);

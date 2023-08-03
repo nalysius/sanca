@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The Nginx version wasn't extracted from HTTP headers.
 - In the evidence text when Apache httpd was identified using its signature, the
   variables like evidence and url of finding were not replaced by their values.
 - OpenSSH detection crashed the program.
