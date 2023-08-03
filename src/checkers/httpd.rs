@@ -78,7 +78,7 @@ impl<'a> ApacheHttpdChecker<'a> {
         if caps_result.is_some() {
             info!("Regex ApacheHttpd/http-body matches");
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response, 45, 45, "Apache httpd", "$techno_name$$techno_version$ has been identified by looking at its signature \"$evidence\" at this page: $url"));
+            return Some(self.extract_finding_from_captures(caps, url_response, 45, 45, "Apache httpd", "$techno_name$$techno_version$ has been identified by looking at its signature \"$evidence$\" at this page: $url_of_finding$"));
         }
         None
     }

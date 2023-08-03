@@ -9,16 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Tomcat detection
-- AngularJS detection
-- GSAP detection
-- TYPO3 detection
-- phpMyAdmin detection
-- A CSV writer to get the findings in CSV
+- Tomcat detection.
+- AngularJS detection.
+- GSAP detection.
+- TYPO3 detection.
+- phpMyAdmin detection.
+- A CSV writer to get the findings in CSV.
 
 ### Fixed
 
-- OpenSSH detection crashed the program
+- In the evidence text when Apache httpd was identified using its signature, the
+  variables like evidence and url of finding were not replaced by their values.
+- OpenSSH detection crashed the program.
 - Evidences found in HTTP headers are truncated in the same way. The 45 first and
   45 last chars are conserved. Affects checkers OpenSSL, PHP, Nginx, Apache httpd,
   and OS.
