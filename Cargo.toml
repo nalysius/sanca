@@ -13,7 +13,7 @@ license = "MIT"
 
 [dependencies]
 regex = "1.9.1"
-clap = { version = "4.3.11", features = ["derive"] }
+clap = { version = "4.3.19", features = ["derive"] }
 reqwest = "0.11.18"
 tokio = "1.29.1"
 futures = "0.3.28"
