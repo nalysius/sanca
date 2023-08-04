@@ -54,7 +54,7 @@ impl<'a> GsapChecker<'a> {
 
         // The regex matches
         if caps_result.is_some() {
-            info!("Regex GSAP/http-body matches");
+            info!("Regex GSAP/http-body-comment matches");
             let caps = caps_result.unwrap();
             return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "GSAP", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
@@ -69,7 +69,7 @@ impl<'a> GsapChecker<'a> {
         if caps_result.is_some() {
             info!("Regex GSAP/http-body-minified matches");
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response, 10, 30, "GSAP", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+            return Some(self.extract_finding_from_captures(caps, url_response, 10, 20, "GSAP", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
         None
     }
