@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- JavaScript files whose URL path contained a '@' weren't downloaded.
 - Some technologies (e.g. PHP) were identified from other servers with
   JavaScript files.
 - The Nginx version wasn't extracted from HTTP headers.
