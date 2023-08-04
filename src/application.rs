@@ -4,6 +4,7 @@
 use clap::{Parser, ValueEnum};
 
 use crate::checkers::angularjs::AngularJSChecker;
+use crate::checkers::bootstrap::BootstrapChecker;
 use crate::checkers::dovecot::DovecotChecker;
 use crate::checkers::exim::EximChecker;
 use crate::checkers::gsap::GsapChecker;
@@ -74,6 +75,7 @@ impl Application {
             Box::new(Typo3Checker::new()),
             Box::new(WordPressChecker::new()),
             Box::new(AngularJSChecker::new()),
+            Box::new(BootstrapChecker::new()),
             Box::new(GsapChecker::new()),
             Box::new(JQueryChecker::new()),
             Box::new(HandlebarsChecker::new()),
