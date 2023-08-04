@@ -75,10 +75,15 @@ impl<'a> OSChecker<'a> {
                 let software = caps["software"].to_string();
                 let software_version = caps["version"].to_string();
                 let os_version = self.get_os_version(&os_name, &software, &software_version);
+                let mut version_text = "".to_string();
+                if os_version.is_some() {
+                    version_text = format!(" {}", os_version.as_ref().unwrap());
+                }
                 let evidence = &header_value;
                 let evidence_text = format!(
-                        "The operating system {} has been identified using the HTTP header \"{}: {}\" returned at the following URL: {}",
+                        "The operating system {}{} has been identified using the HTTP header \"{}: {}\" returned at the following URL: {}",
                         os_name,
+                        version_text,
                         header_name,
                         evidence,
                         url_response.url,
@@ -115,10 +120,15 @@ impl<'a> OSChecker<'a> {
             let os_name = caps["os"].to_string();
             let software_version = caps["version"].to_string();
             let os_version = self.get_os_version(&os_name, "apache", &software_version);
+            let mut version_text = "".to_string();
+            if os_version.is_some() {
+                version_text = format!(" {}", os_version.as_ref().unwrap());
+            }
 
             let evidence_text = format!(
-                    "The operating system {} has been identified by looking at the web server's signature \"{}\" at this page: {}",
+                    "The operating system {}{} has been identified by looking at the web server's signature \"{}\" at this page: {}",
                     os_name,
+                    version_text,
                     evidence,
                     url_response.url
                 );
@@ -146,10 +156,15 @@ impl<'a> OSChecker<'a> {
             let os_name = caps["os"].to_string();
             let software_version = caps["version"].to_string();
             let os_version = self.get_os_version(&os_name, "nginx", &software_version);
+            let mut version_text = "".to_string();
+            if os_version.is_some() {
+                version_text = format!(" {}", os_version.as_ref().unwrap());
+            }
 
             let evidence_text = format!(
-                    "The operating system {} has been identified by looking at the web server's signature \"{}\" at this page: {}",
+                    "The operating system {}{} has been identified by looking at the web server's signature \"{}\" at this page: {}",
                     os_name,
+                    version_text,
                     evidence,
                     url_response.url
                 );
@@ -244,15 +259,20 @@ impl<'a> TcpChecker for OSChecker<'a> {
                 let caps = caps_result.unwrap();
                 let os_name = caps["os"].to_string();
                 let software_version = caps["version"].to_string();
-                let version = self.get_os_version(&os_name, "openssh", &software_version);
+                let os_version = self.get_os_version(&os_name, "openssh", &software_version);
+                let mut version_text = "".to_string();
+                if os_version.is_some() {
+                    version_text = format!(" {}", os_version.as_ref().unwrap());
+                }
 
                 let os_evidence_text = format!(
-                        "The operating system {} has been identified using the banner presented by OpenSSH.",
-                        os_name
+                        "The operating system {}{} has been identified using the banner presented by OpenSSH.",
+                        os_name,
+                        version_text,
                     );
                 return Some(Finding::new(
                     &os_name,
-                    version,
+                    os_version,
                     item,
                     &os_evidence_text,
                     None,
