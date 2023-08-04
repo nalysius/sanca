@@ -351,16 +351,6 @@ impl UrlRequest {
             trace!("No path found in the main URL, use /");
             "/".to_string()
         };
-        let query_string: String = if caps.name("querystring").is_some() {
-            trace!(
-                "Found a query string in the main URL: {}",
-                caps.name("querystring").unwrap().as_str()
-            );
-            caps.name("querystring").unwrap().as_str().to_string()
-        } else {
-            trace!("No query string found in the main URL");
-            "".to_string()
-        };
 
         let new_path: String = if path_to.starts_with("/") {
             // If an absolute path is provided, just use it
@@ -413,13 +403,7 @@ impl UrlRequest {
             }
         };
 
-        // Avoid sending requests with a '?' if no query string is provided
-        let qs = if query_string.is_empty() {
-            "".to_string()
-        } else {
-            format!("?{}", query_string)
-        };
-        let url = format!("{}://{}{}{}{}", protocol, hostname, port, new_path, qs);
+        let url = format!("{}://{}{}{}", protocol, hostname, port, new_path);
         Self::new(&url, fetch_js)
     }
 
