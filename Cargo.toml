@@ -1,6 +1,6 @@
 [package]
 name = "sanca"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "A scanner to discover what technologies are running on a remote host. Focus on providing evidences."
 readme = "README.md"
