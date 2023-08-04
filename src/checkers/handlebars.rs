@@ -21,11 +21,15 @@ impl<'a> HandlebarsChecker<'a> {
     /// reused.
     pub fn new() -> Self {
         let mut regexes = HashMap::new();
-        // Example:
+        // Example: /**!
+        //          @license
+        //          handlebars v4.7.7
         let comment_regex = Regex::new(
             r"\/\*\*![\s\*]+@license\s+(?P<wholematch>handlebars (v(?P<version>\d\.\d\.\d)))",
         )
         .unwrap();
+
+        // Example: HandlebarsEnvironment;[...]b="4.7.7";An.VERSION=b;
         let source_code_regex = Regex::new(r#"(?P<wholematch>HandlebarsEnvironment;.*[a-zA-Z0-9]="(?P<version>\d+\.\d+\.\d+)";[a-zA-Z0-9]+\.VERSION=[a-zA-Z0-9]+;)"#).unwrap();
 
         regexes.insert("http-body-comment", comment_regex);
