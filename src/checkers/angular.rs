@@ -128,7 +128,7 @@ mod tests {
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
-            body,
+            "nothing to see in body",
             UrlRequestType::Default,
         );
         let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
@@ -138,17 +138,18 @@ mod tests {
     #[test]
     fn doesnt_find_match_in_url_responses() {
         let checker = AngularChecker::new();
-        let body = r#"var a = 2;CORE="angular";var b = new Version("16.1.8"); var c = 'test';"#;
+        let body1 = r#"var a = 2;CORE="angular";var b = new Version("16.1.8"); var c = 'test';"#;
         let url_response_invalid1 = UrlResponse::new(
             "https://www.example.com/abc/def1",
             HashMap::new(),
-            body,
+            body1,
             UrlRequestType::Default,
         );
+        let body2 = r#"var a = 2;code="Angular";var b = new version("16.1.8"); var c = 'test';"#;
         let url_response_invalid2 = UrlResponse::new(
             "https://www.example.com/abc-1/de-f1",
             HashMap::new(),
-            body,
+            body2,
             UrlRequestType::Default,
         );
         let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
