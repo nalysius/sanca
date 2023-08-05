@@ -77,7 +77,7 @@ impl<'a> BootstrapChecker<'a> {
 
         // The regex matches
         if caps_result.is_some() {
-            info!("Regex Handlebars/http-body-source matches");
+            info!("Regex Bootstrap/http-body-source matches");
             let caps = caps_result.unwrap();
             return Some(self.extract_finding_from_captures(
                 caps,
