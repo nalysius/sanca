@@ -99,3 +99,131 @@ impl<'a> HttpChecker for AngularJSChecker<'a> {
         Technology::AngularJS
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::UrlRequestType;
+    #[test]
+    fn source_code_matches() {
+        let checker = AngularJSChecker::new();
+        let body = r#"a.test();var errorPage = 'https://errors.angularjs.org/1.8.2/';"#;
+        let url_response_valid = UrlResponse::new(
+            "https://www.example.com/js/file.js",
+            HashMap::new(),
+            body,
+            UrlRequestType::JavaScript,
+        );
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn source_code_doesnt_matches() {
+        let checker = AngularJSChecker::new();
+        let body = r#"var notAngularjs = "The URL is http://errors.angularjs.org/1.8.2";"#;
+        let url_response_valid = UrlResponse::new(
+            "https://www.example.com/that.jsp?abc=def",
+            HashMap::new(),
+            body,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn comment_matches() {
+        let checker = AngularJSChecker::new();
+        let body1 = r#" * @license AngularJS v1.8.2"#;
+        let mut url_response_valid = UrlResponse::new(
+            "https://www.example.com/that.jsp?abc=def",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+
+        let body2 = " AngularJS v1.5.3 ";
+        url_response_valid.body = body2.to_string();
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn comment_doesnt_matches() {
+        let checker = AngularJSChecker::new();
+        let body1 = r#"license AngularJS v1.8.2"#;
+        let mut url_response_valid = UrlResponse::new(
+            "https://www.example.com/that.jsp?abc=def",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_none());
+
+        let body2 = "AngularJS 1.5.3";
+        url_response_valid.body = body2.to_string();
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn finds_match_in_url_responses() {
+        let checker = AngularJSChecker::new();
+        let body1 = r#"var a = "\nhttp://errors.angularjs.org/1.9.3/";"#;
+        let url_response_valid = UrlResponse::new(
+            "https://www.example.com/a.js",
+            HashMap::new(),
+            body1,
+            UrlRequestType::JavaScript,
+        );
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert!(finding.is_some());
+
+        let body2 = " * @license AngularJS v1.5.3";
+        let url_response_valid = UrlResponse::new(
+            "https://www.example.com/a.js",
+            HashMap::new(),
+            body2,
+            UrlRequestType::JavaScript,
+        );
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn doesnt_find_match_in_url_responses() {
+        let checker = AngularJSChecker::new();
+        let body1 = r#"<p>You can find errors.angularjs.org 1.8.3</p>"#;
+        let url_response_invalid1 = UrlResponse::new(
+            "https://www.example.com/abc/def1",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+        let body2 = r#"<a href="http://errors.angularjs.org/1.5.8">Click Me</a>"#;
+        let url_response_invalid2 = UrlResponse::new(
+            "https://www.example.com/abc-1/de-f1",
+            HashMap::new(),
+            body2,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(finding.is_none());
+    }
+}
