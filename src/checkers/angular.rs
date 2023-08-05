@@ -80,3 +80,78 @@ impl<'a> HttpChecker for AngularChecker<'a> {
         Technology::Angular
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::UrlRequestType;
+    #[test]
+    fn source_code_matches() {
+        let checker = AngularChecker::new();
+        let body =
+            r#"var a = 2;CORE="@angular/core";var b = new Version("16.1.8"); var c = 'test';"#;
+        let url_response_valid = UrlResponse::new(
+            "https://www.example.com/js/angular.js",
+            HashMap::new(),
+            body,
+            UrlRequestType::JavaScript,
+        );
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn source_code_doesnt_matches() {
+        let checker = AngularChecker::new();
+        let body = r#"var a = 2;package="angular";var b = new Version("16.1.8"); var c = 'test';"#;
+        let url_response_valid = UrlResponse::new(
+            "https://www.example.com/that.jsp?abc=def",
+            HashMap::new(),
+            body,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn finds_match_in_url_responses() {
+        let checker = AngularChecker::new();
+        let body =
+            r#"var a = 2;CORE="@angular/core";var b = new Version("16.1.8"); var c = 'test';"#;
+        let url_response_valid = UrlResponse::new(
+            "https://www.example.com/a.js",
+            HashMap::new(),
+            body,
+            UrlRequestType::JavaScript,
+        );
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            body,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn doesnt_find_match_in_url_responses() {
+        let checker = AngularChecker::new();
+        let body = r#"var a = 2;CORE="angular";var b = new Version("16.1.8"); var c = 'test';"#;
+        let url_response_invalid1 = UrlResponse::new(
+            "https://www.example.com/abc/def1",
+            HashMap::new(),
+            body,
+            UrlRequestType::Default,
+        );
+        let url_response_invalid2 = UrlResponse::new(
+            "https://www.example.com/abc-1/de-f1",
+            HashMap::new(),
+            body,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(finding.is_none());
+    }
+}
