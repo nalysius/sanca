@@ -101,6 +101,7 @@ pub enum Technology {
     Gsap,
     Bootstrap,
     Angular,
+    Plesk,
 }
 
 impl Technology {
@@ -177,6 +178,9 @@ impl Technology {
                     UrlRequest::from_path(main_url, "wp-login.php", false),
                 ]
             }
+            Self::Plesk => {
+                vec![UrlRequest::from_path(main_url, "/login_up.php", false)]
+            }
             _ => vec![UrlRequest::new(main_url, true)],
         }
     }
@@ -211,6 +215,7 @@ impl ValueEnum for Technology {
             Technology::Tomcat,
             Technology::Bootstrap,
             Technology::Angular,
+            Technology::Plesk,
         ]
     }
 
@@ -242,6 +247,7 @@ impl ValueEnum for Technology {
             Technology::Gsap => Some(PossibleValue::new("gsap")),
             Technology::Bootstrap => Some(PossibleValue::new("bootstrap")),
             Technology::Angular => Some(PossibleValue::new("angular")),
+            Technology::Plesk => Some(PossibleValue::new("plesk")),
         }
     }
 }

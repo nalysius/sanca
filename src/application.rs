@@ -21,6 +21,7 @@ use crate::checkers::openssl::OpenSSLChecker;
 use crate::checkers::os::OSChecker;
 use crate::checkers::php::PHPChecker;
 use crate::checkers::phpmyadmin::PhpMyAdminChecker;
+use crate::checkers::plesk::PleskChecker;
 use crate::checkers::proftpd::ProFTPDChecker;
 use crate::checkers::pureftpd::PureFTPdChecker;
 use crate::checkers::reactjs::ReactJSChecker;
@@ -76,6 +77,7 @@ impl Application {
             Box::new(PhpMyAdminChecker::new()),
             Box::new(Typo3Checker::new()),
             Box::new(WordPressChecker::new()),
+            Box::new(PleskChecker::new()),
             Box::new(AngularChecker::new()),
             Box::new(AngularJSChecker::new()),
             Box::new(BootstrapChecker::new()),

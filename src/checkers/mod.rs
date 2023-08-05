@@ -20,6 +20,7 @@ pub mod openssl;
 pub mod os;
 pub mod php;
 pub mod phpmyadmin;
+pub mod plesk;
 pub mod proftpd;
 pub mod pureftpd;
 pub mod reactjs;
