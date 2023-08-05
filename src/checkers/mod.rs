@@ -21,6 +21,7 @@ pub mod php;
 pub mod phpmyadmin;
 pub mod proftpd;
 pub mod pureftpd;
+pub mod reactjs;
 pub mod tomcat;
 pub mod typo3;
 pub mod wordpress;
