@@ -2,6 +2,7 @@
 //! A checker is a struct that checks an input (banner, HTTP headers, etc)
 //! to against a technology.
 
+pub mod angular;
 pub mod angularjs;
 pub mod bootstrap;
 pub mod dovecot;

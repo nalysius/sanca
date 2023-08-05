@@ -3,6 +3,7 @@
 
 use clap::{Parser, ValueEnum};
 
+use crate::checkers::angular::AngularChecker;
 use crate::checkers::angularjs::AngularJSChecker;
 use crate::checkers::bootstrap::BootstrapChecker;
 use crate::checkers::dovecot::DovecotChecker;
@@ -75,6 +76,7 @@ impl Application {
             Box::new(PhpMyAdminChecker::new()),
             Box::new(Typo3Checker::new()),
             Box::new(WordPressChecker::new()),
+            Box::new(AngularChecker::new()),
             Box::new(AngularJSChecker::new()),
             Box::new(BootstrapChecker::new()),
             Box::new(GsapChecker::new()),

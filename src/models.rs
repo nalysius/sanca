@@ -100,6 +100,7 @@ pub enum Technology {
     AngularJS,
     Gsap,
     Bootstrap,
+    Angular,
 }
 
 impl Technology {
@@ -209,6 +210,7 @@ impl ValueEnum for Technology {
             Technology::Gsap,
             Technology::Tomcat,
             Technology::Bootstrap,
+            Technology::Angular,
         ]
     }
 
@@ -239,6 +241,7 @@ impl ValueEnum for Technology {
             Technology::AngularJS => Some(PossibleValue::new("angularjs")),
             Technology::Gsap => Some(PossibleValue::new("gsap")),
             Technology::Bootstrap => Some(PossibleValue::new("bootstrap")),
+            Technology::Angular => Some(PossibleValue::new("angular")),
         }
     }
 }
