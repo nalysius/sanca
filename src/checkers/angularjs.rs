@@ -119,7 +119,7 @@ mod tests {
     }
 
     #[test]
-    fn source_code_doesnt_matches() {
+    fn source_code_doesnt_match() {
         let checker = AngularJSChecker::new();
         let body = r#"var notAngularjs = "The URL is http://errors.angularjs.org/1.8.2";"#;
         let url_response_invalid = UrlResponse::new(
@@ -152,7 +152,7 @@ mod tests {
     }
 
     #[test]
-    fn comment_doesnt_matches() {
+    fn comment_doesnt_match() {
         let checker = AngularJSChecker::new();
         let body1 = r#"license AngularJS v1.8.2"#;
         let mut url_response_invalid = UrlResponse::new(

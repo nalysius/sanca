@@ -145,7 +145,7 @@ mod tests {
     }
 
     #[test]
-    fn source_code_doesnt_matches() {
+    fn source_code_doesnt_match() {
         let checker = ApacheHttpdChecker::new();
         let body = r#"<address>Apache 2.4.52 server</address>"#;
         let url_response_invalid = UrlResponse::new(
@@ -182,7 +182,7 @@ mod tests {
     }
 
     #[test]
-    fn header_doesnt_matches() {
+    fn header_doesnt_match() {
         let checker = ApacheHttpdChecker::new();
         let mut headers1 = HashMap::new();
         headers1.insert("Accept".to_string(), "text/html".to_string());

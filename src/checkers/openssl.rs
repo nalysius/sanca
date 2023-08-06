@@ -123,7 +123,7 @@ mod tests {
     }
 
     #[test]
-    fn header_doesnt_matches() {
+    fn header_doesnt_match() {
         let checker = OpenSSLChecker::new();
         let mut headers1 = HashMap::new();
         headers1.insert("Accept".to_string(), "text/html".to_string());

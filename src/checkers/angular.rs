@@ -101,7 +101,7 @@ mod tests {
     }
 
     #[test]
-    fn source_code_doesnt_matches() {
+    fn source_code_doesnt_match() {
         let checker = AngularChecker::new();
         let body = r#"var a = 2;package="angular";var b = new Version("16.1.8"); var c = 'test';"#;
         let url_response_invalid = UrlResponse::new(

@@ -99,7 +99,7 @@ mod tests {
     }
 
     #[test]
-    fn comment_doesnt_matches() {
+    fn comment_doesnt_match() {
         let checker = JQueryChecker::new();
         let body1 = r#"/**
         * jQuery 1.2.3

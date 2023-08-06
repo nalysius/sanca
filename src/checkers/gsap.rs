@@ -117,7 +117,7 @@ mod tests {
     }
 
     #[test]
-    fn source_code_doesnt_matches() {
+    fn source_code_doesnt_match() {
         let checker = GsapChecker::new();
         let body = r#"GSAP is in version 1.2.3"#;
         let url_response_invalid = UrlResponse::new(
@@ -150,7 +150,7 @@ mod tests {
     }
 
     #[test]
-    fn comment_doesnt_matches() {
+    fn comment_doesnt_match() {
         let checker = GsapChecker::new();
         let body1 = r#"Is CSSRulePlugin 3.11.1 installed?"#;
         let mut url_response_invalid = UrlResponse::new(

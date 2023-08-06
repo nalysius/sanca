@@ -128,7 +128,7 @@ mod tests {
     }
 
     #[test]
-    fn source_code_doesnt_matches() {
+    fn source_code_doesnt_match() {
         let checker = LodashChecker::new();
         let body = r#"var f = "LodashPlaceholder"; VERSION="4.7.7";"#;
         let url_response_invalid = UrlResponse::new(

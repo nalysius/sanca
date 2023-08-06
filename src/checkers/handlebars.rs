@@ -129,7 +129,7 @@ mod tests {
     }
 
     #[test]
-    fn source_code_doesnt_matches() {
+    fn source_code_doesnt_match() {
         let checker = HandlebarsChecker::new();
         let body = r#"var f = "HandlebarsEnvironment"; VERSION="4.7.7";"#;
         let url_response_invalid = UrlResponse::new(
@@ -163,7 +163,7 @@ mod tests {
     }
 
     #[test]
-    fn comment_doesnt_matches() {
+    fn comment_doesnt_match() {
         let checker = HandlebarsChecker::new();
         let body1 = r#"/**
         * Handlebars 1.2.3
