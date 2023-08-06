@@ -34,7 +34,7 @@ impl<'a> BootstrapChecker<'a> {
         //
         // Bootstrap[...]d.VERSION="3.3.7"
         let source_code_regex = Regex::new(
-            r#"(?P<wholematch>Bootstrap.+VERSION(\(\)\s*\{return\s*"|=")(?P<version>\d+\.\d+\.\d+)")"#,
+            r#"(?P<wholematch>Bootstrap.+VERSION(\(\)\s*\{\s*return\s*"|=")(?P<version>\d+\.\d+\.\d+)")"#,
         )
         .unwrap();
 
@@ -108,5 +108,138 @@ impl<'a> HttpChecker for BootstrapChecker<'a> {
     /// The technology supported by the checker
     fn get_technology(&self) -> Technology {
         Technology::Bootstrap
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::UrlRequestType;
+    #[test]
+    fn source_code_matches() {
+        let checker = BootstrapChecker::new();
+        let body1 = r#"Bootstrap.this();i.VERSION="3.3.7";"#;
+        let mut url_response_valid = UrlResponse::new(
+            "https://www.example.com/js/file.js",
+            HashMap::new(),
+            body1,
+            UrlRequestType::JavaScript,
+        );
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+
+        let body2 = r#"Bootstrap.this();i.VERSION(){return"3.3.7";}"#;
+        url_response_valid.body = body2.to_string();
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn source_code_doesnt_matches() {
+        let checker = BootstrapChecker::new();
+        let body = r#"application.bootstrap(); application.VERSION = "1.2.3";"#;
+        let url_response_valid = UrlResponse::new(
+            "https://www.example.com/that.jsp?abc=def",
+            HashMap::new(),
+            body,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn comment_matches() {
+        let checker = BootstrapChecker::new();
+        let body1 = r#" * Bootstrap v5.2.0 (https://getbootstrap.com/)"#;
+        let mut url_response_valid = UrlResponse::new(
+            "https://www.example.com/that.jsp?abc=def",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+
+        let body2 = "* Bootstrap v5.2.0 (http://getbootstrap.com)";
+        url_response_valid.body = body2.to_string();
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn comment_doesnt_matches() {
+        let checker = BootstrapChecker::new();
+        let body1 = r#"// Bootstrap 3.2.1 (https://getbootstrap.com)"#;
+        let mut url_response_valid = UrlResponse::new(
+            "https://www.example.com/that.jsp?abc=def",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_none());
+
+        let body2 = " * Bootstrap v3.2.1";
+        url_response_valid.body = body2.to_string();
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn finds_match_in_url_responses() {
+        let checker = BootstrapChecker::new();
+        let body1 = r#"* Bootstrap v5.3.0 (https://getbootstrap.com/)"#;
+        let url_response_valid = UrlResponse::new(
+            "https://www.example.com/a.js",
+            HashMap::new(),
+            body1,
+            UrlRequestType::JavaScript,
+        );
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert!(finding.is_some());
+
+        let body2 = "* Bootstrap v5.3.0 (http://getbootstrap.com)";
+        let url_response_valid = UrlResponse::new(
+            "https://www.example.com/a.js",
+            HashMap::new(),
+            body2,
+            UrlRequestType::JavaScript,
+        );
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn doesnt_find_match_in_url_responses() {
+        let checker = BootstrapChecker::new();
+        let body1 = r#"Bootstrap v5.3.0 is available at https://getbootstrap.com"#;
+        let url_response_invalid1 = UrlResponse::new(
+            "https://www.example.com/abc/def1",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+        let body2 = r#"Bootstrap doesn't match here."#;
+        let url_response_invalid2 = UrlResponse::new(
+            "https://www.example.com/abc-1/de-f1",
+            HashMap::new(),
+            body2,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(finding.is_none());
     }
 }
