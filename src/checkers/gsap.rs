@@ -112,6 +112,7 @@ mod tests {
 
         let body2 = r#"gsap) && a.b = 12;r.version='3.11.0';"#;
         url_response_valid.body = body2.to_string();
+        let finding = checker.check_http_body(&url_response_valid);
         assert!(finding.is_some());
     }
 

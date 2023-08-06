@@ -30,7 +30,7 @@ impl<'a> HandlebarsChecker<'a> {
         .unwrap();
 
         // Example: HandlebarsEnvironment;[...]b="4.7.7";An.VERSION=b;
-        let source_code_regex = Regex::new(r#"(?P<wholematch>HandlebarsEnvironment;.*[a-zA-Z0-9]+="(?P<version>\d+\.\d+\.\d+)";[a-zA-Z0-9]+\.VERSION=[a-zA-Z0-9]+;)"#).unwrap();
+        let source_code_regex = Regex::new(r#"(?P<wholematch>HandlebarsEnvironment;.*[a-zA-Z0-9]+\s*=\s*"(?P<version>\d+\.\d+\.\d+)";[a-zA-Z0-9]+\.VERSION=[a-zA-Z0-9]+;)"#).unwrap();
 
         regexes.insert("http-body-comment", comment_regex);
         regexes.insert("http-body-source", source_code_regex);
@@ -122,8 +122,9 @@ mod tests {
         let finding = checker.check_http_body(&url_response_valid);
         assert!(finding.is_some());
 
-        let body2 = r#"this.ok= true;that().HandlebarsEnvironment;var1 = "4.7.7";v.VERSION=var1;"#;
+        let body2 = r#"this.ok= true;that().HandlebarsEnvironment;var1="4.7.7";v.VERSION=var1;"#;
         url_response_valid.body = body2.to_string();
+        let finding = checker.check_http_body(&url_response_valid);
         assert!(finding.is_some());
     }
 
