@@ -138,13 +138,13 @@ mod tests {
     fn source_code_doesnt_matches() {
         let checker = BootstrapChecker::new();
         let body = r#"application.bootstrap(); application.VERSION = "1.2.3";"#;
-        let url_response_valid = UrlResponse::new(
+        let url_response_invalid = UrlResponse::new(
             "https://www.example.com/that.jsp?abc=def",
             HashMap::new(),
             body,
             UrlRequestType::Default,
         );
-        let finding = checker.check_http_body(&url_response_valid);
+        let finding = checker.check_http_body(&url_response_invalid);
         assert!(finding.is_none());
     }
 
@@ -171,18 +171,18 @@ mod tests {
     fn comment_doesnt_matches() {
         let checker = BootstrapChecker::new();
         let body1 = r#"// Bootstrap 3.2.1 (https://getbootstrap.com)"#;
-        let mut url_response_valid = UrlResponse::new(
+        let mut url_response_invalid = UrlResponse::new(
             "https://www.example.com/that.jsp?abc=def",
             HashMap::new(),
             body1,
             UrlRequestType::Default,
         );
-        let finding = checker.check_http_body(&url_response_valid);
+        let finding = checker.check_http_body(&url_response_invalid);
         assert!(finding.is_none());
 
         let body2 = " * Bootstrap v3.2.1";
-        url_response_valid.body = body2.to_string();
-        let finding = checker.check_http_body(&url_response_valid);
+        url_response_invalid.body = body2.to_string();
+        let finding = checker.check_http_body(&url_response_invalid);
         assert!(finding.is_none());
     }
 

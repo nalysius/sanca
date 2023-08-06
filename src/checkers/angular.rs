@@ -104,13 +104,13 @@ mod tests {
     fn source_code_doesnt_matches() {
         let checker = AngularChecker::new();
         let body = r#"var a = 2;package="angular";var b = new Version("16.1.8"); var c = 'test';"#;
-        let url_response_valid = UrlResponse::new(
+        let url_response_invalid = UrlResponse::new(
             "https://www.example.com/that.jsp?abc=def",
             HashMap::new(),
             body,
             UrlRequestType::Default,
         );
-        let finding = checker.check_http_body(&url_response_valid);
+        let finding = checker.check_http_body(&url_response_invalid);
         assert!(finding.is_none());
     }
 

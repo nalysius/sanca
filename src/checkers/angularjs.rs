@@ -122,13 +122,13 @@ mod tests {
     fn source_code_doesnt_matches() {
         let checker = AngularJSChecker::new();
         let body = r#"var notAngularjs = "The URL is http://errors.angularjs.org/1.8.2";"#;
-        let url_response_valid = UrlResponse::new(
+        let url_response_invalid = UrlResponse::new(
             "https://www.example.com/that.jsp?abc=def",
             HashMap::new(),
             body,
             UrlRequestType::Default,
         );
-        let finding = checker.check_http_body(&url_response_valid);
+        let finding = checker.check_http_body(&url_response_invalid);
         assert!(finding.is_none());
     }
 
@@ -155,18 +155,18 @@ mod tests {
     fn comment_doesnt_matches() {
         let checker = AngularJSChecker::new();
         let body1 = r#"license AngularJS v1.8.2"#;
-        let mut url_response_valid = UrlResponse::new(
+        let mut url_response_invalid = UrlResponse::new(
             "https://www.example.com/that.jsp?abc=def",
             HashMap::new(),
             body1,
             UrlRequestType::Default,
         );
-        let finding = checker.check_http_body(&url_response_valid);
+        let finding = checker.check_http_body(&url_response_invalid);
         assert!(finding.is_none());
 
         let body2 = "AngularJS 1.5.3";
-        url_response_valid.body = body2.to_string();
-        let finding = checker.check_http_body(&url_response_valid);
+        url_response_invalid.body = body2.to_string();
+        let finding = checker.check_http_body(&url_response_invalid);
         assert!(finding.is_none());
     }
 
