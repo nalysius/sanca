@@ -194,7 +194,7 @@ mod tests {
         let mut headers2 = HashMap::new();
         headers2.insert("Accept".to_string(), "text/html".to_string());
         url_response_invalid.headers = headers2;
-        let finding = checker.check_http_body(&url_response_invalid);
+        let finding = checker.check_http_headers(&url_response_invalid);
         assert!(finding.is_none());
     }
 
@@ -265,7 +265,7 @@ mod tests {
         let body1 = r#"<hr><center>nginx/1.22.4 (Debian)</center>"#;
         let url = "https://www.example.com/404.php";
         let url_response_valid1 =
-            UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::JavaScript);
+            UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::Default);
         let finding = checker.check_http_body(&url_response_valid1);
         assert!(finding.is_some());
 
