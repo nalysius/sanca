@@ -120,3 +120,173 @@ impl<'a> HttpChecker for ApacheHttpdChecker<'a> {
         Technology::Httpd
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::UrlRequestType;
+    #[test]
+    fn source_code_matches() {
+        let checker = ApacheHttpdChecker::new();
+        let body1 = r#"<p><address>Apache Server at www.test-domain.com Port 80</address></p>"#;
+        let mut url_response_valid = UrlResponse::new(
+            "https://www.example.com/pageNotFound",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+
+        let body2 = r#"<p><address>Apache/2.5.52 (Debian) Server at <a href="mailto:webmaster@test-domain.com">www.test-domain.com</a> Port 80</address></p>"#;
+        url_response_valid.body = body2.to_string();
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn source_code_doesnt_matches() {
+        let checker = ApacheHttpdChecker::new();
+        let body = r#"<address>Apache 2.4.52 server</address>"#;
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/not-found.php?abc=def",
+            HashMap::new(),
+            body,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_invalid);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn header_matches() {
+        let checker = ApacheHttpdChecker::new();
+        let mut headers1 = HashMap::new();
+        headers1.insert("Accept".to_string(), "text/html".to_string());
+        headers1.insert("Server".to_string(), "Apache/2.4.52".to_string());
+        let mut url_response_valid = UrlResponse::new(
+            "https://www.example.com/that.php?abc=def",
+            headers1,
+            "the body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_headers(&url_response_valid);
+        assert!(finding.is_some());
+
+        let mut headers2 = HashMap::new();
+        headers2.insert("Accept".to_string(), "text/html".to_string());
+        headers2.insert("Server".to_string(), "Apache/2.4.52 (CentOS)".to_string());
+        url_response_valid.headers = headers2;
+        let finding = checker.check_http_headers(&url_response_valid);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn header_doesnt_matches() {
+        let checker = ApacheHttpdChecker::new();
+        let mut headers1 = HashMap::new();
+        headers1.insert("Accept".to_string(), "text/html".to_string());
+        headers1.insert("Server".to_string(), "nginx/1.22.0".to_string());
+        let mut url_response_invalid = UrlResponse::new(
+            "https://www.example.com/that.php?abc=def",
+            headers1,
+            "the body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_headers(&url_response_invalid);
+        assert!(finding.is_none());
+
+        let mut headers2 = HashMap::new();
+        headers2.insert("Accept".to_string(), "text/html".to_string());
+        url_response_invalid.headers = headers2;
+        let finding = checker.check_http_body(&url_response_invalid);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn finds_match_in_url_responses() {
+        let checker = ApacheHttpdChecker::new();
+        let body1 = r#"<address>Apache Server at www.test-domain.com Port 80</address>"#;
+        let url_response_valid = UrlResponse::new(
+            "https://www.example.com/pageNotFound.html",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert!(finding.is_some());
+
+        let mut headers1 = HashMap::new();
+        headers1.insert("Accept".to_string(), "text/html".to_string());
+        headers1.insert("Server".to_string(), "Apache/2.4.52".to_string());
+        let url_response_valid = UrlResponse::new(
+            "https://www.example.com/test.php",
+            headers1,
+            "the body",
+            UrlRequestType::Default,
+        );
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn doesnt_find_match_in_url_responses() {
+        let checker = ApacheHttpdChecker::new();
+        let body1 = r#"About Apache httpd 2.4.54"#;
+        let url_response_invalid1 = UrlResponse::new(
+            "https://www.example.com/abc/def1",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+
+        let mut headers1 = HashMap::new();
+        headers1.insert("Accept".to_string(), "text/html".to_string());
+        let url_response_invalid2 = UrlResponse::new(
+            "https://www.example.com/abc-1/de-f1",
+            headers1,
+            "the body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn finding_fields_are_valid() {
+        let checker = ApacheHttpdChecker::new();
+        let body1 =
+            r#"<address>Apache/2.4.54 (Debian) Server at dev.that.site.com Port 80</address>"#;
+        let url = "https://www.example.com/404.php";
+        let url_response_valid1 =
+            UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::JavaScript);
+        let finding = checker.check_http_body(&url_response_valid1);
+        assert!(finding.is_some());
+
+        let finding = finding.unwrap();
+        assert!(finding.url_of_finding.is_some());
+        assert_eq!(url, finding.url_of_finding.unwrap());
+        let expected_evidence = "Apache/2.4.54";
+        assert!(finding.evidence.contains(expected_evidence));
+        assert_eq!("Apache httpd", finding.technology);
+        assert!(finding.version.is_some());
+        assert_eq!("2.4.54", finding.version.unwrap());
+
+        let evidence_text = finding.evidence_text;
+        assert!(evidence_text.contains(url)); // URL of finding
+        assert!(evidence_text.contains("Apache httpd 2.4.54")); // Technology / version
+        assert!(evidence_text.contains(expected_evidence)); // Evidence
+    }
+}
