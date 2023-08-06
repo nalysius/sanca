@@ -242,4 +242,29 @@ mod tests {
         let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(finding.is_none());
     }
+
+    #[test]
+    fn finding_fields_are_valid() {
+        let checker = BootstrapChecker::new();
+        let body1 = "* Bootstrap v5.3.0 (http://getbootstrap.com)";
+        let url = "https://www.example.com/b.js";
+        let url_response_valid1 =
+            UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::JavaScript);
+        let finding = checker.check_http_body(&url_response_valid1);
+        assert!(finding.is_some());
+
+        let finding = finding.unwrap();
+        assert!(finding.url_of_finding.is_some());
+        assert_eq!(url, finding.url_of_finding.unwrap());
+        let expected_evidence = "Bootstrap v5.3.0";
+        assert!(finding.evidence.contains(expected_evidence));
+        assert_eq!("Bootstrap", finding.technology);
+        assert!(finding.version.is_some());
+        assert_eq!("5.3.0", finding.version.unwrap());
+
+        let evidence_text = finding.evidence_text;
+        assert!(evidence_text.contains(url)); // URL of finding
+        assert!(evidence_text.contains("Bootstrap 5.3.0")); // Technology / version
+        assert!(evidence_text.contains(expected_evidence)); // Evidence
+    }
 }

@@ -226,4 +226,29 @@ mod tests {
         let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(finding.is_none());
     }
+
+    #[test]
+    fn finding_fields_are_valid() {
+        let checker = AngularJSChecker::new();
+        let body1 = r#"var a = "\nhttp://errors.angularjs.org/1.9.3/";"#;
+        let url = "https://www.example.com/a.js";
+        let url_response_valid1 =
+            UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::JavaScript);
+        let finding = checker.check_http_body(&url_response_valid1);
+        assert!(finding.is_some());
+
+        let finding = finding.unwrap();
+        assert!(finding.url_of_finding.is_some());
+        assert_eq!(url, finding.url_of_finding.unwrap());
+        let expected_evidence = "http://errors.angularjs.org/1.9.3/";
+        assert!(finding.evidence.contains(expected_evidence));
+        assert_eq!("AngularJS", finding.technology);
+        assert!(finding.version.is_some());
+        assert_eq!("1.9.3", finding.version.unwrap());
+
+        let evidence_text = finding.evidence_text;
+        assert!(evidence_text.contains(url)); // URL of finding
+        assert!(evidence_text.contains("AngularJS 1.9.3")); // Technology / version
+        assert!(evidence_text.contains(expected_evidence)); // Evidence
+    }
 }
