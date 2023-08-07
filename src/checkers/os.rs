@@ -317,3 +317,188 @@ impl<'a> HttpChecker for OSChecker<'a> {
         Technology::OS
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::UrlRequestType;
+    #[test]
+    fn source_code_matches() {
+        let checker = OSChecker::new();
+        let body1 = r#"</p><hr><center>nginx/1.22.0 (Ubuntu)</center>"#;
+        let mut url_response_valid = UrlResponse::new(
+            "https://www.example.com/pageNotFound",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+
+        let body2 = r#"<address>Apache/2.4.52 (Debian) Server at company.com Port 8080</address>"#;
+        url_response_valid.body = body2.to_string();
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn source_code_doesnt_match() {
+        let checker = OSChecker::new();
+        let body = r#"<center>nginx</center>"#;
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/not-found.php?abc=def",
+            HashMap::new(),
+            body,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_invalid);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn header_matches() {
+        let checker = OSChecker::new();
+        let mut headers1 = HashMap::new();
+        headers1.insert("Accept".to_string(), "text/html".to_string());
+        headers1.insert("Server".to_string(), "nginx/1.22.2 (Debian)".to_string());
+        let mut url_response_valid = UrlResponse::new(
+            "https://www.example.com/that.php?abc=def",
+            headers1,
+            "the body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_headers(&url_response_valid);
+        assert!(finding.is_some());
+
+        let mut headers2 = HashMap::new();
+        headers2.insert("Accept".to_string(), "text/html".to_string());
+        headers2.insert("Server".to_string(), "Apache/2.4.54 (CentOS)".to_string());
+        url_response_valid.headers = headers2;
+        let finding = checker.check_http_headers(&url_response_valid);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn header_doesnt_match() {
+        let checker = OSChecker::new();
+        let mut headers1 = HashMap::new();
+        headers1.insert("Accept".to_string(), "text/html".to_string());
+        headers1.insert("Server".to_string(), "Apache/2.4.51".to_string());
+        let mut url_response_invalid = UrlResponse::new(
+            "https://www.example.com/that.php?abc=def",
+            headers1,
+            "the body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_headers(&url_response_invalid);
+        assert!(finding.is_none());
+
+        let mut headers2 = HashMap::new();
+        headers2.insert("Accept".to_string(), "text/html".to_string());
+        url_response_invalid.headers = headers2;
+        let finding = checker.check_http_headers(&url_response_invalid);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn finds_match_in_url_responses() {
+        let checker = OSChecker::new();
+        let body1 = r#"<hr><center>nginx/1.22.4 (Debian)</center>"#;
+        let url_response_valid = UrlResponse::new(
+            "https://www.example.com/pageNotFound.html",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert!(finding.is_some());
+
+        let mut headers1 = HashMap::new();
+        headers1.insert("Accept".to_string(), "text/html".to_string());
+        headers1.insert("Server".to_string(), "nginx/1.22.2 (Debian)".to_string());
+        let url_response_valid = UrlResponse::new(
+            "https://www.example.com/test.php",
+            headers1,
+            "the body",
+            UrlRequestType::Default,
+        );
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn doesnt_find_match_in_url_responses() {
+        let checker = OSChecker::new();
+        let body1 = r#"About Nginx 1.2.11 on Debian"#;
+        let url_response_invalid1 = UrlResponse::new(
+            "https://www.example.com/abc/def1",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+
+        let mut headers1 = HashMap::new();
+        headers1.insert("Accept".to_string(), "text/html".to_string());
+        let url_response_invalid2 = UrlResponse::new(
+            "https://www.example.com/abc-1/de-f1",
+            headers1,
+            "the body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn tcp_banner_matches() {
+        let checker = OSChecker::new();
+        let banner = "SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5";
+        let finding = checker.check_tcp(&[banner.to_string()]);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn tcp_banner_doesnt_match() {
+        let checker = OSChecker::new();
+        let banner = "OpenSSH 8.2 on Ubuntu";
+        let finding = checker.check_tcp(&[banner.to_string()]);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn finding_fields_are_valid() {
+        let checker = OSChecker::new();
+        let body1 = r#"<address>Apache/2.4.54 (Debian) Server at localhost Port 80</address>"#;
+        let url = "https://www.example.com/404.php";
+        let url_response_valid1 =
+            UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::Default);
+        let finding = checker.check_http_body(&url_response_valid1);
+        assert!(finding.is_some());
+
+        let finding = finding.unwrap();
+        assert!(finding.url_of_finding.is_some());
+        assert_eq!(url, finding.url_of_finding.unwrap());
+        let expected_evidence = "Apache/2.4.54 (Debian)";
+        assert!(finding.evidence.contains(expected_evidence));
+        assert_eq!("Debian", finding.technology);
+        assert!(finding.version.is_some());
+        assert_eq!("11", finding.version.unwrap());
+
+        let evidence_text = finding.evidence_text;
+        assert!(evidence_text.contains(url)); // URL of finding
+        assert!(evidence_text.contains("Debian 11")); // Technology / version
+        assert!(evidence_text.contains(expected_evidence)); // Evidence
+    }
+}
