@@ -81,3 +81,125 @@ impl<'a> HttpChecker for PleskChecker<'a> {
         Technology::Plesk
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::UrlRequestType;
+    #[test]
+    fn source_code_matches() {
+        let checker = PleskChecker::new();
+        let body1 = r#"<title>Plesk Obsidian 18.1.36</title>"#;
+        let mut url_response_valid = UrlResponse::new(
+            "http://www.example.com:8080/login_up.php?this=that",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+
+        let body2 = r#"<title>Plesk Onyx 17.1.36</title>"#;
+        url_response_valid.body = body2.to_string();
+        url_response_valid.url = "https://www.example.com:8443/login_up.php".to_string();
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn source_code_doesnt_match() {
+        let checker = PleskChecker::new();
+        let body = r#"<h1>Plesk 17.2</h1>"#;
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/about.php?abc=def",
+            HashMap::new(),
+            body,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_invalid);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn finds_match_in_url_responses() {
+        let checker = PleskChecker::new();
+        let body1 = r#"<title>Plesk Obsidian 18.2.42</title>"#;
+        let url_response_valid = UrlResponse::new(
+            "https://www.example.com:8443/login_up.php",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert!(finding.is_some());
+
+        let body2 = "<title>Plesk Onyx 17.42.1</title>";
+        let url_response_valid = UrlResponse::new(
+            "http://www.example.com:8080/login_up.php",
+            HashMap::new(),
+            body2,
+            UrlRequestType::Default,
+        );
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn doesnt_find_match_in_url_responses() {
+        let checker = PleskChecker::new();
+        let body1 = r#"About Plesk 17.2.11"#;
+        let url_response_invalid1 = UrlResponse::new(
+            "https://www.example.com/abc/def1",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+
+        let body2 = "<title>Plesk Obsidian 18.3.2</title>";
+        let url_response_invalid2 = UrlResponse::new(
+            "https://www.example.com/not-login_up.php",
+            HashMap::new(),
+            body2,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn finding_fields_are_valid() {
+        let checker = PleskChecker::new();
+        let body1 = r#"<title>Plesk Onyx 17.5.30</title>"#;
+        let url = "https://www.example.com:8443/login_up.php";
+        let url_response_valid1 =
+            UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::Default);
+        let finding = checker.check_http_body(&url_response_valid1);
+        assert!(finding.is_some());
+
+        let finding = finding.unwrap();
+        assert!(finding.url_of_finding.is_some());
+        assert_eq!(url, finding.url_of_finding.unwrap());
+        let expected_evidence = "Plesk Onyx 17.5.30";
+        assert!(finding.evidence.contains(expected_evidence));
+        assert_eq!("Plesk", finding.technology);
+        assert!(finding.version.is_some());
+        assert_eq!("17.5.30", finding.version.unwrap());
+
+        let evidence_text = finding.evidence_text;
+        assert!(evidence_text.contains(url)); // URL of finding
+        assert!(evidence_text.contains("Plesk 17.5.30")); // Technology / version
+        assert!(evidence_text.contains(expected_evidence)); // Evidence
+    }
+}
