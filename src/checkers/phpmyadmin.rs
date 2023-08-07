@@ -101,3 +101,125 @@ impl<'a> HttpChecker for PhpMyAdminChecker<'a> {
         Technology::PhpMyAdmin
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::UrlRequestType;
+    #[test]
+    fn source_code_matches() {
+        let checker = PhpMyAdminChecker::new();
+        let body1 = r#"<title>Welcome to phpMyAdmin's documentation! phpMyAdmin 5.2.0 documentation</title>"#;
+        let mut url_response_valid = UrlResponse::new(
+            "https://www.example.com/phpmyadmin/doc/html/index.html",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+
+        let body2 = r#"5.2.0 (2022-05-10)"#;
+        url_response_valid.body = body2.to_string();
+        url_response_valid.url = "https://www.example.com/phpmyadmin/ChangeLog".to_string();
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn source_code_doesnt_match() {
+        let checker = PhpMyAdminChecker::new();
+        let body = r#"<h1>phpMyAdmin 5.2</h1>"#;
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/about.php?abc=def",
+            HashMap::new(),
+            body,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_invalid);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn finds_match_in_url_responses() {
+        let checker = PhpMyAdminChecker::new();
+        let body1 = r#"<title>Welcome to phpMyAdmin's documentation! phpMyAdmin 5.2.1 documentation</title>"#;
+        let url_response_valid = UrlResponse::new(
+            "https://www.example.com/mysql/doc/html/index.html",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert!(finding.is_some());
+
+        let body2 = "5.2.1 (2022-05-11)";
+        let url_response_valid = UrlResponse::new(
+            "https://www.example.com/mysql/ChangeLog",
+            HashMap::new(),
+            body2,
+            UrlRequestType::Default,
+        );
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        assert!(finding.is_some());
+    }
+
+    #[test]
+    fn doesnt_find_match_in_url_responses() {
+        let checker = PhpMyAdminChecker::new();
+        let body1 = r#"About PhpMyAdmin 8.2.11"#;
+        let url_response_invalid1 = UrlResponse::new(
+            "https://www.example.com/abc/def1",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+
+        let body2 = "5.2.0 (2022-05-10)";
+        let url_response_invalid2 = UrlResponse::new(
+            "https://www.example.com/NotChangeLog",
+            HashMap::new(),
+            body2,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn finding_fields_are_valid() {
+        let checker = PhpMyAdminChecker::new();
+        let body1 = r#"<title>Welcome to phpMyAdmin’s documentation! &#8212; phpMyAdmin 4.4.15.10 documentation</title>"#;
+        let url = "https://www.example.com/sql/doc/html/index.html";
+        let url_response_valid1 =
+            UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::Default);
+        let finding = checker.check_http_body(&url_response_valid1);
+        assert!(finding.is_some());
+
+        let finding = finding.unwrap();
+        assert!(finding.url_of_finding.is_some());
+        assert_eq!(url, finding.url_of_finding.unwrap());
+        let expected_evidence = "phpMyAdmin 4.4.15.10";
+        assert!(finding.evidence.contains(expected_evidence));
+        assert_eq!("phpMyAdmin", finding.technology);
+        assert!(finding.version.is_some());
+        assert_eq!("4.4.15.10", finding.version.unwrap());
+
+        let evidence_text = finding.evidence_text;
+        assert!(evidence_text.contains(url)); // URL of finding
+        assert!(evidence_text.contains("phpMyAdmin 4.4.15.10")); // Technology / version
+        assert!(evidence_text.contains(expected_evidence)); // Evidence
+    }
+}
