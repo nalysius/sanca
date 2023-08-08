@@ -87,19 +87,17 @@ impl<'a> HttpChecker for Typo3Checker<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::UrlRequestType;
+    use crate::checkers::tests::check_finding_fields;
+
     #[test]
     fn source_code_matches() {
         let checker = Typo3Checker::new();
+        let url = "http://www.example.com/typo3/composer.json";
         let body1 = r#""typo3/cms-core": "4.7.1""#;
-        let url_response_valid = UrlResponse::new(
-            "http://www.example.com/typo3/composer.json",
-            HashMap::new(),
-            body1,
-            UrlRequestType::Default,
-        );
+        let url_response_valid =
+            UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::Default);
         let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        check_finding_fields(finding, "\"4.7.1", "TYPO3", Some("4.7.1"), Some(url));
     }
 
     #[test]
@@ -120,12 +118,9 @@ mod tests {
     fn finds_match_in_url_responses() {
         let checker = Typo3Checker::new();
         let body1 = r#""typo3/cms-core" : "4.7.2.8""#;
-        let url_response_valid = UrlResponse::new(
-            "https://www.example.com/site/typo3/composer.json",
-            HashMap::new(),
-            body1,
-            UrlRequestType::Default,
-        );
+        let url1 = "https://www.example.com/site/typo3/composer.json";
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
@@ -133,7 +128,7 @@ mod tests {
             UrlRequestType::Default,
         );
         let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
-        assert!(finding.is_some());
+        check_finding_fields(finding, "\"4.7.2.8", "TYPO3", Some("4.7.2.8"), Some(url1));
     }
 
     #[test]
@@ -156,30 +151,5 @@ mod tests {
         );
         let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(finding.is_none());
-    }
-
-    #[test]
-    fn finding_fields_are_valid() {
-        let checker = Typo3Checker::new();
-        let body1 = r#""typo3/cms-core": "4.7.8""#;
-        let url = "https://www.example.com/typo3/install/composer.json";
-        let url_response_valid1 =
-            UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::Default);
-        let finding = checker.check_http_body(&url_response_valid1);
-        assert!(finding.is_some());
-
-        let finding = finding.unwrap();
-        assert!(finding.url_of_finding.is_some());
-        assert_eq!(url, finding.url_of_finding.unwrap());
-        let expected_evidence = "\"4.7.8";
-        assert!(finding.evidence.contains(expected_evidence));
-        assert_eq!("TYPO3", finding.technology);
-        assert!(finding.version.is_some());
-        assert_eq!("4.7.8", finding.version.unwrap());
-
-        let evidence_text = finding.evidence_text;
-        assert!(evidence_text.contains(url)); // URL of finding
-        assert!(evidence_text.contains("TYPO3 4.7.8")); // Technology / version
-        assert!(evidence_text.contains(expected_evidence)); // Evidence
     }
 }

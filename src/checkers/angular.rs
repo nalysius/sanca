@@ -84,20 +84,25 @@ impl<'a> HttpChecker for AngularChecker<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::checkers::tests::check_finding_fields;
     use crate::models::UrlRequestType;
+
     #[test]
     fn source_code_matches() {
         let checker = AngularChecker::new();
-        let body =
+        let body1 =
             r#"var a = 2;CORE="@angular/core";var b = new Version("16.1.8"); var c = 'test';"#;
-        let url_response_valid = UrlResponse::new(
-            "https://www.example.com/js/angular.js",
-            HashMap::new(),
-            body,
-            UrlRequestType::JavaScript,
-        );
+        let url1 = "https://www.example.com/js/angular.js";
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
         let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "Version(\"16.1.8\")",
+            "Angular",
+            Some("16.1.8"),
+            Some(url1),
+        );
     }
 
     #[test]
@@ -117,14 +122,11 @@ mod tests {
     #[test]
     fn finds_match_in_url_responses() {
         let checker = AngularChecker::new();
-        let body =
+        let body1 =
             r#"var a = 2;CORE="@angular/core";var b = new Version("16.1.8"); var c = 'test';"#;
-        let url_response_valid = UrlResponse::new(
-            "https://www.example.com/a.js",
-            HashMap::new(),
-            body,
-            UrlRequestType::JavaScript,
-        );
+        let url1 = "https://www.example.com/a.js";
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
@@ -132,7 +134,13 @@ mod tests {
             UrlRequestType::Default,
         );
         let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "Version(\"16.1.8\")",
+            "Angular",
+            Some("16.1.8"),
+            Some(url1),
+        );
     }
 
     #[test]
@@ -154,31 +162,5 @@ mod tests {
         );
         let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(finding.is_none());
-    }
-
-    #[test]
-    fn finding_fields_are_valid() {
-        let checker = AngularChecker::new();
-        let body1 =
-            r#"var a = 2;CORE="@angular/core";var b = new Version("16.1.8"); var c = 'test';"#;
-        let url = "https://www.example.com/aa.js";
-        let url_response_valid1 =
-            UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::JavaScript);
-        let finding = checker.check_http_body(&url_response_valid1);
-        assert!(finding.is_some());
-
-        let finding = finding.unwrap();
-        assert!(finding.url_of_finding.is_some());
-        assert_eq!(url, finding.url_of_finding.unwrap());
-        let expected_evidence = "Version(\"16.1.8\")";
-        assert!(finding.evidence.contains(expected_evidence));
-        assert_eq!("Angular", finding.technology);
-        assert!(finding.version.is_some());
-        assert_eq!("16.1.8", finding.version.unwrap());
-
-        let evidence_text = finding.evidence_text;
-        assert!(evidence_text.contains(url)); // URL of finding
-        assert!(evidence_text.contains("Angular 16.1.8")); // Technology / version
-        assert!(evidence_text.contains(expected_evidence)); // Evidence
     }
 }

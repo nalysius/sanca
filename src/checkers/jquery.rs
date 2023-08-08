@@ -76,26 +76,36 @@ impl<'a> HttpChecker for JQueryChecker<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::checkers::tests::check_finding_fields;
     use crate::models::UrlRequestType;
 
     #[test]
     fn comment_matches() {
         let checker = JQueryChecker::new();
         let body1 = r#"/*! jQuery v3.7.0 | 2023"#;
-        let mut url_response_valid = UrlResponse::new(
-            "https://www.example.com/that.jsp?abc=def",
-            HashMap::new(),
-            body1,
-            UrlRequestType::Default,
-        );
+        let url1 = "https://www.example.com/that.jsp?abc=def";
+        let mut url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
         let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "jQuery v3.7.0",
+            "jQuery",
+            Some("3.7.0"),
+            Some(url1),
+        );
 
         let body2 = "/*!
         * jQuery JavaScript Library v3.7.0";
         url_response_valid.body = body2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "jQuery JavaScript Library v3.7.0",
+            "jQuery",
+            Some("3.7.0"),
+            Some(url1),
+        );
     }
 
     #[test]
@@ -124,13 +134,10 @@ mod tests {
         let checker = JQueryChecker::new();
         let body1 = r#"/*!
         *
-        *jQuery v4.7.7"#;
-        let url_response_valid = UrlResponse::new(
-            "https://www.example.com/j.js",
-            HashMap::new(),
-            body1,
-            UrlRequestType::JavaScript,
-        );
+        *jQuery v3.7.7"#;
+        let url1 = "https://www.example.com/j.js";
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
@@ -138,15 +145,18 @@ mod tests {
             UrlRequestType::Default,
         );
         let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "jQuery v3.7.7",
+            "jQuery",
+            Some("3.7.7"),
+            Some(url1),
+        );
 
         let body2 = "/*! * jQuery v3.6.1 | 2022";
-        let url_response_valid = UrlResponse::new(
-            "https://www.example.com/g.js",
-            HashMap::new(),
-            body2,
-            UrlRequestType::JavaScript,
-        );
+        let url2 = "https://www.example.com/g.js";
+        let url_response_valid =
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::JavaScript);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
@@ -154,7 +164,13 @@ mod tests {
             UrlRequestType::Default,
         );
         let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "jQuery v3.6.1",
+            "jQuery",
+            Some("3.6.1"),
+            Some(url2),
+        );
     }
 
     #[test]
@@ -176,30 +192,5 @@ mod tests {
         );
         let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(finding.is_none());
-    }
-
-    #[test]
-    fn finding_fields_are_valid() {
-        let checker = JQueryChecker::new();
-        let body1 = r#"/*! *jQuery v3.7.0 | 2023"#;
-        let url = "https://www.example.com/g.js";
-        let url_response_valid1 =
-            UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::JavaScript);
-        let finding = checker.check_http_body(&url_response_valid1);
-        assert!(finding.is_some());
-
-        let finding = finding.unwrap();
-        assert!(finding.url_of_finding.is_some());
-        assert_eq!(url, finding.url_of_finding.unwrap());
-        let expected_evidence = "jQuery v3.7.0";
-        assert!(finding.evidence.contains(expected_evidence));
-        assert_eq!("jQuery", finding.technology);
-        assert!(finding.version.is_some());
-        assert_eq!("3.7.0", finding.version.unwrap());
-
-        let evidence_text = finding.evidence_text;
-        assert!(evidence_text.contains(url)); // URL of finding
-        assert!(evidence_text.contains("jQuery 3.7.0")); // Technology / version
-        assert!(evidence_text.contains(expected_evidence)); // Evidence
     }
 }

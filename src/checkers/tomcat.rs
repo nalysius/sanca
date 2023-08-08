@@ -91,19 +91,23 @@ impl<'a> HttpChecker for TomcatChecker<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::UrlRequestType;
+    use crate::checkers::tests::check_finding_fields;
+
     #[test]
     fn source_code_matches() {
         let checker = TomcatChecker::new();
         let body1 = r#"<h3>Apache Tomcat/9.2.0</h3>"#;
-        let url_response_valid = UrlResponse::new(
-            "http://www.example.com/pageNotFoundNotFound",
-            HashMap::new(),
-            body1,
-            UrlRequestType::Default,
-        );
+        let url1 = "http://www.example.com/pageNotFoundNotFound";
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
         let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "Apache Tomcat/9.2.0",
+            "Tomcat",
+            Some("9.2.0"),
+            Some(url1),
+        );
     }
 
     #[test]
@@ -124,12 +128,9 @@ mod tests {
     fn finds_match_in_url_responses() {
         let checker = TomcatChecker::new();
         let body1 = r#"<h3>Apache Tomcat/9.2.42</h3>"#;
-        let url_response_valid = UrlResponse::new(
-            "https://www.example.com/pageNotFoundNotFound",
-            HashMap::new(),
-            body1,
-            UrlRequestType::Default,
-        );
+        let url1 = "https://www.example.com/pageNotFoundNotFound";
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
@@ -137,7 +138,13 @@ mod tests {
             UrlRequestType::Default,
         );
         let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "Apache Tomcat/9.2.42",
+            "Tomcat",
+            Some("9.2.42"),
+            Some(url1),
+        );
     }
 
     #[test]
@@ -160,30 +167,5 @@ mod tests {
         );
         let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(finding.is_none());
-    }
-
-    #[test]
-    fn finding_fields_are_valid() {
-        let checker = TomcatChecker::new();
-        let body1 = r#"<h3>Apache Tomcat/10.0.30</h3>"#;
-        let url = "https://www.example.com/pageNotFoundNotFound";
-        let url_response_valid1 =
-            UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::Default);
-        let finding = checker.check_http_body(&url_response_valid1);
-        assert!(finding.is_some());
-
-        let finding = finding.unwrap();
-        assert!(finding.url_of_finding.is_some());
-        assert_eq!(url, finding.url_of_finding.unwrap());
-        let expected_evidence = "Apache Tomcat/10.0.30";
-        assert!(finding.evidence.contains(expected_evidence));
-        assert_eq!("Tomcat", finding.technology);
-        assert!(finding.version.is_some());
-        assert_eq!("10.0.30", finding.version.unwrap());
-
-        let evidence_text = finding.evidence_text;
-        assert!(evidence_text.contains(url)); // URL of finding
-        assert!(evidence_text.contains("Tomcat 10.0.30")); // Technology / version
-        assert!(evidence_text.contains(expected_evidence)); // Evidence
     }
 }

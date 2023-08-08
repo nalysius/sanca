@@ -98,25 +98,30 @@ impl<'a> HttpChecker for WordPressChecker<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::UrlRequestType;
+    use crate::checkers::tests::check_finding_fields;
+
     #[test]
     fn source_code_matches() {
         let checker = WordPressChecker::new();
         let body1 = r#"<meta name="generator" content="WordPress 6.1.2" />"#;
-        let mut url_response_valid = UrlResponse::new(
-            "https://www.example.com/index.php",
-            HashMap::new(),
-            body1,
-            UrlRequestType::Default,
-        );
+        let url1 = "https://www.example.com/index.php";
+        let mut url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
         let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "WordPress 6.1.2",
+            "WordPress",
+            Some("6.1.2"),
+            Some(url1),
+        );
 
         let body2 = r#"<link href="style.min.css?ver=6.1.2" rel="stylesheet""#;
+        let url2 = "https://www.example.com/wp-login.php";
         url_response_valid.body = body2.to_string();
-        url_response_valid.url = "https://www.example.com/wp-login.php".to_string();
+        url_response_valid.url = url2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        check_finding_fields(finding, "ver=6.1.2", "WordPress", Some("6.1.2"), Some(url2));
     }
 
     #[test]
@@ -137,12 +142,9 @@ mod tests {
     fn finds_match_in_url_responses() {
         let checker = WordPressChecker::new();
         let body1 = r#"<meta   name = "generator"     content = "WordPress 5.8.4"/>"#;
-        let url_response_valid = UrlResponse::new(
-            "https://www.example.com/blog.php",
-            HashMap::new(),
-            body1,
-            UrlRequestType::Default,
-        );
+        let url1 = "https://www.example.com/blog.php";
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
@@ -150,15 +152,18 @@ mod tests {
             UrlRequestType::Default,
         );
         let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "content = \"WordPress 5.8.4\"",
+            "WordPress",
+            Some("5.8.4"),
+            Some(url1),
+        );
 
         let body2 = "<script src = \"/that.js?ver=5.8.4\"></script>";
-        let url_response_valid = UrlResponse::new(
-            "https://www.example.com/blog/wp-login.php",
-            HashMap::new(),
-            body2,
-            UrlRequestType::Default,
-        );
+        let url2 = "https://www.example.com/blog/wp-login.php";
+        let url_response_valid =
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::Default);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
@@ -166,7 +171,13 @@ mod tests {
             UrlRequestType::Default,
         );
         let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "?ver=5.8.4",
+            "WordPress",
+            Some("5.8.4"),
+            Some(url2),
+        );
     }
 
     #[test]
@@ -189,30 +200,5 @@ mod tests {
         );
         let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(finding.is_none());
-    }
-
-    #[test]
-    fn finding_fields_are_valid() {
-        let checker = WordPressChecker::new();
-        let body1 = r#"<meta name="generator" content="WordPress 6.1.2"   />"#;
-        let url = "https://www.example.com/blog/";
-        let url_response_valid1 =
-            UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::Default);
-        let finding = checker.check_http_body(&url_response_valid1);
-        assert!(finding.is_some());
-
-        let finding = finding.unwrap();
-        assert!(finding.url_of_finding.is_some());
-        assert_eq!(url, finding.url_of_finding.unwrap());
-        let expected_evidence = "WordPress 6.1.2";
-        assert!(finding.evidence.contains(expected_evidence));
-        assert_eq!("WordPress", finding.technology);
-        assert!(finding.version.is_some());
-        assert_eq!("6.1.2", finding.version.unwrap());
-
-        let evidence_text = finding.evidence_text;
-        assert!(evidence_text.contains(url)); // URL of finding
-        assert!(evidence_text.contains("WordPress 6.1.2")); // Technology / version
-        assert!(evidence_text.contains(expected_evidence)); // Evidence
     }
 }

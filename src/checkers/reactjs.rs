@@ -84,24 +84,34 @@ impl<'a> HttpChecker for ReactJSChecker<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::checkers::tests::check_finding_fields;
     use crate::models::UrlRequestType;
     #[test]
     fn source_code_matches() {
         let checker = ReactJSChecker::new();
         let body1 = r#"var ReactVersion = "18.2.0";var b = 1;"#;
-        let mut url_response_valid = UrlResponse::new(
-            "https://www.example.com/js/file.js",
-            HashMap::new(),
-            body1,
-            UrlRequestType::JavaScript,
-        );
+        let url1 = "https://www.example.com/js/file.js";
+        let mut url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
         let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "ReactVersion = \"18.2.0\"",
+            "ReactJS",
+            Some("18.2.0"),
+            Some(url1),
+        );
 
         let body2 = r#" var ReactVersion='18.1.2'"#;
         url_response_valid.body = body2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "ReactVersion='18.1.2'",
+            "ReactJS",
+            Some("18.1.2"),
+            Some(url1),
+        );
     }
 
     #[test]
@@ -122,12 +132,9 @@ mod tests {
     fn finds_match_in_url_responses() {
         let checker = ReactJSChecker::new();
         let body1 = r#"var ReactVersion = "18.2.10";"#;
-        let url_response_valid = UrlResponse::new(
-            "https://www.example.com/r.js",
-            HashMap::new(),
-            body1,
-            UrlRequestType::JavaScript,
-        );
+        let url1 = "https://www.example.com/r.js";
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
@@ -135,15 +142,18 @@ mod tests {
             UrlRequestType::Default,
         );
         let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "ReactVersion = \"18.2.10\"",
+            "ReactJS",
+            Some("18.2.10"),
+            Some(url1),
+        );
 
         let body2 = r#" var ReactVersion="18.1.1";"#;
-        let url_response_valid = UrlResponse::new(
-            "https://www.example.com/r.js",
-            HashMap::new(),
-            body2,
-            UrlRequestType::JavaScript,
-        );
+        let url2 = "https://www.example.com/r.js";
+        let url_response_valid =
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::JavaScript);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
@@ -151,7 +161,13 @@ mod tests {
             UrlRequestType::Default,
         );
         let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "ReactVersion=\"18.1.1\"",
+            "ReactJS",
+            Some("18.1.1"),
+            Some(url2),
+        );
     }
 
     #[test]
@@ -173,30 +189,5 @@ mod tests {
         );
         let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(finding.is_none());
-    }
-
-    #[test]
-    fn finding_fields_are_valid() {
-        let checker = ReactJSChecker::new();
-        let body1 = r#"var ReactVersion = "18.0.0";"#;
-        let url = "https://www.example.com/r.js";
-        let url_response_valid1 =
-            UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::JavaScript);
-        let finding = checker.check_http_body(&url_response_valid1);
-        assert!(finding.is_some());
-
-        let finding = finding.unwrap();
-        assert!(finding.url_of_finding.is_some());
-        assert_eq!(url, finding.url_of_finding.unwrap());
-        let expected_evidence = "18.0.0";
-        assert!(finding.evidence.contains(expected_evidence));
-        assert_eq!("ReactJS", finding.technology);
-        assert!(finding.version.is_some());
-        assert_eq!("18.0.0", finding.version.unwrap());
-
-        let evidence_text = finding.evidence_text;
-        assert!(evidence_text.contains(url)); // URL of finding
-        assert!(evidence_text.contains("ReactJS 18.0.0")); // Technology / version
-        assert!(evidence_text.contains(expected_evidence)); // Evidence
     }
 }

@@ -114,24 +114,35 @@ impl<'a> HttpChecker for BootstrapChecker<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::checkers::tests::check_finding_fields;
     use crate::models::UrlRequestType;
+
     #[test]
     fn source_code_matches() {
         let checker = BootstrapChecker::new();
         let body1 = r#"Bootstrap.this();i.VERSION="3.3.7";"#;
-        let mut url_response_valid = UrlResponse::new(
-            "https://www.example.com/js/file.js",
-            HashMap::new(),
-            body1,
-            UrlRequestType::JavaScript,
-        );
+        let url1 = "https://www.example.com/js/file.js";
+        let mut url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
         let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "VERSION=\"3.3.7\"",
+            "Bootstrap",
+            Some("3.3.7"),
+            Some(url1),
+        );
 
         let body2 = r#"Bootstrap.this();i.VERSION(){return"3.3.7";}"#;
         url_response_valid.body = body2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "return\"3.3.7\"",
+            "Bootstrap",
+            Some("3.3.7"),
+            Some(url1),
+        );
     }
 
     #[test]
@@ -152,19 +163,28 @@ mod tests {
     fn comment_matches() {
         let checker = BootstrapChecker::new();
         let body1 = r#" * Bootstrap v5.2.0 (https://getbootstrap.com/)"#;
-        let mut url_response_valid = UrlResponse::new(
-            "https://www.example.com/that.jsp?abc=def",
-            HashMap::new(),
-            body1,
-            UrlRequestType::Default,
-        );
+        let url1 = "https://www.example.com/that.jsp?abc=def";
+        let mut url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
         let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "Bootstrap v5.2.0",
+            "Bootstrap",
+            Some("5.2.0"),
+            Some(url1),
+        );
 
         let body2 = "* Bootstrap v5.2.0 (http://getbootstrap.com)";
         url_response_valid.body = body2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "Bootstrap v5.2.0",
+            "Bootstrap",
+            Some("5.2.0"),
+            Some(url1),
+        );
     }
 
     #[test]
@@ -190,12 +210,9 @@ mod tests {
     fn finds_match_in_url_responses() {
         let checker = BootstrapChecker::new();
         let body1 = r#"* Bootstrap v5.3.0 (https://getbootstrap.com/)"#;
-        let url_response_valid = UrlResponse::new(
-            "https://www.example.com/a.js",
-            HashMap::new(),
-            body1,
-            UrlRequestType::JavaScript,
-        );
+        let url1 = "https://www.example.com/a.js";
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
@@ -203,15 +220,18 @@ mod tests {
             UrlRequestType::Default,
         );
         let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "Bootstrap v5.3.0",
+            "Bootstrap",
+            Some("5.3.0"),
+            Some(url1),
+        );
 
         let body2 = "* Bootstrap v5.3.0 (http://getbootstrap.com)";
-        let url_response_valid = UrlResponse::new(
-            "https://www.example.com/a.js",
-            HashMap::new(),
-            body2,
-            UrlRequestType::JavaScript,
-        );
+        let url2 = "https://www.example.com/a.js";
+        let url_response_valid =
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::JavaScript);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
@@ -219,7 +239,13 @@ mod tests {
             UrlRequestType::Default,
         );
         let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "Bootstrap v5.3.0",
+            "Bootstrap",
+            Some("5.3.0"),
+            Some(url2),
+        );
     }
 
     #[test]
@@ -241,30 +267,5 @@ mod tests {
         );
         let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(finding.is_none());
-    }
-
-    #[test]
-    fn finding_fields_are_valid() {
-        let checker = BootstrapChecker::new();
-        let body1 = "* Bootstrap v5.3.0 (http://getbootstrap.com)";
-        let url = "https://www.example.com/b.js";
-        let url_response_valid1 =
-            UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::JavaScript);
-        let finding = checker.check_http_body(&url_response_valid1);
-        assert!(finding.is_some());
-
-        let finding = finding.unwrap();
-        assert!(finding.url_of_finding.is_some());
-        assert_eq!(url, finding.url_of_finding.unwrap());
-        let expected_evidence = "Bootstrap v5.3.0";
-        assert!(finding.evidence.contains(expected_evidence));
-        assert_eq!("Bootstrap", finding.technology);
-        assert!(finding.version.is_some());
-        assert_eq!("5.3.0", finding.version.unwrap());
-
-        let evidence_text = finding.evidence_text;
-        assert!(evidence_text.contains(url)); // URL of finding
-        assert!(evidence_text.contains("Bootstrap 5.3.0")); // Technology / version
-        assert!(evidence_text.contains(expected_evidence)); // Evidence
     }
 }

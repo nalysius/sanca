@@ -108,24 +108,35 @@ impl<'a> HttpChecker for HandlebarsChecker<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::checkers::tests::check_finding_fields;
     use crate::models::UrlRequestType;
+
     #[test]
     fn source_code_matches() {
         let checker = HandlebarsChecker::new();
         let body1 = r#"start.HandlebarsEnvironment;a.b = 2;c="4.7.6";d.VERSION=c;e=mc2"#;
-        let mut url_response_valid = UrlResponse::new(
-            "https://www.example.com/js/file.js",
-            HashMap::new(),
-            body1,
-            UrlRequestType::JavaScript,
-        );
+        let url1 = "https://www.example.com/js/file.js";
+        let mut url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
         let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "c=\"4.7.6\"",
+            "Handlebars",
+            Some("4.7.6"),
+            Some(url1),
+        );
 
         let body2 = r#"this.ok= true;that().HandlebarsEnvironment;var1="4.7.7";v.VERSION=var1;"#;
         url_response_valid.body = body2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "var1=\"4.7.7\"",
+            "Handlebars",
+            Some("4.7.7"),
+            Some(url1),
+        );
     }
 
     #[test]
@@ -146,20 +157,29 @@ mod tests {
     fn comment_matches() {
         let checker = HandlebarsChecker::new();
         let body1 = r#"/**! * @license handlebars v4.7.7"#;
-        let mut url_response_valid = UrlResponse::new(
-            "https://www.example.com/that.jsp?abc=def",
-            HashMap::new(),
-            body1,
-            UrlRequestType::Default,
-        );
+        let url1 = "https://www.example.com/that.jsp?abc=def";
+        let mut url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
         let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "handlebars v4.7.7",
+            "Handlebars",
+            Some("4.7.7"),
+            Some(url1),
+        );
 
         let body2 = "/**!
         * @license handlebars v4.7.7";
         url_response_valid.body = body2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "handlebars v4.7.7",
+            "Handlebars",
+            Some("4.7.7"),
+            Some(url1),
+        );
     }
 
     #[test]
@@ -189,12 +209,9 @@ mod tests {
         let body1 = r#"/**!
         *
         *@license handlebars v4.7.7"#;
-        let url_response_valid = UrlResponse::new(
-            "https://www.example.com/g.js",
-            HashMap::new(),
-            body1,
-            UrlRequestType::JavaScript,
-        );
+        let url1 = "https://www.example.com/g.js";
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
@@ -202,17 +219,20 @@ mod tests {
             UrlRequestType::Default,
         );
         let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "handlebars v4.7.7",
+            "Handlebars",
+            Some("4.7.7"),
+            Some(url1),
+        );
 
         let body2 = "/**!
         * 
         * @license handlebars v4.7.7";
-        let url_response_valid = UrlResponse::new(
-            "https://www.example.com/g.js",
-            HashMap::new(),
-            body2,
-            UrlRequestType::JavaScript,
-        );
+        let url2 = "https://www.example.com/g.js";
+        let url_response_valid =
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::JavaScript);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
@@ -220,7 +240,13 @@ mod tests {
             UrlRequestType::Default,
         );
         let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
-        assert!(finding.is_some());
+        check_finding_fields(
+            finding,
+            "handlebars v4.7.7",
+            "Handlebars",
+            Some("4.7.7"),
+            Some(url2),
+        );
     }
 
     #[test]
@@ -242,30 +268,5 @@ mod tests {
         );
         let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(finding.is_none());
-    }
-
-    #[test]
-    fn finding_fields_are_valid() {
-        let checker = HandlebarsChecker::new();
-        let body1 = r#"/**! *@license handlebars v4.7.7"#;
-        let url = "https://www.example.com/g.js";
-        let url_response_valid1 =
-            UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::JavaScript);
-        let finding = checker.check_http_body(&url_response_valid1);
-        assert!(finding.is_some());
-
-        let finding = finding.unwrap();
-        assert!(finding.url_of_finding.is_some());
-        assert_eq!(url, finding.url_of_finding.unwrap());
-        let expected_evidence = "handlebars v4.7.7";
-        assert!(finding.evidence.contains(expected_evidence));
-        assert_eq!("Handlebars", finding.technology);
-        assert!(finding.version.is_some());
-        assert_eq!("4.7.7", finding.version.unwrap());
-
-        let evidence_text = finding.evidence_text;
-        assert!(evidence_text.contains(url)); // URL of finding
-        assert!(evidence_text.contains("Handlebars 4.7.7")); // Technology / version
-        assert!(evidence_text.contains(expected_evidence)); // Evidence
     }
 }
