@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Unit tests.
 - Plesk detection.
 - Angular detection.
 - ReactJS detection.
+
+### Fixed
+
+- When fetching JavaScript files, the images were downloaded too.
+- When fetching JavaScript files, the URLs starting with // were ignored: //www.example.com/a/b.js.
 
 ## [0.2.0]
 
