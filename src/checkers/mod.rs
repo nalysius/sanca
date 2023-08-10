@@ -156,19 +156,70 @@ fn check_finding_fields(
     let evidence_text = &finding.evidence_text;
 
     if url.is_some() {
-        assert!(finding.url_of_finding.is_some());
-        assert_eq!(url.unwrap(), finding.url_of_finding.as_ref().unwrap());
-        assert!(evidence_text.contains(url.unwrap()));
+        assert!(
+            finding.url_of_finding.is_some(),
+            "Assertion 'finding.url_of_finding.is_some()' failed. Expected URL: {}",
+            url.unwrap()
+        );
+        assert_eq!(
+            finding.url_of_finding.as_ref().unwrap(),
+            url.unwrap(),
+            "Assertion 'finding.url_of_finding == url' failed. Finding's URL: {}, url: {}",
+            url.as_ref().unwrap(),
+            finding.url_of_finding.as_ref().unwrap()
+        );
+        assert!(
+            evidence_text.contains(url.unwrap()),
+            "Assertion 'finding.evidence_text.contains(url)' failed. Finding's evidence text: {}, url: {}",
+            evidence_text,
+            url.unwrap()
+        );
     }
 
-    assert!(finding.evidence.contains(evidence));
-    assert_eq!(technology, finding.technology);
-    assert!(evidence_text.contains(technology));
-    assert!(evidence_text.contains(evidence));
+    assert!(
+        finding.evidence.contains(evidence),
+        "Assertion 'finding.evidence.contains(evidence)' failed. Finding's evidence: {}, evidence {}",
+        finding.evidence,
+        evidence
+    );
+    assert_eq!(
+        finding.technology,
+        technology,
+        "Assertion 'finding.technology == technology' failed. Finding's technology: {}, technology: {}",
+        finding.technology,
+        technology
+    );
+    assert!(
+        evidence_text.contains(technology),
+        "Assertion 'finding.evidence_text.contains(technology)' failed. Finding's evidence text: {}, technology: {}",
+        evidence_text,
+        technology
+    );
+    assert!(
+        evidence_text.contains(evidence),
+        "Assertion 'finding.evidence_text.contains(evidence)' failed. Finding's evidence text: {}, evidence: {}",
+        evidence_text,
+        evidence
+    );
 
     if version.is_some() {
-        assert!(finding.version.is_some());
-        assert_eq!(version.unwrap(), finding.version.as_ref().unwrap());
-        assert!(evidence_text.contains(version.unwrap()));
+        assert!(
+            finding.version.is_some(),
+            "Assertion 'finding.version.is_some()' failed. Expected version: {}",
+            version.unwrap()
+        );
+        assert_eq!(
+            finding.version.as_ref().unwrap(),
+            version.unwrap(),
+            "Assertion 'finding.version == version' failed. Finding's version: {}, version: {}",
+            finding.version.as_ref().unwrap(),
+            version.unwrap()
+        );
+        assert!(
+            evidence_text.contains(version.unwrap()),
+            "Assertion 'finding.evidence_text.contains(version)' failed. Finding's evidence text: {}, version:{}",
+            evidence_text,
+            version.unwrap()
+        );
     }
 }
