@@ -113,66 +113,62 @@ pub trait HttpChecker {
     }
 }
 
+/// Checks the fields of a Finding to ensure they are properly set.
+///
+/// Note: this method is not a test, it's a utility available to all
+/// the checkers.
+///
+/// finding_option: the optional Finding to call assertions on.
+/// evidence: a string to find in the evidence
+/// technology: the technology name
+/// version: the optional version of the technology
+/// url: the optional URL of the finding.
+///
+/// # Example
+///
+/// ```rust
+/// let finding = Finding::new(
+///     "WordPress",
+///     Some("6.1.2"),
+///     "<meta name='generator' content='WordPress 6.1.2'/>",
+///     "WordPress 6.1.2 has been identified because we found 'content='WordPress 6.1.2'/>' at 'https://example.com/blog/index.php'"
+///     Some("https://example.com/blog/index.php")
+///     );
+///
+/// check_finding_fields(
+///     Some(finding),
+///     "content='WordPress 6.1.2'",
+///     "WordPress",
+///     Some("6.1.2"),
+///     Some("https://example.com/blog/index.php")
+/// );
+/// ```
 #[cfg(test)]
-mod tests {
-    use crate::models::Finding;
+fn check_finding_fields(
+    finding_option: Option<Finding>,
+    evidence: &str,
+    technology: &str,
+    version: Option<&str>,
+    url: Option<&str>,
+) {
+    assert!(finding_option.is_some());
+    let finding = finding_option.unwrap();
+    let evidence_text = &finding.evidence_text;
 
-    /// Checks the fields of a Finding to ensure they are properly set.
-    ///
-    /// Note: this method is not a test, it's a utility available to all
-    /// the checkers.
-    ///
-    /// finding_option: the optional Finding to call assertions on.
-    /// evidence: a string to find in the evidence
-    /// technology: the technology name
-    /// version: the optional version of the technology
-    /// url: the optional URL of the finding.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let finding = Finding::new(
-    ///     "WordPress",
-    ///     Some("6.1.2"),
-    ///     "<meta name='generator' content='WordPress 6.1.2'/>",
-    ///     "WordPress 6.1.2 has been identified because we found 'content='WordPress 6.1.2'/>' at 'https://example.com/blog/index.php'"
-    ///     Some("https://example.com/blog/index.php")
-    ///     );
-    ///
-    /// check_finding_fields(
-    ///     Some(finding),
-    ///     "content='WordPress 6.1.2'",
-    ///     "WordPress",
-    ///     Some("6.1.2"),
-    ///     Some("https://example.com/blog/index.php")
-    /// );
-    /// ```
-    pub fn check_finding_fields(
-        finding_option: Option<Finding>,
-        evidence: &str,
-        technology: &str,
-        version: Option<&str>,
-        url: Option<&str>,
-    ) {
-        assert!(finding_option.is_some());
-        let finding = finding_option.unwrap();
-        let evidence_text = &finding.evidence_text;
+    if url.is_some() {
+        assert!(finding.url_of_finding.is_some());
+        assert_eq!(url.unwrap(), finding.url_of_finding.as_ref().unwrap());
+        assert!(evidence_text.contains(url.unwrap()));
+    }
 
-        if url.is_some() {
-            assert!(finding.url_of_finding.is_some());
-            assert_eq!(url.unwrap(), finding.url_of_finding.as_ref().unwrap());
-            assert!(evidence_text.contains(url.unwrap()));
-        }
+    assert!(finding.evidence.contains(evidence));
+    assert_eq!(technology, finding.technology);
+    assert!(evidence_text.contains(technology));
+    assert!(evidence_text.contains(evidence));
 
-        assert!(finding.evidence.contains(evidence));
-        assert_eq!(technology, finding.technology);
-        assert!(evidence_text.contains(technology));
-        assert!(evidence_text.contains(evidence));
-
-        if version.is_some() {
-            assert!(finding.version.is_some());
-            assert_eq!(version.unwrap(), finding.version.as_ref().unwrap());
-            assert!(evidence_text.contains(version.unwrap()));
-        }
+    if version.is_some() {
+        assert!(finding.version.is_some());
+        assert_eq!(version.unwrap(), finding.version.as_ref().unwrap());
+        assert!(evidence_text.contains(version.unwrap()));
     }
 }

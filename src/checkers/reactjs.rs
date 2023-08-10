@@ -84,7 +84,7 @@ impl<'a> HttpChecker for ReactJSChecker<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::checkers::tests::check_finding_fields;
+    use crate::checkers::check_finding_fields;
     use crate::models::UrlRequestType;
     #[test]
     fn source_code_matches() {

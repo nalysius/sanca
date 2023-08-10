@@ -114,7 +114,7 @@ impl<'a> HttpChecker for BootstrapChecker<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::checkers::tests::check_finding_fields;
+    use crate::checkers::check_finding_fields;
     use crate::models::UrlRequestType;
 
     #[test]

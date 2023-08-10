@@ -91,7 +91,7 @@ impl<'a> HttpChecker for TomcatChecker<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::checkers::tests::check_finding_fields;
+    use crate::checkers::check_finding_fields;
 
     #[test]
     fn source_code_matches() {

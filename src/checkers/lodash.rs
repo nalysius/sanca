@@ -107,7 +107,7 @@ impl<'a> HttpChecker for LodashChecker<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::checkers::tests::check_finding_fields;
+    use crate::checkers::check_finding_fields;
     use crate::models::UrlRequestType;
 
     #[test]
