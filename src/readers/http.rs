@@ -20,7 +20,7 @@ impl HttpReader {
     /// Creates a new HttpReader
     pub fn new() -> Self {
         let url_regex = Regex::new(
-            r#"src\s*=\s*["']\s*(?P<url>(((?P<protocol>[a-z0-9]+):)?\/\/(?P<hostname>[^\/:]+)(:(?P<port>\d{1,5}))?)?(?P<path>\/?[a-zA-Z0-9\/._ %@-]*(?P<extension>\.[a-zA-Z0-9_-]+)?)?(?P<querystring>\?[^#\s"]*)?(#[^"\s]*)?)\s*["']"#
+            r#"<script[^>]+src\s*=\s*["']\s*(?P<url>(((?P<protocol>[a-z0-9]+):)?\/\/(?P<hostname>[^\/:]+)(:(?P<port>\d{1,5}))?)?(?P<path>\/?[a-zA-Z0-9\/._ %@-]*(?P<extension>\.[a-zA-Z0-9_-]+)?)?(?P<querystring>\?[^#\s"]*)?(#[^"\s]*)?)\s*["']"#
         ).unwrap();
         HttpReader { url_regex }
     }
