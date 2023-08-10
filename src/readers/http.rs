@@ -20,7 +20,7 @@ impl HttpReader {
     /// Creates a new HttpReader
     pub fn new() -> Self {
         let url_regex = Regex::new(
-            r#"src\s*=\s*["']\s*(?P<url>((?P<protocol>[a-z0-9]+):\/\/(?P<hostname>[^\/:]+)(:(?P<port>\d{1,5}))?)?(?P<path>\/?[a-zA-Z0-9\/._ %@-]*(?P<extension>\.[a-zA-Z0-9_-]+)?)?(?P<querystring>\?[^#\s"]*)?(#[^"\s]*)?)\s*["']"#
+            r#"src\s*=\s*["']\s*(?P<url>(((?P<protocol>[a-z0-9]+):)?\/\/(?P<hostname>[^\/:]+)(:(?P<port>\d{1,5}))?)?(?P<path>\/?[a-zA-Z0-9\/._ %@-]*(?P<extension>\.[a-zA-Z0-9_-]+)?)?(?P<querystring>\?[^#\s"]*)?(#[^"\s]*)?)\s*["']"#
         ).unwrap();
         HttpReader { url_regex }
     }
@@ -194,7 +194,19 @@ impl HttpReader {
         let mut url_requests: Vec<UrlRequest> = Vec::new();
         let caps = self.url_regex.captures_iter(data);
         for rmatch in caps {
-            let url_or_path = rmatch.name("url").unwrap().as_str();
+            let mut url_or_path = rmatch.name("url").unwrap().as_str().to_string();
+            let found_protocol = rmatch.name("protocol");
+            let hostname = rmatch.name("hostname");
+            // URL is in the following form: //www.this.com/a/b.js
+            // It's used when we want to use the same protocol as the original request
+            if found_protocol.is_none() && hostname.is_some() {
+                let protocol = if request_url.starts_with("http://") {
+                    "http:"
+                } else {
+                    "https:"
+                };
+                url_or_path = format!("{}{}", protocol, url_or_path);
+            }
             let path_extension_match = rmatch.name("extension");
             let mut path_extension = "";
             if path_extension_match.is_some() {
@@ -207,9 +219,9 @@ impl HttpReader {
             }
 
             if url_or_path.starts_with("https://") || url_or_path.starts_with("http://") {
-                url_requests.push(UrlRequest::new(url_or_path, false));
+                url_requests.push(UrlRequest::new(&url_or_path, false));
             } else {
-                url_requests.push(UrlRequest::from_path(request_url, url_or_path, false));
+                url_requests.push(UrlRequest::from_path(request_url, &url_or_path, false));
             }
         }
         url_requests
