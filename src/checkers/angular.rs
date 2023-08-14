@@ -5,7 +5,7 @@
 use std::collections::HashMap;
 
 use super::HttpChecker;
-use crate::models::{Finding, Technology, UrlResponse};
+use crate::models::{reqres::UrlResponse, technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
 
@@ -85,7 +85,7 @@ impl<'a> HttpChecker for AngularChecker<'a> {
 mod tests {
     use super::*;
     use crate::checkers::check_finding_fields;
-    use crate::models::UrlRequestType;
+    use crate::models::reqres::UrlRequestType;
 
     #[test]
     fn source_code_matches() {

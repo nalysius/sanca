@@ -5,7 +5,8 @@
 use std::collections::HashMap;
 
 use super::HttpChecker;
-use crate::models::{Finding, Technology, UrlRequestType, UrlResponse};
+use crate::models::reqres::{UrlRequestType, UrlResponse};
+use crate::models::{technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
 

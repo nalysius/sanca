@@ -8,7 +8,7 @@ use log::{debug, error, trace};
 use regex::Regex;
 use reqwest::Client;
 
-use crate::models::{UrlRequest, UrlRequestType, UrlResponse};
+use crate::models::reqres::{UrlRequest, UrlRequestType, UrlResponse};
 
 /// A HTTP reader
 pub struct HttpReader {
