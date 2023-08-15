@@ -5,7 +5,7 @@
 use std::collections::HashMap;
 
 use super::HttpChecker;
-use crate::models::{Finding, Technology, UrlResponse};
+use crate::models::{reqres::UrlResponse, technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
 
@@ -78,5 +78,116 @@ impl<'a> HttpChecker for ReactJSChecker<'a> {
     /// The technology supported by the checker
     fn get_technology(&self) -> Technology {
         Technology::ReactJS
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::checkers::check_finding_fields;
+    use crate::models::reqres::UrlRequestType;
+    #[test]
+    fn source_code_matches() {
+        let checker = ReactJSChecker::new();
+        let body1 = r#"var ReactVersion = "18.2.0";var b = 1;"#;
+        let url1 = "https://www.example.com/js/file.js";
+        let mut url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
+        let finding = checker.check_http_body(&url_response_valid);
+        check_finding_fields(
+            finding,
+            "ReactVersion = \"18.2.0\"",
+            "ReactJS",
+            Some("18.2.0"),
+            Some(url1),
+        );
+
+        let body2 = r#" var ReactVersion='18.1.2'"#;
+        url_response_valid.body = body2.to_string();
+        let finding = checker.check_http_body(&url_response_valid);
+        check_finding_fields(
+            finding,
+            "ReactVersion='18.1.2'",
+            "ReactJS",
+            Some("18.1.2"),
+            Some(url1),
+        );
+    }
+
+    #[test]
+    fn source_code_doesnt_match() {
+        let checker = ReactJSChecker::new();
+        let body = r#"var f = "ReactVersion"; VERSION="18.1.1";"#;
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/that.jsp?abc=def",
+            HashMap::new(),
+            body,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_invalid);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn finds_match_in_url_responses() {
+        let checker = ReactJSChecker::new();
+        let body1 = r#"var ReactVersion = "18.2.10";"#;
+        let url1 = "https://www.example.com/r.js";
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        check_finding_fields(
+            finding,
+            "ReactVersion = \"18.2.10\"",
+            "ReactJS",
+            Some("18.2.10"),
+            Some(url1),
+        );
+
+        let body2 = r#" var ReactVersion="18.1.1";"#;
+        let url2 = "https://www.example.com/r.js";
+        let url_response_valid =
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::JavaScript);
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        check_finding_fields(
+            finding,
+            "ReactVersion=\"18.1.1\"",
+            "ReactJS",
+            Some("18.1.1"),
+            Some(url2),
+        );
+    }
+
+    #[test]
+    fn doesnt_find_match_in_url_responses() {
+        let checker = ReactJSChecker::new();
+        let body1 = r#"React 18.2.15 is not installed here."#;
+        let url_response_invalid1 = UrlResponse::new(
+            "https://www.example.com/abc/def1",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+        let body2 = r#"It should not be detected"#;
+        let url_response_invalid2 = UrlResponse::new(
+            "https://www.example.com/abc-1/de-f1",
+            HashMap::new(),
+            body2,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(finding.is_none());
     }
 }

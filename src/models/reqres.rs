@@ -1,256 +1,10 @@
-//! In this module are declared the entities manipulated by this program
+//! In this module are defined the structs and methods related to
+//! HTTP requests and responses.
 
-use std::collections::HashMap;
-
-use clap::{builder::PossibleValue, ValueEnum};
+use super::technology::Technology;
 use log::{error, trace};
 use regex::Regex;
-
-/// Represents the type of scan
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum ScanType {
-    /// Protocol TCP
-    Tcp,
-    /// Protocol UDP (not supported yet)
-    Udp,
-    /// Protocol HTTP
-    Http,
-}
-
-impl ValueEnum for ScanType {
-    /// Lists the variants available for clap
-    fn value_variants<'a>() -> &'a [Self] {
-        &[ScanType::Tcp, ScanType::Http, ScanType::Udp]
-    }
-
-    /// Map each value to a possible value in clap
-    fn to_possible_value(&self) -> Option<PossibleValue> {
-        match &self {
-            ScanType::Tcp => Some(PossibleValue::new("tcp")),
-            ScanType::Http => Some(PossibleValue::new("http")),
-            ScanType::Udp => Some(PossibleValue::new("udp")),
-        }
-    }
-}
-
-/// Represents a finding of a technology running on an asset
-pub struct Finding {
-    /// The technology found
-    pub technology: String,
-    /// The version of the technology
-    /// Optional since it can be unknown
-    pub version: Option<String>,
-    /// The evidence of the finding
-    pub evidence: String,
-    /// The text for the evidence
-    pub evidence_text: String,
-    /// The URL where the finding has been found.
-    pub url_of_finding: Option<String>,
-}
-
-impl Finding {
-    /// Creates a new finding
-    pub fn new(
-        technology: &str,
-        version: Option<&str>,
-        evidence: &str,
-        evidence_text: &str,
-        url_of_finding: Option<&str>,
-    ) -> Self {
-        Finding {
-            technology: technology.to_string(),
-            version: version.map(|f| f.to_string()),
-            evidence: evidence.to_string(),
-            evidence_text: evidence_text.to_string(),
-            url_of_finding: url_of_finding.map(|f| f.to_string()),
-        }
-    }
-}
-
-/// An enumeration to represent the technologies that Sanca can tried to identify.
-/// In practice it is useful mainly for the web technologies to send only
-/// HTTP requests needed to identify the given technologies.
-/// As an example, it's not needed to send a request at /phpinfo.php
-/// if we want to identify only the JavaScript libraries.
-#[derive(Clone, PartialEq, Debug)]
-pub enum Technology {
-    Dovecot,
-    Exim,
-    MariaDB,
-    MySQL,
-    OpenSSH,
-    ProFTPD,
-    PureFTPd,
-    /// OS is generic for all OSes.
-    OS,
-    PHP,
-    PhpMyAdmin,
-    Typo3,
-    WordPress,
-    Drupal,
-    /// Apache httpd
-    Httpd,
-    Tomcat,
-    Nginx,
-    OpenSSL,
-    JQuery,
-    ReactJS,
-    Handlebars,
-    Lodash,
-    AngularJS,
-    Gsap,
-    Bootstrap,
-    Angular,
-    Plesk,
-}
-
-impl Technology {
-    /// Returns the scan types matching the technology
-    pub fn get_scans(&self) -> Vec<ScanType> {
-        match self {
-            Self::Dovecot | Self::Exim => vec![ScanType::Tcp],
-            Self::MariaDB | Self::MySQL => vec![ScanType::Tcp],
-            Self::OpenSSH | Self::ProFTPD | Self::PureFTPd => vec![ScanType::Tcp],
-            Self::OS => vec![ScanType::Tcp, ScanType::Http],
-            // Most technologies are about HTTP, so specify only the TCP, UDP
-            // or multiple scan types, the rest will be HTTP-only
-            _ => vec![ScanType::Http],
-        }
-    }
-
-    /// Checks whether the technology supports the given scan type
-    pub fn supports_scan(&self, scan_type: ScanType) -> bool {
-        self.get_scans().contains(&scan_type)
-    }
-
-    /// Get the HTTP paths to request for a given technology
-    pub fn get_url_requests(&self, main_url: &str) -> Vec<UrlRequest> {
-        // Non-HTTP technologies don't need any paths
-        if !self.supports_scan(ScanType::Http) {
-            return Vec::new();
-        }
-
-        match self {
-            Self::PHP => {
-                vec![
-                    UrlRequest::new(main_url, false),
-                    UrlRequest::from_path(main_url, "/phpinfo.php", false),
-                    UrlRequest::from_path(main_url, "/info.php", false),
-                    UrlRequest::from_path(main_url, "phpinfo.php", false),
-                    UrlRequest::from_path(main_url, "info.php", false),
-                    UrlRequest::from_path(main_url, "/pageNotFoundNotFound", false),
-                ]
-            }
-            Self::Httpd | Self::Nginx | Self::OpenSSL => {
-                vec![
-                    UrlRequest::new(main_url, false),
-                    UrlRequest::from_path(main_url, "/pageNotFoundNotFound", false),
-                ]
-            }
-            Self::Tomcat => {
-                vec![UrlRequest::from_path(
-                    main_url,
-                    "/pageNotFoundNotFound",
-                    false,
-                )]
-            }
-            Self::PhpMyAdmin => {
-                vec![
-                    UrlRequest::from_path(main_url, "doc/html/index.html", false),
-                    UrlRequest::from_path(main_url, "/phpmyadmin/doc/html/index.html", false),
-                    UrlRequest::from_path(main_url, "/mysql/doc/html/index.html", false),
-                    UrlRequest::from_path(main_url, "ChangeLog", false),
-                ]
-            }
-            Self::Typo3 => {
-                vec![
-                    UrlRequest::from_path(main_url, "typo3/sysext/install/composer.json", false),
-                    UrlRequest::from_path(
-                        main_url,
-                        "typo3/sysext/linkvalidator/composer.json",
-                        false,
-                    ),
-                ]
-            }
-            Self::WordPress => {
-                vec![
-                    UrlRequest::new(main_url, false),
-                    UrlRequest::from_path(main_url, "wp-login.php", false),
-                ]
-            }
-            Self::Plesk => {
-                vec![UrlRequest::from_path(main_url, "/login_up.php", false)]
-            }
-            _ => vec![UrlRequest::new(main_url, true)],
-        }
-    }
-}
-
-impl ValueEnum for Technology {
-    /// Lists the variants available for clap
-    fn value_variants<'a>() -> &'a [Self] {
-        &[
-            Technology::Dovecot,
-            Technology::Exim,
-            Technology::MariaDB,
-            Technology::MySQL,
-            Technology::OpenSSH,
-            Technology::ProFTPD,
-            Technology::PureFTPd,
-            Technology::OS,
-            Technology::PHP,
-            Technology::PhpMyAdmin,
-            Technology::WordPress,
-            Technology::Drupal,
-            Technology::Typo3,
-            Technology::Httpd,
-            Technology::Nginx,
-            Technology::OpenSSL,
-            Technology::JQuery,
-            Technology::ReactJS,
-            Technology::Handlebars,
-            Technology::Lodash,
-            Technology::AngularJS,
-            Technology::Gsap,
-            Technology::Tomcat,
-            Technology::Bootstrap,
-            Technology::Angular,
-            Technology::Plesk,
-        ]
-    }
-
-    /// Map each value to a possible value in clap
-    fn to_possible_value(&self) -> Option<PossibleValue> {
-        match &self {
-            Technology::Dovecot => Some(PossibleValue::new("dovecot")),
-            Technology::Exim => Some(PossibleValue::new("exim")),
-            Technology::MariaDB => Some(PossibleValue::new("mariadb")),
-            Technology::MySQL => Some(PossibleValue::new("mysql")),
-            Technology::OpenSSH => Some(PossibleValue::new("openssh")),
-            Technology::ProFTPD => Some(PossibleValue::new("proftpd")),
-            Technology::PureFTPd => Some(PossibleValue::new("pureftpd")),
-            Technology::OS => Some(PossibleValue::new("os")),
-            Technology::PHP => Some(PossibleValue::new("php")),
-            Technology::PhpMyAdmin => Some(PossibleValue::new("phpmyadmin")),
-            Technology::WordPress => Some(PossibleValue::new("wordpress")),
-            Technology::Drupal => Some(PossibleValue::new("drupal")),
-            Technology::Typo3 => Some(PossibleValue::new("typo3")),
-            Technology::Httpd => Some(PossibleValue::new("httpd")),
-            Technology::Tomcat => Some(PossibleValue::new("tomcat")),
-            Technology::Nginx => Some(PossibleValue::new("nginx")),
-            Technology::OpenSSL => Some(PossibleValue::new("openssl")),
-            Technology::JQuery => Some(PossibleValue::new("jquery")),
-            Technology::ReactJS => Some(PossibleValue::new("reactjs")),
-            Technology::Handlebars => Some(PossibleValue::new("handlebars")),
-            Technology::Lodash => Some(PossibleValue::new("lodash")),
-            Technology::AngularJS => Some(PossibleValue::new("angularjs")),
-            Technology::Gsap => Some(PossibleValue::new("gsap")),
-            Technology::Bootstrap => Some(PossibleValue::new("bootstrap")),
-            Technology::Angular => Some(PossibleValue::new("angular")),
-            Technology::Plesk => Some(PossibleValue::new("plesk")),
-        }
-    }
-}
+use std::collections::HashMap;
 
 /// Represents a request that an HTTP reader will have to handle
 #[derive(Debug)]
@@ -489,14 +243,6 @@ impl UrlResponse {
     }
 }
 
-impl PartialEq for UrlResponse {
-    /// Two UrlResponse are considered equal if their URLs
-    /// are identical. It is to avoid duplicate.
-    fn eq(&self, other: &Self) -> bool {
-        self.url == other.url
-    }
-}
-
 /// Represents the type of a UrlRequest.
 /// It is about a main URL, or a JavaScript one.
 #[derive(PartialEq)]
@@ -509,26 +255,126 @@ pub enum UrlRequestType {
     JavaScript,
 }
 
-/// An enum to match the available writers
-#[derive(Clone, Debug)]
-pub enum Writers {
-    /// StdoutWriter
-    TextStdout,
-    /// CsvWriter
-    Csv,
-}
+#[cfg(test)]
+mod tests {
+    use super::{UrlRequest, UrlRequestType, UrlResponse};
+    use crate::models::technology::Technology;
+    use std::collections::HashMap;
 
-impl ValueEnum for Writers {
-    /// Lists the variants available for clap
-    fn value_variants<'a>() -> &'a [Self] {
-        &[Self::TextStdout, Self::Csv]
+    #[test]
+    fn from_technologies_remove_duplicate_urls() {
+        // We want to ensure that when calling from_technologies(),
+        // the jQuery's UrlRequest won't be present twice.
+        let technologies: Vec<Technology> =
+            vec![Technology::JQuery, Technology::PHP, Technology::JQuery];
+        let main_url = "https://example.com/";
+        let url_requests_from_technologies = UrlRequest::from_technologies(main_url, &technologies);
+        let mut found_urls: Vec<String> = Vec::new();
+
+        for url_request in url_requests_from_technologies {
+            assert!(
+                !found_urls.contains(&url_request.url),
+                "UrlRequests' URLs are not unique. Duplicate: {}",
+                url_request.url
+            );
+            found_urls.push(url_request.url.clone());
+        }
     }
 
-    /// Map each value to a possible value in clap
-    fn to_possible_value(&self) -> Option<PossibleValue> {
-        match &self {
-            Self::TextStdout => Some(PossibleValue::new("textstdout")),
-            Self::Csv => Some(PossibleValue::new("csv")),
-        }
+    #[test]
+    fn get_hostname_port_works() {
+        let url_request1 = UrlRequest::new("https://www.this.that.example.com", false);
+        let (hostname1, port1) = url_request1.get_hostname_port();
+        assert_eq!("www.this.that.example.com", hostname1);
+        assert_eq!(443, port1);
+
+        let url_request2 = UrlRequest::new(
+            "http://www.that.this.example.com/path/to/blog/index.php",
+            false,
+        );
+        let (hostname2, port2) = url_request2.get_hostname_port();
+        assert_eq!("www.that.this.example.com", hostname2);
+        assert_eq!(80, port2);
+
+        let url_request3 = UrlRequest::new(
+            "http://that.this.example.com:8080/path/to/blog/index.php?a=2",
+            false,
+        );
+        let (hostname3, port3) = url_request3.get_hostname_port();
+        assert_eq!("that.this.example.com", hostname3);
+        assert_eq!(8080, port3);
+    }
+
+    #[test]
+    fn from_path_generates_the_right_url() {
+        let url_request_1 =
+            UrlRequest::from_path("https://test.this-site.co.uk", "/wp-login.php", false);
+        assert_eq!(
+            "https://test.this-site.co.uk/wp-login.php",
+            url_request_1.url
+        );
+
+        let url_request_2 = UrlRequest::from_path(
+            "http://test.this.other-site.com:8080/?u=/test",
+            "/path/login.php",
+            false,
+        );
+        assert_eq!(
+            "http://test.this.other-site.com:8080/path/login.php",
+            url_request_2.url
+        );
+
+        let url_request_3 = UrlRequest::from_path(
+            "https://test.this.other-site.com/path/blog/",
+            "wp-login.php",
+            false,
+        );
+        assert_eq!(
+            "https://test.this.other-site.com/path/blog/wp-login.php",
+            url_request_3.url
+        );
+
+        let url_request_4 = UrlRequest::from_path(
+            "https://test.this.other-site.com:8443/path/blog/index.php",
+            "wp-login.php",
+            false,
+        );
+        assert_eq!(
+            "https://test.this.other-site.com:8443/path/blog/wp-login.php",
+            url_request_4.url
+        );
+
+        let url_request_5 = UrlRequest::from_path(
+            "https://test.this.other-site.com/path/blog/index.php",
+            "/wp-login.php",
+            false,
+        );
+        assert_eq!(
+            "https://test.this.other-site.com/wp-login.php",
+            url_request_5.url
+        );
+    }
+
+    #[test]
+    fn url_response_get_headers_works() {
+        let mut headers_1 = HashMap::new();
+        headers_1.insert("Accept".to_string(), "text/html".to_string());
+        headers_1.insert("Server".to_string(), "Apache/2.4.57".to_string());
+        headers_1.insert("Content-language".to_string(), "en".to_string());
+        headers_1.insert("X-powered-by".to_string(), "PHP/8.2".to_string());
+        let url_response_1 = UrlResponse::new(
+            "https://www.example.com/index.html",
+            headers_1,
+            "",
+            UrlRequestType::Default,
+        );
+
+        let extracted_headers =
+            url_response_1.get_headers(&["Server".to_string(), "X-powered-by".to_string()]);
+        assert!(extracted_headers.len() == 2);
+        assert!(extracted_headers.contains_key("Server"));
+        assert_eq!("Apache/2.4.57", extracted_headers["Server"]);
+        assert!(extracted_headers.contains_key("X-powered-by"));
+        assert_eq!("PHP/8.2", extracted_headers["X-powered-by"]);
     }
 }

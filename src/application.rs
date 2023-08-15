@@ -29,7 +29,7 @@ use crate::checkers::tomcat::TomcatChecker;
 use crate::checkers::typo3::Typo3Checker;
 use crate::checkers::wordpress::WordPressChecker;
 use crate::checkers::{HttpChecker, TcpChecker};
-use crate::models::{Finding, ScanType, Technology, UrlRequest, Writers};
+use crate::models::{reqres::UrlRequest, technology::Technology, Finding, ScanType, Writers};
 use crate::readers::http::HttpReader;
 use crate::readers::tcp::TcpReader;
 use crate::writers::csv::CsvWriter;

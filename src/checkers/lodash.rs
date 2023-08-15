@@ -5,7 +5,7 @@
 use std::collections::HashMap;
 
 use super::HttpChecker;
-use crate::models::{Finding, Technology, UrlResponse};
+use crate::models::{reqres::UrlResponse, technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
 
@@ -101,5 +101,117 @@ impl<'a> HttpChecker for LodashChecker<'a> {
     /// The technology supported by the checker
     fn get_technology(&self) -> Technology {
         Technology::Lodash
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::checkers::check_finding_fields;
+    use crate::models::reqres::UrlRequestType;
+
+    #[test]
+    fn source_code_matches() {
+        let checker = LodashChecker::new();
+        let body1 = r#"var a = 42;lodash.c();var VERSION= '4.17.15';var b = 1;"#;
+        let url1 = "https://www.example.com/js/file.js";
+        let mut url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
+        let finding = checker.check_http_body(&url_response_valid);
+        check_finding_fields(
+            finding,
+            "VERSION= '4.17.15'",
+            "Lodash",
+            Some("4.17.15"),
+            Some(url1),
+        );
+
+        let body2 = r#"a.b=10;VERSION = abc;a.c();var v="4.17.15"; a.lodash_placeholder"#;
+        url_response_valid.body = body2.to_string();
+        let finding = checker.check_http_body(&url_response_valid);
+        check_finding_fields(
+            finding,
+            "v=\"4.17.15\"",
+            "Lodash",
+            Some("4.17.15"),
+            Some(url1),
+        );
+    }
+
+    #[test]
+    fn source_code_doesnt_match() {
+        let checker = LodashChecker::new();
+        let body = r#"var f = "LodashPlaceholder"; VERSION="4.7.7";"#;
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/that.jsp?abc=def",
+            HashMap::new(),
+            body,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_invalid);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn finds_match_in_url_responses() {
+        let checker = LodashChecker::new();
+        let body1 = r#"var a = 42;lodash.x = 0;var VERSION = "4.17.15";var b = 1;"#;
+        let url1 = "https://www.example.com/g.js";
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        check_finding_fields(
+            finding,
+            "VERSION = \"4.17.15\"",
+            "Lodash",
+            Some("4.17.15"),
+            Some(url1),
+        );
+
+        let body2 = r#"a.e1(); VERSION=abc;a.c_1 = "10";var v="4.17.15"; a.lodash_placeholder;"#;
+        let url2 = "https://www.example.com/g.js";
+        let url_response_valid =
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::JavaScript);
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        check_finding_fields(
+            finding,
+            "v=\"4.17.15\"",
+            "Lodash",
+            Some("4.17.15"),
+            Some(url2),
+        );
+    }
+
+    #[test]
+    fn doesnt_find_match_in_url_responses() {
+        let checker = LodashChecker::new();
+        let body1 = r#"Lodash v4.17.15 is not installed here."#;
+        let url_response_invalid1 = UrlResponse::new(
+            "https://www.example.com/abc/def1",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+        let body2 = r#"It should not be detected"#;
+        let url_response_invalid2 = UrlResponse::new(
+            "https://www.example.com/abc-1/de-f1",
+            HashMap::new(),
+            body2,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(finding.is_none());
     }
 }

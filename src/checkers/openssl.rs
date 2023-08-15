@@ -5,7 +5,8 @@
 use std::collections::HashMap;
 
 use super::HttpChecker;
-use crate::models::{Finding, Technology, UrlRequestType, UrlResponse};
+use crate::models::reqres::{UrlRequestType, UrlResponse};
+use crate::models::{technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
 
@@ -85,5 +86,157 @@ impl<'a> HttpChecker for OpenSSLChecker<'a> {
     /// This checker supports Apache httpd
     fn get_technology(&self) -> Technology {
         Technology::OpenSSL
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::checkers::check_finding_fields;
+
+    #[test]
+    fn header_matches() {
+        let checker = OpenSSLChecker::new();
+        let mut headers1 = HashMap::new();
+        headers1.insert("Accept".to_string(), "text/html".to_string());
+        headers1.insert(
+            "Server".to_string(),
+            "Apache/2.4.50 OpenSSL/1.0.2k".to_string(),
+        );
+        let url1 = "https://www.example.com/that.php?abc=def";
+        let mut url_response_valid =
+            UrlResponse::new(url1, headers1, "the body", UrlRequestType::Default);
+        let finding = checker.check_http_headers(&url_response_valid);
+        check_finding_fields(
+            finding,
+            "OpenSSL/1.0.2k",
+            "OpenSSL",
+            Some("1.0.2k"),
+            Some(url1),
+        );
+
+        let mut headers2 = HashMap::new();
+        headers2.insert("Accept".to_string(), "text/html".to_string());
+        headers2.insert(
+            "X-powered-by".to_string(),
+            "nginx/1.22.0 (CentOS) OpenSSL/1.0.2k-fips".to_string(),
+        );
+        url_response_valid.headers = headers2;
+        let finding = checker.check_http_headers(&url_response_valid);
+        check_finding_fields(
+            finding,
+            "OpenSSL/1.0.2k-fips",
+            "OpenSSL",
+            Some("1.0.2k-fips"),
+            Some(url1),
+        );
+    }
+
+    #[test]
+    fn header_doesnt_match() {
+        let checker = OpenSSLChecker::new();
+        let mut headers1 = HashMap::new();
+        headers1.insert("Accept".to_string(), "text/html".to_string());
+        headers1.insert(
+            "Server".to_string(),
+            "Apache/2.4.51 (Debian) OpenSSL 1.0.2k".to_string(),
+        );
+        let mut url_response_invalid = UrlResponse::new(
+            "https://www.example.com/that.php?abc=def",
+            headers1,
+            "the body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_headers(&url_response_invalid);
+        assert!(finding.is_none());
+
+        let mut headers2 = HashMap::new();
+        headers2.insert("Accept".to_string(), "text/html".to_string());
+        url_response_invalid.headers = headers2;
+        let finding = checker.check_http_headers(&url_response_invalid);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn finds_match_in_url_responses() {
+        let checker = OpenSSLChecker::new();
+        let mut headers1 = HashMap::new();
+        headers1.insert("Accept".to_string(), "text/html".to_string());
+        headers1.insert(
+            "Server".to_string(),
+            "Apache/2.4.51 (Debian) OpenSSL/1.0.2k".to_string(),
+        );
+
+        let url1 = "https://www.example.com/pageNotFound.html";
+        let url_response_valid =
+            UrlResponse::new(url1, headers1, "the body", UrlRequestType::Default);
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        check_finding_fields(
+            finding,
+            "OpenSSL/1.0.2k",
+            "OpenSSL",
+            Some("1.0.2k"),
+            Some(url1),
+        );
+
+        let mut headers2 = HashMap::new();
+        headers2.insert("Accept".to_string(), "text/html".to_string());
+        headers2.insert(
+            "Server".to_string(),
+            "nginx/1.22.2 OpenSSL/1.0.2k-fips".to_string(),
+        );
+        let url2 = "https://www.example.com/test.php";
+        let url_response_valid =
+            UrlResponse::new(url2, headers2, "the body", UrlRequestType::Default);
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        check_finding_fields(
+            finding,
+            "OpenSSL/1.0.2k-fips",
+            "OpenSSL",
+            Some("1.0.2k-fips"),
+            Some(url2),
+        );
+    }
+
+    #[test]
+    fn doesnt_find_match_in_url_responses() {
+        let checker = OpenSSLChecker::new();
+        let body1 = r#"About OpenSSL 1.0.2k"#;
+        let url_response_invalid1 = UrlResponse::new(
+            "https://www.example.com/abc/def1",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+
+        let mut headers1 = HashMap::new();
+        headers1.insert("Accept".to_string(), "text/html".to_string());
+        headers1.insert(
+            "Server".to_string(),
+            "Apache/2.4.29 OpenSSL/1.2.3".to_string(),
+        );
+        let url_response_invalid2 = UrlResponse::new(
+            "https://www.example.com/abc-1/de-f1",
+            headers1,
+            "the body",
+            UrlRequestType::JavaScript,
+        );
+        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(
+            finding.is_none(),
+            "OpenSSL must not be detected against JavaScript URLs to avoid false positive"
+        );
     }
 }

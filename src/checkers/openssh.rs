@@ -5,7 +5,7 @@
 use std::collections::HashMap;
 
 use super::TcpChecker;
-use crate::models::{Finding, Technology};
+use crate::models::{technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
 

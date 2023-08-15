@@ -28,7 +28,7 @@ pub mod tomcat;
 pub mod typo3;
 pub mod wordpress;
 
-use crate::models::{Finding, Technology, UrlResponse};
+use crate::models::{reqres::UrlResponse, technology::Technology, Finding};
 use log::trace;
 use regex::Captures;
 
@@ -109,6 +109,117 @@ pub trait HttpChecker {
             &evidence,
             &evidence_text,
             Some(&url_response.url),
+        );
+    }
+}
+
+/// Checks the fields of a Finding to ensure they are properly set.
+///
+/// Note: this method is not a test, it's a utility available to all
+/// the checkers.
+///
+/// finding_option: the optional Finding to call assertions on.
+/// evidence: a string to find in the evidence
+/// technology: the technology name
+/// version: the optional version of the technology
+/// url: the optional URL of the finding.
+///
+/// # Example
+///
+/// ```rust
+/// let finding = Finding::new(
+///     "WordPress",
+///     Some("6.1.2"),
+///     "<meta name='generator' content='WordPress 6.1.2'/>",
+///     "WordPress 6.1.2 has been identified because we found 'content='WordPress 6.1.2'/>' at 'https://example.com/blog/index.php'"
+///     Some("https://example.com/blog/index.php")
+///     );
+///
+/// check_finding_fields(
+///     Some(finding),
+///     "content='WordPress 6.1.2'",
+///     "WordPress",
+///     Some("6.1.2"),
+///     Some("https://example.com/blog/index.php")
+/// );
+/// ```
+#[cfg(test)]
+fn check_finding_fields(
+    finding_option: Option<Finding>,
+    evidence: &str,
+    technology: &str,
+    version: Option<&str>,
+    url: Option<&str>,
+) {
+    assert!(finding_option.is_some());
+    let finding = finding_option.unwrap();
+    let evidence_text = &finding.evidence_text;
+
+    if url.is_some() {
+        assert!(
+            finding.url_of_finding.is_some(),
+            "Assertion 'finding.url_of_finding.is_some()' failed. Expected URL: {}",
+            url.unwrap()
+        );
+        assert_eq!(
+            finding.url_of_finding.as_ref().unwrap(),
+            url.unwrap(),
+            "Assertion 'finding.url_of_finding == url' failed. Finding's URL: {}, url: {}",
+            url.as_ref().unwrap(),
+            finding.url_of_finding.as_ref().unwrap()
+        );
+        assert!(
+            evidence_text.contains(url.unwrap()),
+            "Assertion 'finding.evidence_text.contains(url)' failed. Finding's evidence text: {}, url: {}",
+            evidence_text,
+            url.unwrap()
+        );
+    }
+
+    assert!(
+        finding.evidence.contains(evidence),
+        "Assertion 'finding.evidence.contains(evidence)' failed. Finding's evidence: {}, evidence {}",
+        finding.evidence,
+        evidence
+    );
+    assert_eq!(
+        finding.technology,
+        technology,
+        "Assertion 'finding.technology == technology' failed. Finding's technology: {}, technology: {}",
+        finding.technology,
+        technology
+    );
+    assert!(
+        evidence_text.contains(technology),
+        "Assertion 'finding.evidence_text.contains(technology)' failed. Finding's evidence text: {}, technology: {}",
+        evidence_text,
+        technology
+    );
+    assert!(
+        evidence_text.contains(evidence),
+        "Assertion 'finding.evidence_text.contains(evidence)' failed. Finding's evidence text: {}, evidence: {}",
+        evidence_text,
+        evidence
+    );
+
+    if version.is_some() {
+        assert!(
+            finding.version.is_some(),
+            "Assertion 'finding.version.is_some()' failed. Expected version: {}",
+            version.unwrap()
+        );
+        assert_eq!(
+            finding.version.as_ref().unwrap(),
+            version.unwrap(),
+            "Assertion 'finding.version == version' failed. Finding's version: {}, version: {}",
+            finding.version.as_ref().unwrap(),
+            version.unwrap()
+        );
+        assert!(
+            evidence_text.contains(version.unwrap()),
+            "Assertion 'finding.evidence_text.contains(version)' failed. Finding's evidence text: {}, version:{}",
+            evidence_text,
+            version.unwrap()
         );
     }
 }

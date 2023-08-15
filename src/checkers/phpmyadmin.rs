@@ -5,7 +5,8 @@
 use std::collections::HashMap;
 
 use super::HttpChecker;
-use crate::models::{Finding, Technology, UrlRequestType, UrlResponse};
+use crate::models::reqres::{UrlRequestType, UrlResponse};
+use crate::models::{technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
 
@@ -99,5 +100,119 @@ impl<'a> HttpChecker for PhpMyAdminChecker<'a> {
     /// The technology supported by the checker
     fn get_technology(&self) -> Technology {
         Technology::PhpMyAdmin
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::checkers::check_finding_fields;
+
+    #[test]
+    fn source_code_matches() {
+        let checker = PhpMyAdminChecker::new();
+        let body1 = r#"<title>Welcome to phpMyAdmin's documentation! phpMyAdmin 5.2.0 documentation</title>"#;
+        let url1 = "https://www.example.com/phpmyadmin/doc/html/index.html";
+        let mut url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
+        let finding = checker.check_http_body(&url_response_valid);
+        check_finding_fields(
+            finding,
+            "phpMyAdmin 5.2.0",
+            "phpMyAdmin",
+            Some("5.2.0"),
+            Some(url1),
+        );
+
+        let body2 = r#"5.2.0 (2022-05-10)"#;
+        let url2 = "https://www.example.com/phpmyadmin/ChangeLog";
+        url_response_valid.body = body2.to_string();
+        url_response_valid.url = url2.to_string();
+        let finding = checker.check_http_body(&url_response_valid);
+        check_finding_fields(
+            finding,
+            "5.2.0 (2022-05-10)",
+            "phpMyAdmin",
+            Some("5.2.0"),
+            Some(url2),
+        );
+    }
+
+    #[test]
+    fn source_code_doesnt_match() {
+        let checker = PhpMyAdminChecker::new();
+        let body = r#"<h1>phpMyAdmin 5.2</h1>"#;
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/about.php?abc=def",
+            HashMap::new(),
+            body,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_invalid);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn finds_match_in_url_responses() {
+        let checker = PhpMyAdminChecker::new();
+        let body1 = r#"<title>Welcome to phpMyAdmin's documentation! phpMyAdmin 5.2.1 documentation</title>"#;
+        let url1 = "https://www.example.com/mysql/doc/html/index.html";
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        check_finding_fields(
+            finding,
+            "phpMyAdmin 5.2.1",
+            "phpMyAdmin",
+            Some("5.2.1"),
+            Some(url1),
+        );
+
+        let body2 = "5.2.1 (2022-05-11)";
+        let url2 = "https://www.example.com/mysql/ChangeLog";
+        let url_response_valid =
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::Default);
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        check_finding_fields(
+            finding,
+            "5.2.1 (2022-05-11)",
+            "phpMyAdmin",
+            Some("5.2.1"),
+            Some(url2),
+        );
+    }
+
+    #[test]
+    fn doesnt_find_match_in_url_responses() {
+        let checker = PhpMyAdminChecker::new();
+        let body1 = r#"About PhpMyAdmin 8.2.11"#;
+        let url_response_invalid1 = UrlResponse::new(
+            "https://www.example.com/abc/def1",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+
+        let body2 = "5.2.0 (2022-05-10)";
+        let url_response_invalid2 = UrlResponse::new(
+            "https://www.example.com/NotChangeLog",
+            HashMap::new(),
+            body2,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(finding.is_none());
     }
 }

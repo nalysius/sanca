@@ -5,7 +5,8 @@
 use std::collections::HashMap;
 
 use super::HttpChecker;
-use crate::models::{Finding, Technology, UrlRequestType, UrlResponse};
+use crate::models::reqres::{UrlRequestType, UrlResponse};
+use crate::models::{technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
 
@@ -24,6 +25,7 @@ impl<'a> PHPChecker<'a> {
         // Example: PHP/7.1.33.12
         let header_regex =
             Regex::new(r"(?P<wholematch>.*PHP\/(?P<version>\d+\.\d+(\.\d+(\.\d+)?)?).*)").unwrap();
+        // Example: <h1 class="p">PHP Version 8.2.2</h1>
         let body_regex = Regex::new(r#"(?P<wholematch><h1 class="p">PHP Version (?P<version>\d+\.\d+\.\d+(-[a-z0-9._-]+)?)</h1>)"#).unwrap();
 
         regexes.insert("http-header", header_regex);
@@ -123,5 +125,165 @@ impl<'a> HttpChecker for PHPChecker<'a> {
     /// The technology supported by the checker.
     fn get_technology(&self) -> Technology {
         Technology::PHP
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::checkers::check_finding_fields;
+
+    #[test]
+    fn source_code_matches() {
+        let checker = PHPChecker::new();
+        let body1 = r#"<h1 class="p">PHP Version 8.2.0</h1>"#;
+        let url1 = "https://www.example.com/phpinfo.php";
+        let mut url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
+        let finding = checker.check_http_body(&url_response_valid);
+        check_finding_fields(
+            finding,
+            "PHP Version 8.2.0",
+            "PHP",
+            Some("8.2.0"),
+            Some(url1),
+        );
+
+        let body2 = r#"<h1 class="p">PHP Version 8.2.1-alpha</h1>"#;
+        url_response_valid.body = body2.to_string();
+        let finding = checker.check_http_body(&url_response_valid);
+        check_finding_fields(
+            finding,
+            "PHP Version 8.2.1",
+            "PHP",
+            Some("8.2.1-alpha"),
+            Some(url1),
+        );
+    }
+
+    #[test]
+    fn source_code_doesnt_match() {
+        let checker = PHPChecker::new();
+        let body = r#"<h1>PHP 8.2</h1>"#;
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/about.php?abc=def",
+            HashMap::new(),
+            body,
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http_body(&url_response_invalid);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn header_matches() {
+        let checker = PHPChecker::new();
+        let mut headers1 = HashMap::new();
+        headers1.insert("Accept".to_string(), "text/html".to_string());
+        headers1.insert("Server".to_string(), "Apache/2.4.52 PHP/8.2.1".to_string());
+        let url1 = "https://www.example.com/that.php?abc=def";
+        let mut url_response_valid =
+            UrlResponse::new(url1, headers1, "the body", UrlRequestType::Default);
+        let finding = checker.check_http_headers(&url_response_valid);
+        check_finding_fields(finding, "PHP/8.2.1", "PHP", Some("8.2.1"), Some(url1));
+
+        let mut headers2 = HashMap::new();
+        headers2.insert("Accept".to_string(), "text/html".to_string());
+        headers2.insert("Server".to_string(), "nginx/1.22.0 (CentOS)".to_string());
+        headers2.insert("X-powered-by".to_string(), "PHP/7.4".to_string());
+        url_response_valid.headers = headers2;
+        let finding = checker.check_http_headers(&url_response_valid);
+        check_finding_fields(finding, "PHP/7.4", "PHP", Some("7.4"), Some(url1));
+    }
+
+    #[test]
+    fn header_doesnt_match() {
+        let checker = PHPChecker::new();
+        let mut headers1 = HashMap::new();
+        headers1.insert("Accept".to_string(), "text/html".to_string());
+        headers1.insert("Server".to_string(), "Apache/2.4.51".to_string());
+        let mut url_response_invalid = UrlResponse::new(
+            "https://www.example.com/that.php?abc=def",
+            headers1,
+            "the body",
+            UrlRequestType::JavaScript,
+        );
+        let finding = checker.check_http_headers(&url_response_invalid);
+        assert!(finding.is_none());
+
+        let mut headers2 = HashMap::new();
+        headers2.insert("Accept".to_string(), "text/html".to_string());
+        url_response_invalid.headers = headers2;
+        url_response_invalid.request_type = UrlRequestType::Default;
+        let finding = checker.check_http_headers(&url_response_invalid);
+        assert!(finding.is_none());
+    }
+
+    #[test]
+    fn finds_match_in_url_responses() {
+        let checker = PHPChecker::new();
+        let body1 = r#"<h1 class="p">PHP Version 5.6.40</h1>"#;
+        let url1 = "https://www.example.com/info.php";
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        check_finding_fields(
+            finding,
+            "PHP Version 5.6.40",
+            "PHP",
+            Some("5.6.40"),
+            Some(url1),
+        );
+
+        let mut headers1 = HashMap::new();
+        headers1.insert("Accept".to_string(), "text/html".to_string());
+        headers1.insert(
+            "Server".to_string(),
+            "nginx/1.22.2 OpenSSL/1.0.2k PHP/8.1".to_string(),
+        );
+        let url2 = "https://www.example.com/test.php";
+        let url_response_valid =
+            UrlResponse::new(url2, headers1, "the body", UrlRequestType::Default);
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        check_finding_fields(finding, "PHP/8.1", "PHP", Some("8.1"), Some(url2));
+    }
+
+    #[test]
+    fn doesnt_find_match_in_url_responses() {
+        let checker = PHPChecker::new();
+        let body1 = r#"About PHP 8.2.11"#;
+        let url_response_invalid1 = UrlResponse::new(
+            "https://www.example.com/abc/def1",
+            HashMap::new(),
+            body1,
+            UrlRequestType::Default,
+        );
+
+        let mut headers1 = HashMap::new();
+        headers1.insert("Accept".to_string(), "text/html".to_string());
+        headers1.insert("Server".to_string(), "Apache/2.4.52 PHP/7.1".to_string());
+        let url_response_invalid2 = UrlResponse::new(
+            "https://www.example.com/abc-1/de-f1",
+            headers1,
+            "the body",
+            UrlRequestType::JavaScript,
+        );
+        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(
+            finding.is_none(),
+            "PHP must not be detected on JavaScript URLs to avoid false positive"
+        );
     }
 }

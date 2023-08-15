@@ -2,7 +2,7 @@
 //! It presents the findings in a CSV format and prints it on STDOUT.
 
 use super::Writer;
-use crate::models::{Finding, UrlRequest};
+use crate::models::{reqres::UrlRequest, Finding};
 
 /// A writer to print the findings as CSV.
 pub struct CsvWriter {
