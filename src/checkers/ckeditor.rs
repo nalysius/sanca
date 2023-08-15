@@ -21,13 +21,21 @@ impl<'a> CKEditorChecker<'a> {
     /// reused.
     pub fn new() -> Self {
         let mut regexes = HashMap::new();
-        // Example: const x="39.0.1"[...]CKEDITOR_VERSION=x
+
+        // Example: x.CKEDITOR_VERSION="39.0.1"
         let body_regex = Regex::new(
+            r#"(?P<wholematch>[a-zA-Z0-9_]+\.CKEDITOR_VERSION\s*=\s*['"](?P<version>\d+\.\d+\.\d+)['"])"#,
+        )
+        .unwrap();
+
+        // Example: const x="39.0.1"[...]CKEDITOR_VERSION=x
+        let body_alternative_regex = Regex::new(
             r#"(?P<wholematch>const [a-zA-Z0-9_]+\s*=\s*['"](?P<version>\d+\.\d+\.\d+)['"].+CKEDITOR_VERSION\s*=\s*[a-zA-z0-9_]+)"#,
         )
         .unwrap();
 
         regexes.insert("http-body", body_regex);
+        regexes.insert("http-body-alternative", body_alternative_regex);
         Self { regexes: regexes }
     }
 
@@ -46,6 +54,19 @@ impl<'a> CKEditorChecker<'a> {
         // The regex matches
         if caps_result.is_some() {
             info!("Regex CKEditor/http-body matches");
+            let caps = caps_result.unwrap();
+            return Some(self.extract_finding_from_captures(caps, url_response, 20, 20, "CKEditor", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+        }
+
+        let caps_result = self
+            .regexes
+            .get("http-body-alternative")
+            .expect("Regex \"http-body-alternative\" not found.")
+            .captures(&url_response.body);
+
+        // The regex matches
+        if caps_result.is_some() {
+            info!("Regex CKEditor/http-body-alternative matches");
             let caps = caps_result.unwrap();
             return Some(self.extract_finding_from_captures(caps, url_response, 20, 20, "CKEditor", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
@@ -94,12 +115,12 @@ mod tests {
             Some(url1),
         );
 
-        let body2 = r#"var a = 10; const _ = '39.0.1'; var b1 = 20;CKEDITOR_VERSION=_;a.that();"#;
+        let body2 = r#"const a = 10; x.CKEDITOR_VERSION="39.0.1"; a.b();"#;
         url_response_valid.body = body2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
         check_finding_fields(
             finding,
-            "const _ = '39.0.1'",
+            "x.CKEDITOR_VERSION=\"39.0.1\"",
             "CKEditor",
             Some("39.0.1"),
             Some(url1),
@@ -123,7 +144,8 @@ mod tests {
     #[test]
     fn finds_match_in_url_responses() {
         let checker = CKEditorChecker::new();
-        let body1 = r#"var a = 10; const _ ='39.0.1'; var b1 = 20; CKEDITOR_VERSION = _; a.that();"#;
+        let body1 =
+            r#"var a = 10; const _ ='39.0.1'; var b1 = 20; CKEDITOR_VERSION = _; a.that();"#;
         let url1 = "https://www.example.com/g.js";
         let url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
@@ -140,6 +162,25 @@ mod tests {
             "CKEditor",
             Some("39.0.1"),
             Some(url1),
+        );
+
+        let body2 = r#"x.CKEDITOR_VERSION="39.0.1"; this.that = "test";"#;
+        let url2 = "https://www.example.com/g.js";
+        let url_response_valid =
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::JavaScript);
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+        );
+        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        check_finding_fields(
+            finding,
+            "x.CKEDITOR_VERSION=\"39.0.1\"",
+            "CKEditor",
+            Some("39.0.1"),
+            Some(url2),
         );
     }
 
