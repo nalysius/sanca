@@ -254,3 +254,127 @@ pub enum UrlRequestType {
     /// The UrlRequest is the one of a JavaScript file.
     JavaScript,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{UrlRequest, UrlRequestType, UrlResponse};
+    use crate::models::technology::Technology;
+    use std::collections::HashMap;
+
+    #[test]
+    fn from_technologies_remove_duplicate_urls() {
+        // We want to ensure that when calling from_technologies(),
+        // the jQuery's UrlRequest won't be present twice.
+        let technologies: Vec<Technology> =
+            vec![Technology::JQuery, Technology::PHP, Technology::JQuery];
+        let main_url = "https://example.com/";
+        let url_requests_from_technologies = UrlRequest::from_technologies(main_url, &technologies);
+        let mut found_urls: Vec<String> = Vec::new();
+
+        for url_request in url_requests_from_technologies {
+            assert!(
+                !found_urls.contains(&url_request.url),
+                "UrlRequests' URLs are not unique. Duplicate: {}",
+                url_request.url
+            );
+            found_urls.push(url_request.url.clone());
+        }
+    }
+
+    #[test]
+    fn get_hostname_port_works() {
+        let url_request1 = UrlRequest::new("https://www.this.that.example.com", false);
+        let (hostname1, port1) = url_request1.get_hostname_port();
+        assert_eq!("www.this.that.example.com", hostname1);
+        assert_eq!(443, port1);
+
+        let url_request2 = UrlRequest::new(
+            "http://www.that.this.example.com/path/to/blog/index.php",
+            false,
+        );
+        let (hostname2, port2) = url_request2.get_hostname_port();
+        assert_eq!("www.that.this.example.com", hostname2);
+        assert_eq!(80, port2);
+
+        let url_request3 = UrlRequest::new(
+            "http://that.this.example.com:8080/path/to/blog/index.php?a=2",
+            false,
+        );
+        let (hostname3, port3) = url_request3.get_hostname_port();
+        assert_eq!("that.this.example.com", hostname3);
+        assert_eq!(8080, port3);
+    }
+
+    #[test]
+    fn from_path_generates_the_right_url() {
+        let url_request_1 =
+            UrlRequest::from_path("https://test.this-site.co.uk", "/wp-login.php", false);
+        assert_eq!(
+            "https://test.this-site.co.uk/wp-login.php",
+            url_request_1.url
+        );
+
+        let url_request_2 = UrlRequest::from_path(
+            "http://test.this.other-site.com:8080/?u=/test",
+            "/path/login.php",
+            false,
+        );
+        assert_eq!(
+            "http://test.this.other-site.com:8080/path/login.php",
+            url_request_2.url
+        );
+
+        let url_request_3 = UrlRequest::from_path(
+            "https://test.this.other-site.com/path/blog/",
+            "wp-login.php",
+            false,
+        );
+        assert_eq!(
+            "https://test.this.other-site.com/path/blog/wp-login.php",
+            url_request_3.url
+        );
+
+        let url_request_4 = UrlRequest::from_path(
+            "https://test.this.other-site.com:8443/path/blog/index.php",
+            "wp-login.php",
+            false,
+        );
+        assert_eq!(
+            "https://test.this.other-site.com:8443/path/blog/wp-login.php",
+            url_request_4.url
+        );
+
+        let url_request_5 = UrlRequest::from_path(
+            "https://test.this.other-site.com/path/blog/index.php",
+            "/wp-login.php",
+            false,
+        );
+        assert_eq!(
+            "https://test.this.other-site.com/wp-login.php",
+            url_request_5.url
+        );
+    }
+
+    #[test]
+    fn url_response_get_headers_works() {
+        let mut headers_1 = HashMap::new();
+        headers_1.insert("Accept".to_string(), "text/html".to_string());
+        headers_1.insert("Server".to_string(), "Apache/2.4.57".to_string());
+        headers_1.insert("Content-language".to_string(), "en".to_string());
+        headers_1.insert("X-powered-by".to_string(), "PHP/8.2".to_string());
+        let url_response_1 = UrlResponse::new(
+            "https://www.example.com/index.html",
+            headers_1,
+            "",
+            UrlRequestType::Default,
+        );
+
+        let extracted_headers =
+            url_response_1.get_headers(&["Server".to_string(), "X-powered-by".to_string()]);
+        assert!(extracted_headers.len() == 2);
+        assert!(extracted_headers.contains_key("Server"));
+        assert_eq!("Apache/2.4.57", extracted_headers["Server"]);
+        assert!(extracted_headers.contains_key("X-powered-by"));
+        assert_eq!("PHP/8.2", extracted_headers["X-powered-by"]);
+    }
+}
