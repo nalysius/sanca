@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0]
+
 ### Added
 
 - CKEditor detection.
@@ -17,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Bootstrap was wrongly identified when another library used a variable containing "VERSION".
 - When fetching JavaScript files, the images were downloaded too.
 - When fetching JavaScript files, the URLs starting with // were ignored: //www.example.com/a/b.js.
 
