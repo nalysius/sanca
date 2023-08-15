@@ -6,6 +6,7 @@ use clap::{Parser, ValueEnum};
 use crate::checkers::angular::AngularChecker;
 use crate::checkers::angularjs::AngularJSChecker;
 use crate::checkers::bootstrap::BootstrapChecker;
+use crate::checkers::ckeditor::CKEditorChecker;
 use crate::checkers::dovecot::DovecotChecker;
 use crate::checkers::exim::EximChecker;
 use crate::checkers::gsap::GsapChecker;
@@ -86,6 +87,7 @@ impl Application {
             Box::new(HandlebarsChecker::new()),
             Box::new(LodashChecker::new()),
             Box::new(ReactJSChecker::new()),
+            Box::new(CKEditorChecker::new()),
         ];
 
         trace!("Returning the Application");

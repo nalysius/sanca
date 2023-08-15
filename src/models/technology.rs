@@ -40,6 +40,7 @@ pub enum Technology {
     Bootstrap,
     Angular,
     Plesk,
+    CKEditor,
 }
 
 impl Technology {
@@ -154,6 +155,7 @@ impl ValueEnum for Technology {
             Technology::Bootstrap,
             Technology::Angular,
             Technology::Plesk,
+            Technology::CKEditor,
         ]
     }
 
@@ -186,6 +188,7 @@ impl ValueEnum for Technology {
             Technology::Bootstrap => Some(PossibleValue::new("bootstrap")),
             Technology::Angular => Some(PossibleValue::new("angular")),
             Technology::Plesk => Some(PossibleValue::new("plesk")),
+            Technology::CKEditor => Some(PossibleValue::new("ckeditor")),
         }
     }
 }

@@ -5,6 +5,7 @@
 pub mod angular;
 pub mod angularjs;
 pub mod bootstrap;
+pub mod ckeditor;
 pub mod dovecot;
 pub mod exim;
 pub mod gsap;
@@ -178,7 +179,7 @@ fn check_finding_fields(
 
     assert!(
         finding.evidence.contains(evidence),
-        "Assertion 'finding.evidence.contains(evidence)' failed. Finding's evidence: {}, evidence {}",
+        "Assertion 'finding.evidence.contains(evidence)' failed. Finding's evidence: {}, evidence: {}",
         finding.evidence,
         evidence
     );
