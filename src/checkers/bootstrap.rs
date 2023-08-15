@@ -34,7 +34,7 @@ impl<'a> BootstrapChecker<'a> {
         //
         // Bootstrap[...]d.VERSION="3.3.7"
         let source_code_regex = Regex::new(
-            r#"(?P<wholematch>Bootstrap.+VERSION(\(\)\s*\{\s*return\s*"|=")(?P<version>\d+\.\d+\.\d+)")"#,
+            r#"(?P<wholematch>Bootstrap.+[^A-Za-z0-9_]VERSION(\(\)\s*\{\s*return\s*"|=")(?P<version>\d+\.\d+\.\d+)")"#,
         )
         .unwrap();
 
