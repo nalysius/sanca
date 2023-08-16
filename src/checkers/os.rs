@@ -230,6 +230,7 @@ impl<'a> OSChecker<'a> {
         versions.insert(("debian", "nginx", "1.22.1"), "12");
 
         // Debian / OpenSSH
+        versions.insert(("debian", "openssh", "6.7"), "8");
         versions.insert(("debian", "openssh", "7.9"), "10");
         versions.insert(("debian", "openssh", "8.4"), "11");
         versions.insert(("debian", "openssh", "9.2"), "12");
