@@ -10,6 +10,7 @@ pub mod dovecot;
 pub mod exim;
 pub mod gsap;
 pub mod handlebars;
+pub mod highcharts;
 pub mod httpd;
 pub mod jquery;
 pub mod lodash;

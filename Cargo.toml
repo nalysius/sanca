@@ -14,7 +14,7 @@ license = "MIT"
 [dependencies]
 regex = "1.9.3"
 clap = { version = "4.3.21", features = ["derive"] }
-reqwest = "0.11.18"
+reqwest = { version = "0.11.18", features = ["gzip"] }
 tokio = "1.31.0"
 futures = "0.3.28"
 log = "0.4.20"

@@ -11,6 +11,7 @@ use crate::checkers::dovecot::DovecotChecker;
 use crate::checkers::exim::EximChecker;
 use crate::checkers::gsap::GsapChecker;
 use crate::checkers::handlebars::HandlebarsChecker;
+use crate::checkers::highcharts::HighchartsChecker;
 use crate::checkers::httpd::ApacheHttpdChecker;
 use crate::checkers::jquery::JQueryChecker;
 use crate::checkers::lodash::LodashChecker;
@@ -88,6 +89,7 @@ impl Application {
             Box::new(LodashChecker::new()),
             Box::new(ReactJSChecker::new()),
             Box::new(CKEditorChecker::new()),
+            Box::new(HighchartsChecker::new()),
         ];
 
         trace!("Returning the Application");

@@ -41,6 +41,7 @@ pub enum Technology {
     Angular,
     Plesk,
     CKEditor,
+    Highcharts,
 }
 
 impl Technology {
@@ -156,6 +157,7 @@ impl ValueEnum for Technology {
             Technology::Angular,
             Technology::Plesk,
             Technology::CKEditor,
+            Technology::Highcharts,
         ]
     }
 
@@ -189,6 +191,7 @@ impl ValueEnum for Technology {
             Technology::Angular => Some(PossibleValue::new("angular")),
             Technology::Plesk => Some(PossibleValue::new("plesk")),
             Technology::CKEditor => Some(PossibleValue::new("ckeditor")),
+            Technology::Highcharts => Some(PossibleValue::new("highcharts")),
         }
     }
 }
