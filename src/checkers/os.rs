@@ -238,6 +238,9 @@ impl<'a> OSChecker<'a> {
         // Oracle / OpenSSL
         versions.insert(("oracle", "openssl", "3.0.1"), "9.1");
 
+        // CentOS / Apache httpd
+        versions.insert(("centos", "apache", "2.4.6"), "7");
+
         versions.get(&(&os, &software, &version)).copied()
     }
 }
