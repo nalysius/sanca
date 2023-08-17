@@ -155,7 +155,7 @@ impl HttpReader {
 
         let response = response_result.unwrap();
         let mut headers: HashMap<String, String> = HashMap::new();
-        trace!("Extrating HTTP headers");
+        trace!("Extracting HTTP headers");
         for (header_name, header_value) in response.headers().iter() {
             // Only the first letter of the header name is in uppercase
             // It will avoid struggling with the case later
