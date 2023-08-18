@@ -77,14 +77,16 @@ impl<'a> CKEditorChecker<'a> {
 
 impl<'a> HttpChecker for CKEditorChecker<'a> {
     /// Check for a HTTP scan.
-    fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
+    fn check_http(&self, data: &[UrlResponse]) -> Vec<Finding> {
+        trace!("Running CKEditorChecker::check_http()");
+        let mut findings = Vec::new();
         for url_response in data {
             let response = self.check_http_body(&url_response);
             if response.is_some() {
-                return response;
+                findings.push(response.unwrap());
             }
         }
-        return None;
+        return findings;
     }
 
     /// The technology supported by the checker
@@ -107,8 +109,9 @@ mod tests {
         let mut url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "const x=\"39.0.1\"",
             "CKEditor",
             Some("39.0.1"),
@@ -118,8 +121,9 @@ mod tests {
         let body2 = r#"const a = 10; x.CKEDITOR_VERSION="39.0.1"; a.b();"#;
         url_response_valid.body = body2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "x.CKEDITOR_VERSION=\"39.0.1\"",
             "CKEditor",
             Some("39.0.1"),
@@ -155,9 +159,10 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert_eq!(1, findings.len());
         check_finding_fields(
-            finding,
+            &findings[0],
             "const _ ='39.0.1'",
             "CKEditor",
             Some("39.0.1"),
@@ -174,9 +179,10 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
+        assert_eq!(1, findings.len());
         check_finding_fields(
-            finding,
+            &findings[0],
             "x.CKEDITOR_VERSION=\"39.0.1\"",
             "CKEditor",
             Some("39.0.1"),
@@ -201,7 +207,7 @@ mod tests {
             body2,
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
-        assert!(finding.is_none());
+        let findings = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(findings.is_empty());
     }
 }

@@ -91,8 +91,12 @@ impl<'a> HttpChecker for ApacheHttpdChecker<'a> {
     /// - Server
     /// - X-Powered-By
     /// and in the "not found" page content
-    fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
+    ///
+    /// Returns only one finding, otherwise findings would be duplicated each
+    /// time it's found.
+    fn check_http(&self, data: &[UrlResponse]) -> Vec<Finding> {
         trace!("Running ApacheHttpdChecker::check_http()");
+
         for url_response in data {
             trace!("Checking {}", url_response.url);
             // JavaScript files could be hosted on a different server
@@ -105,15 +109,15 @@ impl<'a> HttpChecker for ApacheHttpdChecker<'a> {
             // Check in HTTP headers first
             let header_finding = self.check_http_headers(url_response);
             if header_finding.is_some() {
-                return header_finding;
+                return vec![header_finding.unwrap()];
             }
             // Check in response body then
             let body_finding = self.check_http_body(url_response);
             if body_finding.is_some() {
-                return body_finding;
+                return vec![body_finding.unwrap()];
             }
         }
-        None
+        Vec::new()
     }
 
     /// This checker supports Apache httpd
@@ -135,13 +139,21 @@ mod tests {
         let mut url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
         let finding = checker.check_http_body(&url_response_valid);
-        check_finding_fields(finding, "Apache Server", "Apache httpd", None, Some(url1));
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "Apache Server",
+            "Apache httpd",
+            None,
+            Some(url1),
+        );
 
         let body2 = r#"<p><address>Apache/2.4.52 (Debian) Server at <a href="mailto:webmaster@test-domain.com">www.test-domain.com</a> Port 80</address></p>"#;
         url_response_valid.body = body2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "Apache/2.4.52",
             "Apache httpd",
             Some("2.4.52"),
@@ -173,8 +185,9 @@ mod tests {
         let mut url_response_valid =
             UrlResponse::new(url1, headers1, "the body", UrlRequestType::Default);
         let finding = checker.check_http_headers(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "Apache/2.4.52",
             "Apache httpd",
             Some("2.4.52"),
@@ -186,8 +199,9 @@ mod tests {
         headers2.insert("Server".to_string(), "Apache/2.4.52 (CentOS)".to_string());
         url_response_valid.headers = headers2;
         let finding = checker.check_http_headers(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "Apache/2.4.52",
             "Apache httpd",
             Some("2.4.52"),
@@ -231,8 +245,15 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
-        check_finding_fields(finding, "Apache Server", "Apache httpd", None, Some(url1));
+        let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert_eq!(1, findings.len());
+        check_finding_fields(
+            &findings[0],
+            "Apache Server",
+            "Apache httpd",
+            None,
+            Some(url1),
+        );
 
         let mut headers1 = HashMap::new();
         headers1.insert("Accept".to_string(), "text/html".to_string());
@@ -246,9 +267,10 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
+        assert_eq!(1, findings.len());
         check_finding_fields(
-            finding,
+            &findings[0],
             "Apache/2.4.52",
             "Apache httpd",
             Some("2.4.52"),
@@ -276,9 +298,9 @@ mod tests {
             "the body",
             UrlRequestType::JavaScript,
         );
-        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        let findings = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(
-            finding.is_none(),
+            findings.is_empty(),
             "Apache httpd must not be detected on JavaScript URLs to avoid false positive"
         );
     }

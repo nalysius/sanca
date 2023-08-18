@@ -64,15 +64,16 @@ impl<'a> AngularChecker<'a> {
 
 impl<'a> HttpChecker for AngularChecker<'a> {
     /// Check for a HTTP scan.
-    fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
+    fn check_http(&self, data: &[UrlResponse]) -> Vec<Finding> {
         trace!("Running AngularChecker::check_http()");
+        let mut findings = Vec::new();
         for url_response in data {
             let response = self.check_http_body(&url_response);
             if response.is_some() {
-                return response;
+                findings.push(response.unwrap());
             }
         }
-        return None;
+        return findings;
     }
 
     /// The technology supported by the checker
@@ -96,8 +97,9 @@ mod tests {
         let url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "Version(\"16.1.8\")",
             "Angular",
             Some("16.1.8"),
@@ -133,9 +135,10 @@ mod tests {
             "nothing to see in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert_eq!(1, findings.len());
         check_finding_fields(
-            finding,
+            &findings[0],
             "Version(\"16.1.8\")",
             "Angular",
             Some("16.1.8"),
@@ -160,7 +163,7 @@ mod tests {
             body2,
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
-        assert!(finding.is_none());
+        let findings = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(findings.is_empty());
     }
 }

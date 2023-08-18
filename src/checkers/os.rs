@@ -295,8 +295,11 @@ impl<'a> TcpChecker for OSChecker<'a> {
 }
 
 impl<'a> HttpChecker for OSChecker<'a> {
-    fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
+    /// Returns only one finding, otherwise findings would be duplicated each
+    /// time it's found.
+    fn check_http(&self, data: &[UrlResponse]) -> Vec<Finding> {
         trace!("Running OSChecker::check_http()");
+
         for url_response in data {
             // JavaScript files could be hosted on a different server
             // Don't check the JavaScript files to avoid false positive,
@@ -307,15 +310,15 @@ impl<'a> HttpChecker for OSChecker<'a> {
             // Check in HTTP headers first
             let header_finding = self.check_http_headers(url_response);
             if header_finding.is_some() {
-                return header_finding;
+                return vec![header_finding.unwrap()];
             }
             // Check in response body then
             let body_finding = self.check_http_body(url_response);
             if body_finding.is_some() {
-                return body_finding;
+                return vec![body_finding.unwrap()];
             }
         }
-        None
+        Vec::new()
     }
 
     /// This checker supports the OS
@@ -337,8 +340,9 @@ mod tests {
         let mut url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "nginx/1.22.0 (Ubuntu)",
             "Ubuntu",
             Some("22.10|23.04"),
@@ -348,8 +352,9 @@ mod tests {
         let body2 = r#"<address>Apache/2.4.54 (Debian) Server at company.com Port 8080</address>"#;
         url_response_valid.body = body2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "Apache/2.4.54 (Debian)",
             "Debian",
             Some("11"),
@@ -359,8 +364,9 @@ mod tests {
         let body3 = r#"<address>Apache/2.4.10 (Fedora) Server at company.com Port 8080</address>"#;
         url_response_valid.body = body3.to_string();
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "Apache/2.4.10 (Fedora)",
             "Fedora",
             None,
@@ -392,8 +398,9 @@ mod tests {
         let mut url_response_valid =
             UrlResponse::new(url1, headers1, "the body", UrlRequestType::Default);
         let finding = checker.check_http_headers(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "nginx/1.22.1 (Debian)",
             "Debian",
             Some("12"),
@@ -405,8 +412,9 @@ mod tests {
         headers2.insert("Server".to_string(), "Apache/2.4.54 (CentOS)".to_string());
         url_response_valid.headers = headers2;
         let finding = checker.check_http_headers(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "Apache/2.4.54 (CentOS)",
             "CentOS",
             None,
@@ -449,8 +457,15 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
-        check_finding_fields(finding, "nginx/1.18.0 (Debian)", "Debian", None, Some(url1));
+        let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert_eq!(1, findings.len());
+        check_finding_fields(
+            &findings[0],
+            "nginx/1.18.0 (Debian)",
+            "Debian",
+            None,
+            Some(url1),
+        );
 
         let mut headers1 = HashMap::new();
         headers1.insert("Accept".to_string(), "text/html".to_string());
@@ -464,9 +479,10 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
+        assert_eq!(1, findings.len());
         check_finding_fields(
-            finding,
+            &findings[0],
             "nginx/1.14.2 (Debian)",
             "Debian",
             Some("10"),
@@ -493,8 +509,8 @@ mod tests {
             "the body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
-        assert!(finding.is_none());
+        let findings = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(findings.is_empty());
     }
 
     #[test]
@@ -502,7 +518,8 @@ mod tests {
         let checker = OSChecker::new();
         let banner = "SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5";
         let finding = checker.check_tcp(&[banner.to_string()]);
-        check_finding_fields(finding, banner, "Ubuntu", Some("20.04"), None);
+        assert!(finding.is_some());
+        check_finding_fields(&finding.unwrap(), banner, "Ubuntu", Some("20.04"), None);
     }
 
     #[test]

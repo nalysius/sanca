@@ -87,8 +87,12 @@ impl<'a> HttpChecker for NginxChecker<'a> {
     /// - Server
     /// - X-Powered-By
     /// and in the "not found" page content
-    fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
+    ///
+    /// Returns only one finding, otherwise findings would be duplicated each
+    /// time it's found.
+    fn check_http(&self, data: &[UrlResponse]) -> Vec<Finding> {
         trace!("Running NginxChecker::check_http()");
+
         for url_response in data {
             // JavaScript files could be hosted on a different server
             // Don't check the JavaScript files to avoid false positive,
@@ -100,15 +104,15 @@ impl<'a> HttpChecker for NginxChecker<'a> {
             // Check in HTTP headers first
             let header_finding = self.check_http_headers(url_response);
             if header_finding.is_some() {
-                return header_finding;
+                return vec![header_finding.unwrap()];
             }
             // Check in response body then
             let body_finding = self.check_http_body(url_response);
             if body_finding.is_some() {
-                return body_finding;
+                return vec![body_finding.unwrap()];
             }
         }
-        None
+        Vec::new()
     }
 
     /// This checker supports Apache httpd
@@ -130,12 +134,20 @@ mod tests {
         let mut url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
         let finding = checker.check_http_body(&url_response_valid);
-        check_finding_fields(finding, "nginx/1.22.0", "Nginx", Some("1.22.0"), Some(url1));
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "nginx/1.22.0",
+            "Nginx",
+            Some("1.22.0"),
+            Some(url1),
+        );
 
         let body2 = r#"<hr><center>nginx</center>"#;
         url_response_valid.body = body2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
-        check_finding_fields(finding, "nginx", "Nginx", None, Some(url1));
+        assert!(finding.is_some());
+        check_finding_fields(&finding.unwrap(), "nginx", "Nginx", None, Some(url1));
     }
 
     #[test]
@@ -162,14 +174,28 @@ mod tests {
         let mut url_response_valid =
             UrlResponse::new(url1, headers1, "the body", UrlRequestType::Default);
         let finding = checker.check_http_headers(&url_response_valid);
-        check_finding_fields(finding, "nginx/1.22.2", "Nginx", Some("1.22.2"), Some(url1));
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "nginx/1.22.2",
+            "Nginx",
+            Some("1.22.2"),
+            Some(url1),
+        );
 
         let mut headers2 = HashMap::new();
         headers2.insert("Accept".to_string(), "text/html".to_string());
         headers2.insert("Server".to_string(), "nginx/1.22.0 (CentOS)".to_string());
         url_response_valid.headers = headers2;
         let finding = checker.check_http_headers(&url_response_valid);
-        check_finding_fields(finding, "nginx/1.22.0", "Nginx", Some("1.22.0"), Some(url1));
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "nginx/1.22.0",
+            "Nginx",
+            Some("1.22.0"),
+            Some(url1),
+        );
     }
 
     #[test]
@@ -208,8 +234,15 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
-        check_finding_fields(finding, "nginx/1.22.4", "Nginx", Some("1.22.4"), Some(url1));
+        let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert_eq!(1, findings.len());
+        check_finding_fields(
+            &findings[0],
+            "nginx/1.22.4",
+            "Nginx",
+            Some("1.22.4"),
+            Some(url1),
+        );
 
         let mut headers1 = HashMap::new();
         headers1.insert("Accept".to_string(), "text/html".to_string());
@@ -223,8 +256,15 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
-        check_finding_fields(finding, "nginx/1.22.2", "Nginx", Some("1.22.2"), Some(url2));
+        let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
+        assert_eq!(1, findings.len());
+        check_finding_fields(
+            &findings[0],
+            "nginx/1.22.2",
+            "Nginx",
+            Some("1.22.2"),
+            Some(url2),
+        );
     }
 
     #[test]
@@ -247,9 +287,9 @@ mod tests {
             "the body",
             UrlRequestType::JavaScript,
         );
-        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        let findings = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(
-            finding.is_none(),
+            findings.is_empty(),
             "Nginx must not be detected against JavaScript URLs to avoid false positive"
         );
     }

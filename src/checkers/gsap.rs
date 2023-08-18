@@ -31,9 +31,11 @@ impl<'a> GsapChecker<'a> {
         .unwrap();
 
         // Example: gsap)&&f.r[...],i,c,y,v,h,r={version:"3.11.1"
-        let body_minified_regex =
-            Regex::new(r#"(?P<wholematch>gsap.+version[=:]\s*['"](?P<version>\d+\.\d+\.\d+)['"])"#)
-                .unwrap();
+        // Note: GSAP is actually in version 3.x. Filter on this to reduce false-positive results
+        let body_minified_regex = Regex::new(
+            r#"(?P<wholematch>(gsap|_gsScope).+version[=:]\s*['"](?P<version>[1-3]\.\d+\.\d+)['"])"#,
+        )
+        .unwrap();
 
         regexes.insert("http-body-comment", comment_regex);
         regexes.insert("http-body-minified", body_minified_regex);
@@ -77,14 +79,16 @@ impl<'a> GsapChecker<'a> {
 
 impl<'a> HttpChecker for GsapChecker<'a> {
     /// Check for a HTTP scan.
-    fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
+    fn check_http(&self, data: &[UrlResponse]) -> Vec<Finding> {
+        trace!("Running GsapChecker::check_http()");
+        let mut findings = Vec::new();
         for url_response in data {
             let response = self.check_http_body(&url_response);
             if response.is_some() {
-                return response;
+                findings.push(response.unwrap());
             }
         }
-        return None;
+        return findings;
     }
 
     /// The technology supported by the checker
@@ -107,8 +111,9 @@ mod tests {
         let mut url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "version:\"3.11.0\"",
             "GSAP",
             Some("3.11.0"),
@@ -118,8 +123,9 @@ mod tests {
         let body2 = r#"gsap) && a.b = 12;r.version='3.11.0';"#;
         url_response_valid.body = body2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "version='3.11.0'",
             "GSAP",
             Some("3.11.0"),
@@ -149,13 +155,21 @@ mod tests {
         let mut url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
         let finding = checker.check_http_body(&url_response_valid);
-        check_finding_fields(finding, "Flip 3.11.1", "GSAP", Some("3.11.1"), Some(url1));
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "Flip 3.11.1",
+            "GSAP",
+            Some("3.11.1"),
+            Some(url1),
+        );
 
         let body2 = " * CustomEase 3.11.1";
         url_response_valid.body = body2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "CustomEase 3.11.1",
             "GSAP",
             Some("3.11.1"),
@@ -195,9 +209,10 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert_eq!(1, findings.len());
         check_finding_fields(
-            finding,
+            &findings[0],
             "ScrollToPlugin    3.1.9",
             "GSAP",
             Some("3.1.9"),
@@ -214,9 +229,10 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
+        assert_eq!(1, findings.len());
         check_finding_fields(
-            finding,
+            &findings[0],
             "version='3.10.4'",
             "GSAP",
             Some("3.10.4"),
@@ -242,6 +258,6 @@ mod tests {
             UrlRequestType::Default,
         );
         let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
-        assert!(finding.is_none());
+        assert!(finding.is_empty());
     }
 }
