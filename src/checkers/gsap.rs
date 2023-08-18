@@ -31,9 +31,12 @@ impl<'a> GsapChecker<'a> {
         .unwrap();
 
         // Example: gsap)&&f.r[...],i,c,y,v,h,r={version:"3.11.1"
-        let body_minified_regex =
-            Regex::new(r#"(?P<wholematch>gsap.+version[=:]\s*['"](?P<version>\d+\.\d+\.\d+)['"])"#)
-                .unwrap();
+        // or
+        // version="2.0.3"[...]GSAP encountered missing dependency
+        let body_minified_regex = Regex::new(
+            r#"(?P<wholematch>(gsap.+)?version[=:]\s*['"](?P<version>\d+\.\d+\.\d+)['"](.+GSAP)?)"#,
+        )
+        .unwrap();
 
         regexes.insert("http-body-comment", comment_regex);
         regexes.insert("http-body-minified", body_minified_regex);
