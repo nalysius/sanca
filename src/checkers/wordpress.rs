@@ -72,8 +72,9 @@ impl<'a> WordPressChecker<'a> {
 
 impl<'a> HttpChecker for WordPressChecker<'a> {
     /// Check for a HTTP scan.
-    fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
+    fn check_http(&self, data: &[UrlResponse]) -> Vec<Finding> {
         trace!("Running WordPressChecker::check_http()");
+
         for url_response in data {
             // JavaScript files could be hosted on a different server
             // Don't check the JavaScript files to avoid false positive,
@@ -84,10 +85,10 @@ impl<'a> HttpChecker for WordPressChecker<'a> {
 
             let response = self.check_http_body(&url_response);
             if response.is_some() {
-                return response;
+                return vec![response.unwrap()];
             }
         }
-        return None;
+        return Vec::new();
     }
 
     /// The technology supported by the checker
@@ -109,8 +110,9 @@ mod tests {
         let mut url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "WordPress 6.1.2",
             "WordPress",
             Some("6.1.2"),
@@ -122,7 +124,14 @@ mod tests {
         url_response_valid.body = body2.to_string();
         url_response_valid.url = url2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
-        check_finding_fields(finding, "ver=6.1.2", "WordPress", Some("6.1.2"), Some(url2));
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "ver=6.1.2",
+            "WordPress",
+            Some("6.1.2"),
+            Some(url2),
+        );
     }
 
     #[test]
@@ -152,9 +161,10 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert_eq!(1, findings.len());
         check_finding_fields(
-            finding,
+            &findings[0],
             "content = \"WordPress 5.8.4\"",
             "WordPress",
             Some("5.8.4"),
@@ -171,9 +181,10 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
+        assert_eq!(1, findings.len());
         check_finding_fields(
-            finding,
+            &findings[0],
             "?ver=5.8.4",
             "WordPress",
             Some("5.8.4"),
@@ -199,7 +210,7 @@ mod tests {
             body2,
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
-        assert!(finding.is_none());
+        let findings = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(findings.is_empty());
     }
 }

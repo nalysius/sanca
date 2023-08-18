@@ -99,8 +99,12 @@ impl<'a> HttpChecker for PHPChecker<'a> {
     /// - Server
     /// - X-Powered-By
     /// and in the "not found" page content
-    fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
+    ///
+    /// Returns only one finding, otherwise findings would be duplicated each
+    /// time it's found.
+    fn check_http(&self, data: &[UrlResponse]) -> Vec<Finding> {
         trace!("Running PHPChecker::check_http()");
+
         for url_response in data {
             // JavaScript files could be hosted on a different server
             // Don't check the JavaScript files to avoid false positive,
@@ -111,15 +115,15 @@ impl<'a> HttpChecker for PHPChecker<'a> {
 
             let header_finding = self.check_http_headers(url_response);
             if header_finding.is_some() {
-                return header_finding;
+                return vec![header_finding.unwrap()];
             }
 
             let body_finding = self.check_http_body(url_response);
             if body_finding.is_some() {
-                return body_finding;
+                return vec![body_finding.unwrap()];
             }
         }
-        return None;
+        return Vec::new();
     }
 
     /// The technology supported by the checker.
@@ -141,8 +145,9 @@ mod tests {
         let mut url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "PHP Version 8.2.0",
             "PHP",
             Some("8.2.0"),
@@ -152,8 +157,9 @@ mod tests {
         let body2 = r#"<h1 class="p">PHP Version 8.2.1-alpha</h1>"#;
         url_response_valid.body = body2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "PHP Version 8.2.1",
             "PHP",
             Some("8.2.1-alpha"),
@@ -185,7 +191,14 @@ mod tests {
         let mut url_response_valid =
             UrlResponse::new(url1, headers1, "the body", UrlRequestType::Default);
         let finding = checker.check_http_headers(&url_response_valid);
-        check_finding_fields(finding, "PHP/8.2.1", "PHP", Some("8.2.1"), Some(url1));
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "PHP/8.2.1",
+            "PHP",
+            Some("8.2.1"),
+            Some(url1),
+        );
 
         let mut headers2 = HashMap::new();
         headers2.insert("Accept".to_string(), "text/html".to_string());
@@ -193,7 +206,8 @@ mod tests {
         headers2.insert("X-powered-by".to_string(), "PHP/7.4".to_string());
         url_response_valid.headers = headers2;
         let finding = checker.check_http_headers(&url_response_valid);
-        check_finding_fields(finding, "PHP/7.4", "PHP", Some("7.4"), Some(url1));
+        assert!(finding.is_some());
+        check_finding_fields(&finding.unwrap(), "PHP/7.4", "PHP", Some("7.4"), Some(url1));
     }
 
     #[test]
@@ -232,9 +246,10 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert_eq!(1, findings.len());
         check_finding_fields(
-            finding,
+            &findings[0],
             "PHP Version 5.6.40",
             "PHP",
             Some("5.6.40"),
@@ -256,8 +271,9 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
-        check_finding_fields(finding, "PHP/8.1", "PHP", Some("8.1"), Some(url2));
+        let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
+        assert_eq!(1, findings.len());
+        check_finding_fields(&findings[0], "PHP/8.1", "PHP", Some("8.1"), Some(url2));
     }
 
     #[test]
@@ -280,9 +296,9 @@ mod tests {
             "the body",
             UrlRequestType::JavaScript,
         );
-        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        let findings = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(
-            finding.is_none(),
+            findings.is_empty(),
             "PHP must not be detected on JavaScript URLs to avoid false positive"
         );
     }

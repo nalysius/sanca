@@ -63,8 +63,12 @@ impl<'a> HttpChecker for TomcatChecker<'a> {
     /// - Server
     /// - X-Powered-By
     /// and in the "not found" page content
-    fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
+    ///
+    /// Returns only one finding, otherwise findings would be duplicated each
+    /// time it's found.
+    fn check_http(&self, data: &[UrlResponse]) -> Vec<Finding> {
         trace!("Running TomcatChecker::check_http()");
+
         for url_response in data {
             // JavaScript files could be hosted on a different server
             // Don't check the JavaScript files to avoid false positive,
@@ -77,10 +81,10 @@ impl<'a> HttpChecker for TomcatChecker<'a> {
             // Check in response body
             let body_finding = self.check_http_body(url_response);
             if body_finding.is_some() {
-                return body_finding;
+                return vec![body_finding.unwrap()];
             }
         }
-        None
+        Vec::new()
     }
 
     /// Get the technology supported by the checker
@@ -102,8 +106,9 @@ mod tests {
         let url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "Apache Tomcat/9.2.0",
             "Tomcat",
             Some("9.2.0"),
@@ -138,9 +143,10 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert_eq!(1, findings.len());
         check_finding_fields(
-            finding,
+            &findings[0],
             "Apache Tomcat/9.2.42",
             "Tomcat",
             Some("9.2.42"),
@@ -166,7 +172,7 @@ mod tests {
             body2,
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
-        assert!(finding.is_none());
+        let findings = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(findings.is_empty());
     }
 }

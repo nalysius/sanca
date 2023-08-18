@@ -88,15 +88,16 @@ impl<'a> HandlebarsChecker<'a> {
 
 impl<'a> HttpChecker for HandlebarsChecker<'a> {
     /// Check for a HTTP scan.
-    fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
+    fn check_http(&self, data: &[UrlResponse]) -> Vec<Finding> {
         trace!("Running HandlebarsChecker::check_http()");
+        let mut findings = Vec::new();
         for url_response in data {
             let response = self.check_http_body(&url_response);
             if response.is_some() {
-                return response;
+                findings.push(response.unwrap());
             }
         }
-        return None;
+        return findings;
     }
 
     /// The technology supported by the checker
@@ -119,8 +120,9 @@ mod tests {
         let mut url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "c=\"4.7.6\"",
             "Handlebars",
             Some("4.7.6"),
@@ -130,8 +132,9 @@ mod tests {
         let body2 = r#"this.ok= true;that().HandlebarsEnvironment;var1="4.7.7";v.VERSION=var1;"#;
         url_response_valid.body = body2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "var1=\"4.7.7\"",
             "Handlebars",
             Some("4.7.7"),
@@ -161,8 +164,9 @@ mod tests {
         let mut url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "handlebars v4.7.7",
             "Handlebars",
             Some("4.7.7"),
@@ -173,8 +177,9 @@ mod tests {
         * @license handlebars v4.7.7";
         url_response_valid.body = body2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "handlebars v4.7.7",
             "Handlebars",
             Some("4.7.7"),
@@ -218,9 +223,10 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert_eq!(1, findings.len());
         check_finding_fields(
-            finding,
+            &findings[0],
             "handlebars v4.7.7",
             "Handlebars",
             Some("4.7.7"),
@@ -239,9 +245,10 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
+        assert_eq!(1, findings.len());
         check_finding_fields(
-            finding,
+            &findings[0],
             "handlebars v4.7.7",
             "Handlebars",
             Some("4.7.7"),
@@ -266,7 +273,7 @@ mod tests {
             body2,
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
-        assert!(finding.is_none());
+        let findings = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(findings.is_empty());
     }
 }

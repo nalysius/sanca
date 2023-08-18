@@ -209,13 +209,13 @@ impl Application {
             // technologies we're looking for
             if technologies.contains(&http_checker.get_technology()) {
                 debug!("Using HTTP checker {:?}", http_checker.get_technology());
-                let finding = http_checker.check_http(&url_responses);
-                if finding.is_some() {
+                let mut found_findings = http_checker.check_http(&url_responses);
+                if !found_findings.is_empty() {
                     info!(
-                        "HTTP checker {:?} found a finding",
+                        "HTTP checker {:?} found finding(s)",
                         http_checker.get_technology()
                     );
-                    findings.push(finding.unwrap());
+                    findings.append(&mut found_findings);
                 }
             }
         }

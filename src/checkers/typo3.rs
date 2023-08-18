@@ -61,8 +61,12 @@ impl<'a> Typo3Checker<'a> {
 
 impl<'a> HttpChecker for Typo3Checker<'a> {
     /// Check for a HTTP scan.
-    fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
+    ///
+    /// Returns only one finding, otherwise findings would be duplicated each
+    /// time it's found.
+    fn check_http(&self, data: &[UrlResponse]) -> Vec<Finding> {
         trace!("Running Typo3Checker::check_http()");
+
         for url_response in data {
             // JavaScript files could be hosted on a different server
             // Don't check the JavaScript files to avoid false positive,
@@ -73,10 +77,10 @@ impl<'a> HttpChecker for Typo3Checker<'a> {
 
             let response = self.check_http_body(&url_response);
             if response.is_some() {
-                return response;
+                return vec![response.unwrap()];
             }
         }
-        return None;
+        return Vec::new();
     }
 
     /// The technology supported by the checker
@@ -98,7 +102,14 @@ mod tests {
         let url_response_valid =
             UrlResponse::new(url, HashMap::new(), body1, UrlRequestType::Default);
         let finding = checker.check_http_body(&url_response_valid);
-        check_finding_fields(finding, "\"4.7.1", "TYPO3", Some("4.7.1"), Some(url));
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "\"4.7.1",
+            "TYPO3",
+            Some("4.7.1"),
+            Some(url),
+        );
     }
 
     #[test]
@@ -128,8 +139,15 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
-        check_finding_fields(finding, "\"4.7.2.8", "TYPO3", Some("4.7.2.8"), Some(url1));
+        let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert_eq!(1, findings.len());
+        check_finding_fields(
+            &findings[0],
+            "\"4.7.2.8",
+            "TYPO3",
+            Some("4.7.2.8"),
+            Some(url1),
+        );
     }
 
     #[test]
@@ -150,7 +168,7 @@ mod tests {
             body2,
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
-        assert!(finding.is_none());
+        let findings = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        assert!(findings.is_empty());
     }
 }

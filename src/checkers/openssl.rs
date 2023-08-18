@@ -66,7 +66,11 @@ impl<'a> HttpChecker for OpenSSLChecker<'a> {
     /// It looks in the following HTTP headers:
     /// - Server
     /// - X-Powered-By
-    fn check_http(&self, data: &[UrlResponse]) -> Option<Finding> {
+    ///
+    /// Returns only one finding, otherwise findings would be duplicated each
+    /// time it's found.
+    fn check_http(&self, data: &[UrlResponse]) -> Vec<Finding> {
+        trace!("Running OpenSSLChecker::check_http()");
         for url_response in data {
             // JavaScript files could be hosted on a different server
             // Don't check the JavaScript files to avoid false positive,
@@ -77,10 +81,10 @@ impl<'a> HttpChecker for OpenSSLChecker<'a> {
 
             let response = self.check_http_headers(url_response);
             if response.is_some() {
-                return response;
+                return vec![response.unwrap()];
             }
         }
-        return None;
+        return Vec::new();
     }
 
     /// This checker supports Apache httpd
@@ -107,8 +111,9 @@ mod tests {
         let mut url_response_valid =
             UrlResponse::new(url1, headers1, "the body", UrlRequestType::Default);
         let finding = checker.check_http_headers(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "OpenSSL/1.0.2k",
             "OpenSSL",
             Some("1.0.2k"),
@@ -123,8 +128,9 @@ mod tests {
         );
         url_response_valid.headers = headers2;
         let finding = checker.check_http_headers(&url_response_valid);
+        assert!(finding.is_some());
         check_finding_fields(
-            finding,
+            &finding.unwrap(),
             "OpenSSL/1.0.2k-fips",
             "OpenSSL",
             Some("1.0.2k-fips"),
@@ -176,9 +182,10 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_invalid, url_response_valid]);
+        let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
+        assert_eq!(1, findings.len());
         check_finding_fields(
-            finding,
+            &findings[0],
             "OpenSSL/1.0.2k",
             "OpenSSL",
             Some("1.0.2k"),
@@ -200,9 +207,10 @@ mod tests {
             "nothing to find in body",
             UrlRequestType::Default,
         );
-        let finding = checker.check_http(&[url_response_valid, url_response_invalid]);
+        let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
+        assert_eq!(1, findings.len());
         check_finding_fields(
-            finding,
+            &findings[0],
             "OpenSSL/1.0.2k-fips",
             "OpenSSL",
             Some("1.0.2k-fips"),
@@ -233,9 +241,9 @@ mod tests {
             "the body",
             UrlRequestType::JavaScript,
         );
-        let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
+        let findings = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(
-            finding.is_none(),
+            findings.is_empty(),
             "OpenSSL must not be detected against JavaScript URLs to avoid false positive"
         );
     }

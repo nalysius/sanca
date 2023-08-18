@@ -49,7 +49,7 @@ pub trait TcpChecker {
 pub trait HttpChecker {
     /// Checks data to determine if a given technology matches.
     /// data will contain information about HTTP request & response.
-    fn check_http(&self, data: &[UrlResponse]) -> Option<Finding>;
+    fn check_http(&self, data: &[UrlResponse]) -> Vec<Finding>;
 
     /// Get the technology supported by the checker.
     fn get_technology(&self) -> Technology;
@@ -147,14 +147,12 @@ pub trait HttpChecker {
 /// ```
 #[cfg(test)]
 fn check_finding_fields(
-    finding_option: Option<Finding>,
+    finding: &Finding,
     evidence: &str,
     technology: &str,
     version: Option<&str>,
     url: Option<&str>,
 ) {
-    assert!(finding_option.is_some());
-    let finding = finding_option.unwrap();
     let evidence_text = &finding.evidence_text;
 
     if url.is_some() {
