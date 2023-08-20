@@ -1,5 +1,20 @@
-//! This module contains the main structure and logic for the whole
-//! application.
+//! The main module of Sanca
+//!
+//! This module defines the struct Application, which orchestrate the execution
+//! of the whole application.
+//!
+//! Sanca is composed of three parts:
+//! 1. The readers
+//! 2. The checkers
+//! 3. The writers
+//!
+//! The readers have the responsibility to fetch the data, be it a TCP banner
+//! or HTTP resource(s).
+//! The checkers have the role to match the data fetched by the readers against
+//! regular expression, fingerprints or more, to confirm whether a given
+//! technology is used by the remote host.
+//! The writers are there to handle the findings returned by the checkers. They
+//! can write them to standard output or in a CSV file for example.
 
 use clap::{Parser, ValueEnum};
 

@@ -1,4 +1,4 @@
-//! This module declares the TextStdout writer.
+//! Write the [`Finding`]s to standard output
 //! It is the default writer, it presents the findings in a text
 //! format and prints it on STDOUT.
 

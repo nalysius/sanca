@@ -1,5 +1,7 @@
-//! In this module are defined the structs and methods related to
-//! HTTP requests and responses.
+//! HTTP requests and responses
+//!
+//! In this module are defined the [`UrlRequest`] and [`UrlResponse`] structs.
+//! They provide an interface between [`Technology`] and [`crate::readers::http::HttpReader`].
 
 use super::technology::Technology;
 use log::{error, trace};
@@ -7,6 +9,9 @@ use regex::Regex;
 use std::collections::HashMap;
 
 /// Represents a request that an HTTP reader will have to handle
+/// It contains a URL, and a `fetch_js` field. If `fetch_js` is set
+/// to true, the reader will look for JavaScript URLs in the response
+/// body, and fetch all of them.
 #[derive(Debug)]
 pub struct UrlRequest {
     /// The URL where to send the HTTP request
@@ -16,7 +21,7 @@ pub struct UrlRequest {
 }
 
 impl UrlRequest {
-    /// Creates a list of UrlRequests based on a lits of technologies
+    /// Creates a list of UrlRequests based on a list of technologies
     pub fn from_technologies(main_url: &str, technologies: &[Technology]) -> Vec<UrlRequest> {
         trace!("Running UrlRequest::from_technologies()");
         // Helps to avoid duplicated when building the list of UrlRequests
@@ -74,11 +79,21 @@ impl UrlRequest {
 
     /// Generate a new URL based on the original one and the path.
     ///
-    /// # Example
-    /// main_url = "https://example.com/blog/index.php"
+    /// # Examples
     ///
-    /// If path = "/phpinfo.php" the result will be https://example.com/phpinfo.php
-    /// But if path = "phpinfo.php" the result will be https://example.com/blog/phpinfo.php
+    /// ```rust
+    /// let main_url = "https://example.com/blog/index.php";
+    /// let path = "/phpinfo.php";
+    /// let url_request = sanca::models::reqres::UrlRequest::from_path(main_url, path, false);
+    /// assert_eq!("https://example.com/phpinfo.php", url_request.url);
+    /// ```
+    ///
+    /// ```rust
+    /// let main_url = "https://example.com/blog/index.php";
+    /// let path = "phpinfo.php"; // Note the absence of / at the beginning
+    /// let url_request = sanca::models::reqres::UrlRequest::from_path(main_url, path, false);
+    /// assert_eq!("https://example.com/blog/phpinfo.php", url_request.url);
+    /// ```
     pub fn from_path(main_url: &str, path_to: &str, fetch_js: bool) -> Self {
         trace!("Running UrlRequest::from_path()");
         // Note: this regex is not exhaustive. It doesn't support the
@@ -171,6 +186,15 @@ impl UrlRequest {
     }
 
     /// Get the IP or hostname & the port of the URL
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let url_request = sanca::models::reqres::UrlRequest::new("https://www.example.com/index.php", false);
+    /// let (hostname, port) = url_request.get_hostname_port();
+    /// assert_eq!("www.example.com", hostname);
+    /// assert_eq!(443, port);
+    /// ```
     pub fn get_hostname_port(&self) -> (String, u16) {
         // Note: this regex is not exhaustive. It doesn't support the
         // user:pass@hostname form, and it ignores the hash (#ancher1)
@@ -200,6 +224,9 @@ impl UrlRequest {
 }
 
 /// Represents the response returned by an HTTP reader
+///
+/// Contains all the data needed by a checker: the URL of the request,
+/// the HTTP headers, the response body, and the [`UrlRequestType`].
 pub struct UrlResponse {
     /// The URL where the request was sent
     pub url: String,

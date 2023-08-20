@@ -1,6 +1,17 @@
-//! This module declares all the checkers.
-//! A checker is a struct that checks an input (banner, HTTP headers, etc)
-//! to against a technology.
+//! A checker has the role of checking data to confirm whether a given
+//! technology is used on the remote host.
+//!
+//! Checkers are the core of Sanca, each checker checks for one
+//! technology using regular expressions, fingerprinting or other
+//! techniques.
+//!
+//! Checkers are grouped by scan type. Actually there are three types of
+//! checkers: TCP, UDP and HTTP.
+//! A checker is relevant only for a given scan type, for example jQuery
+//! cannot be identified from a TCP banner, so it's not needed to check
+//! it. A checker can have several types (see [`os::OSChecker`]), but it
+//! has to have at least one.
+//!
 
 pub mod angular;
 pub mod angularjs;

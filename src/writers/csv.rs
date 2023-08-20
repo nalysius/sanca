@@ -1,4 +1,4 @@
-//! This module declares the CSV writer.
+//! Write the [`Finding`]s as CSV
 //! It presents the findings in a CSV format and prints it on STDOUT.
 
 use super::Writer;

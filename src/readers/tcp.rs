@@ -1,5 +1,6 @@
-//! This module declares a TCP reader. The objective is to easily read
-//! data over TCP.
+//! Fetch data over TCP
+//!
+//! The [`TcpReader`] fetches the banner of services running on TCP.
 
 use log::{debug, warn};
 use log::{error, trace};

@@ -1,5 +1,11 @@
-//! Here the Technology enum is defined, and the corresponding methods
-//! are implemented
+//! The module related to technologies.
+//!
+//! A [`Technology`] is a generic term to name a software, a programming
+//! language, a web server, a JavaScript library, a CMS and more.
+//!
+//! It's possible to instruct Sanca to search only for a given set of
+//! technologies. It's mainly useful in HTTP scan, since it allows to
+//! send less requests.
 
 use super::reqres::UrlRequest;
 use super::ScanType;
@@ -46,6 +52,8 @@ pub enum Technology {
 
 impl Technology {
     /// Returns the scan types matching the technology
+    /// Most technologies are HTTP-related, so define only the
+    /// specific-ones
     pub fn get_scans(&self) -> Vec<ScanType> {
         match self {
             Self::Dovecot | Self::Exim => vec![ScanType::Tcp],
@@ -59,11 +67,21 @@ impl Technology {
     }
 
     /// Checks whether the technology supports the given scan type
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let technology = sanca::models::technology::Technology::OpenSSH;
+    /// assert!(technology.supports_scan(sanca::models::ScanType::Tcp));
+    /// ```
     pub fn supports_scan(&self, scan_type: ScanType) -> bool {
         self.get_scans().contains(&scan_type)
     }
 
     /// Get the HTTP paths to request for a given technology
+    ///
+    /// For non-HTTP scans, an empty list is returned. For HTTP scans,
+    /// the requests matching the technology are returned.
     pub fn get_url_requests(&self, main_url: &str) -> Vec<UrlRequest> {
         // Non-HTTP technologies don't need any paths
         if !self.supports_scan(ScanType::Http) {

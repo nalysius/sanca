@@ -1,5 +1,7 @@
-//! This module declares a HTTP reader. The objective is to easily read
-//! data over HTTP.
+//! Fetch data over HTTP(S)
+//!
+//! The [`HttpReader`] is there to fetch resources via HTTP(S), to identify the
+//! technologies being used by the remote host.
 
 use std::collections::HashMap;
 
@@ -10,7 +12,14 @@ use reqwest::Client;
 
 use crate::models::reqres::{UrlRequest, UrlRequestType, UrlResponse};
 
-/// A HTTP reader
+/// A reader used to fetch HTTP(S) resources.
+///
+/// It's able to send several requests according to the technologies being
+/// wanted. If a JavaScript library is wanted, the reader extracts the
+/// JavaScript URLs from the main HTTP response and fetch them too.
+///
+/// The `HttpReader` works asynchronously, to fetch all data in a minimum amount
+/// of time.
 pub struct HttpReader {
     /// The regex to find URLs
     url_regex: Regex,
