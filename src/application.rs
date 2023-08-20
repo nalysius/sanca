@@ -1,12 +1,12 @@
 //! The main module of Sanca
 //!
-//! This module defines the struct Application, which orchestrate the execution
+//! This module defines the struct [`Application`], which orchestrates the execution
 //! of the whole application.
 //!
 //! Sanca is composed of three parts:
-//! 1. The readers
-//! 2. The checkers
-//! 3. The writers
+//! 1. The [`crate::readers`]
+//! 2. The [`crate::checkers`]
+//! 3. The [`crate::writers`]
 //!
 //! The readers have the responsibility to fetch the data, be it a TCP banner
 //! or HTTP resource(s).
