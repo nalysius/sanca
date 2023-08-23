@@ -42,7 +42,7 @@ impl<'a> OSChecker<'a> {
         let body_apache_regex = Regex::new(r"<address>(?P<wholematch>Apache\/(?P<version>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\)) Server at [a-zA-Z0-9-.]+ Port \d+)</address>").unwrap();
 
         // Example: <hr><center>nginx/1.22.3</center>
-        let body_nginx_regex = Regex::new(r"<hr><center>(?P<wholematch>nginx(\/(?P<version>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\)))?)</center>").unwrap();
+        let body_nginx_regex = Regex::new(r"<hr><center>(?P<wholematch>nginx(\/(?P<version>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\))))</center>").unwrap();
 
         regexes.insert("openssh-banner", openssh_regex);
         regexes.insert("http-header", header_regex);

@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A technology can be identified more than once. Useful for JavaScript
   library installed several times on a same website.
 
+### Fixed
+
+- Sanca panicked when Nginx was encountered without the OS in the header.
+
 ## [0.3.0]
 
 ### Added
