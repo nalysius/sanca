@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- jQuery wasn't detected if one part of the version had more than one digit.
 - Sanca panicked when Nginx was encountered without the OS in the header.
 
 ## [0.3.0]
