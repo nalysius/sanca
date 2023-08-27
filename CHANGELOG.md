@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - A technology can be identified more than once. Useful for JavaScript
   library installed several times on a same website.
+- The HTTP status code is now available to all HttpCheckers. WordPress
+  use it to reduce false positive.
 
 ### Fixed
 
