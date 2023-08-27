@@ -118,7 +118,7 @@ mod tests {
         let body1 = r#"<title>Welcome to phpMyAdmin's documentation! phpMyAdmin 5.2.0 documentation</title>"#;
         let url1 = "https://www.example.com/phpmyadmin/doc/html/index.html";
         let mut url_response_valid =
-            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default, 200);
         let finding = checker.check_http_body(&url_response_valid);
         assert!(finding.is_some());
         check_finding_fields(
@@ -153,6 +153,7 @@ mod tests {
             HashMap::new(),
             body,
             UrlRequestType::Default,
+            200
         );
         let finding = checker.check_http_body(&url_response_invalid);
         assert!(finding.is_none());
@@ -164,12 +165,13 @@ mod tests {
         let body1 = r#"<title>Welcome to phpMyAdmin's documentation! phpMyAdmin 5.2.1 documentation</title>"#;
         let url1 = "https://www.example.com/mysql/doc/html/index.html";
         let url_response_valid =
-            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default, 200);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
             "nothing to find in body",
             UrlRequestType::Default,
+            200
         );
         let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
         assert_eq!(1, findings.len());
@@ -184,12 +186,13 @@ mod tests {
         let body2 = "5.2.1 (2022-05-11)";
         let url2 = "https://www.example.com/mysql/ChangeLog";
         let url_response_valid =
-            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::Default);
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::Default, 200);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
             "nothing to find in body",
             UrlRequestType::Default,
+            200
         );
         let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
         assert_eq!(1, findings.len());
@@ -211,6 +214,7 @@ mod tests {
             HashMap::new(),
             body1,
             UrlRequestType::Default,
+            200
         );
 
         let body2 = "5.2.0 (2022-05-10)";
@@ -219,6 +223,7 @@ mod tests {
             HashMap::new(),
             body2,
             UrlRequestType::Default,
+            200
         );
         let findings = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(findings.is_empty());

@@ -79,7 +79,9 @@ impl<'a> HttpChecker for WordPressChecker<'a> {
             // JavaScript files could be hosted on a different server
             // Don't check the JavaScript files to avoid false positive,
             // Check only the "main" requests.
-            if url_response.request_type != UrlRequestType::Default {
+            //
+            // Handle only the 200 status code, to avoid false positive on 404
+            if url_response.request_type != UrlRequestType::Default || url_response.status_code != 200 {
                 continue;
             }
 
@@ -108,7 +110,7 @@ mod tests {
         let body1 = r#"<meta name="generator" content="WordPress 6.1.2" />"#;
         let url1 = "https://www.example.com/index.php";
         let mut url_response_valid =
-            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default, 200);
         let finding = checker.check_http_body(&url_response_valid);
         assert!(finding.is_some());
         check_finding_fields(
@@ -143,6 +145,7 @@ mod tests {
             HashMap::new(),
             body,
             UrlRequestType::Default,
+            200
         );
         let finding = checker.check_http_body(&url_response_invalid);
         assert!(finding.is_none());
@@ -154,12 +157,13 @@ mod tests {
         let body1 = r#"<meta   name = "generator"     content = "WordPress 5.8.4"/>"#;
         let url1 = "https://www.example.com/blog.php";
         let url_response_valid =
-            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default, 200);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
             "nothing to find in body",
             UrlRequestType::Default,
+            200
         );
         let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
         assert_eq!(1, findings.len());
@@ -174,12 +178,13 @@ mod tests {
         let body2 = "<script src = \"/that.js?ver=5.8.4\"></script>";
         let url2 = "https://www.example.com/blog/wp-login.php";
         let url_response_valid =
-            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::Default);
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::Default, 200);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
             "nothing to find in body",
             UrlRequestType::Default,
+            200
         );
         let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
         assert_eq!(1, findings.len());
@@ -201,6 +206,7 @@ mod tests {
             HashMap::new(),
             body1,
             UrlRequestType::Default,
+            200
         );
 
         let body2 = "src='/wp.js?ver=5.4.3'";
@@ -209,6 +215,7 @@ mod tests {
             HashMap::new(),
             body2,
             UrlRequestType::Default,
+            200
         );
         let findings = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(findings.is_empty());

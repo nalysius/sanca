@@ -109,7 +109,7 @@ mod tests {
         let body1 = r#"gsap) && a.b = 12;r={version:"3.11.0"};"#;
         let url1 = "https://www.example.com/js/file.js";
         let mut url_response_valid =
-            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript, 200);
         let finding = checker.check_http_body(&url_response_valid);
         assert!(finding.is_some());
         check_finding_fields(
@@ -142,6 +142,7 @@ mod tests {
             HashMap::new(),
             body,
             UrlRequestType::Default,
+            200
         );
         let finding = checker.check_http_body(&url_response_invalid);
         assert!(finding.is_none());
@@ -153,7 +154,7 @@ mod tests {
         let body1 = r#"* Flip 3.11.1"#;
         let url1 = "https://www.example.com/that.jsp?abc=def";
         let mut url_response_valid =
-            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default);
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default, 200);
         let finding = checker.check_http_body(&url_response_valid);
         assert!(finding.is_some());
         check_finding_fields(
@@ -186,6 +187,7 @@ mod tests {
             HashMap::new(),
             body1,
             UrlRequestType::Default,
+            200
         );
         let finding = checker.check_http_body(&url_response_invalid);
         assert!(finding.is_none());
@@ -202,12 +204,13 @@ mod tests {
         let body1 = r#" * ScrollToPlugin    3.1.9"#;
         let url1 = "https://www.example.com/g.js";
         let url_response_valid =
-            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript, 200);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
             "nothing to find in body",
             UrlRequestType::Default,
+            200
         );
         let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
         assert_eq!(1, findings.len());
@@ -222,12 +225,13 @@ mod tests {
         let body2 = "gsap();var a ='test';version='3.10.4'";
         let url2 = "https://www.example.com/g.js";
         let url_response_valid =
-            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::JavaScript);
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::JavaScript, 200);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
             "nothing to find in body",
             UrlRequestType::Default,
+            200
         );
         let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
         assert_eq!(1, findings.len());
@@ -249,6 +253,7 @@ mod tests {
             HashMap::new(),
             body1,
             UrlRequestType::Default,
+            200
         );
         let body2 = r#"Except if it's installed"#;
         let url_response_invalid2 = UrlResponse::new(
@@ -256,6 +261,7 @@ mod tests {
             HashMap::new(),
             body2,
             UrlRequestType::Default,
+            200
         );
         let finding = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(finding.is_empty());

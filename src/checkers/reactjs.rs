@@ -93,7 +93,7 @@ mod tests {
         let body1 = r#"var ReactVersion = "18.2.0";var b = 1;"#;
         let url1 = "https://www.example.com/js/file.js";
         let mut url_response_valid =
-            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript, 200);
         let finding = checker.check_http_body(&url_response_valid);
         assert!(finding.is_some());
         check_finding_fields(
@@ -126,6 +126,7 @@ mod tests {
             HashMap::new(),
             body,
             UrlRequestType::Default,
+            200
         );
         let finding = checker.check_http_body(&url_response_invalid);
         assert!(finding.is_none());
@@ -137,12 +138,13 @@ mod tests {
         let body1 = r#"var ReactVersion = "18.2.10";"#;
         let url1 = "https://www.example.com/r.js";
         let url_response_valid =
-            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript);
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript, 200);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
             "nothing to find in body",
             UrlRequestType::Default,
+            200
         );
         let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
         assert_eq!(1, findings.len());
@@ -157,12 +159,13 @@ mod tests {
         let body2 = r#" var ReactVersion="18.1.1";"#;
         let url2 = "https://www.example.com/r.js";
         let url_response_valid =
-            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::JavaScript);
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::JavaScript, 200);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
             "nothing to find in body",
             UrlRequestType::Default,
+            200
         );
         let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
         assert_eq!(1, findings.len());
@@ -184,6 +187,7 @@ mod tests {
             HashMap::new(),
             body1,
             UrlRequestType::Default,
+            200
         );
         let body2 = r#"It should not be detected"#;
         let url_response_invalid2 = UrlResponse::new(
@@ -191,6 +195,7 @@ mod tests {
             HashMap::new(),
             body2,
             UrlRequestType::Default,
+            200
         );
         let findings = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(findings.is_empty());

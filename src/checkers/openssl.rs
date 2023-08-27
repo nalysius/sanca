@@ -109,7 +109,7 @@ mod tests {
         );
         let url1 = "https://www.example.com/that.php?abc=def";
         let mut url_response_valid =
-            UrlResponse::new(url1, headers1, "the body", UrlRequestType::Default);
+            UrlResponse::new(url1, headers1, "the body", UrlRequestType::Default, 200);
         let finding = checker.check_http_headers(&url_response_valid);
         assert!(finding.is_some());
         check_finding_fields(
@@ -152,6 +152,7 @@ mod tests {
             headers1,
             "the body",
             UrlRequestType::Default,
+            200
         );
         let finding = checker.check_http_headers(&url_response_invalid);
         assert!(finding.is_none());
@@ -175,12 +176,13 @@ mod tests {
 
         let url1 = "https://www.example.com/pageNotFound.html";
         let url_response_valid =
-            UrlResponse::new(url1, headers1, "the body", UrlRequestType::Default);
+            UrlResponse::new(url1, headers1, "the body", UrlRequestType::Default, 200);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
             "nothing to find in body",
             UrlRequestType::Default,
+            200
         );
         let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
         assert_eq!(1, findings.len());
@@ -200,12 +202,13 @@ mod tests {
         );
         let url2 = "https://www.example.com/test.php";
         let url_response_valid =
-            UrlResponse::new(url2, headers2, "the body", UrlRequestType::Default);
+            UrlResponse::new(url2, headers2, "the body", UrlRequestType::Default, 200);
         let url_response_invalid = UrlResponse::new(
             "https://www.example.com/invalid/path.php",
             HashMap::new(),
             "nothing to find in body",
             UrlRequestType::Default,
+            200
         );
         let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
         assert_eq!(1, findings.len());
@@ -227,6 +230,7 @@ mod tests {
             HashMap::new(),
             body1,
             UrlRequestType::Default,
+            200
         );
 
         let mut headers1 = HashMap::new();
@@ -240,6 +244,7 @@ mod tests {
             headers1,
             "the body",
             UrlRequestType::JavaScript,
+            200
         );
         let findings = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(

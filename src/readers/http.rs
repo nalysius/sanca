@@ -179,6 +179,7 @@ impl HttpReader {
             );
         }
 
+        let status_code = response.status().as_u16();
         let body = response.text().await.unwrap_or("".to_string());
 
         Ok(UrlResponse::new(
@@ -186,6 +187,7 @@ impl HttpReader {
             headers,
             &body,
             request_type,
+            status_code
         ))
     }
 

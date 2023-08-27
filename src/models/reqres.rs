@@ -230,6 +230,8 @@ impl UrlRequest {
 pub struct UrlResponse {
     /// The URL where the request was sent
     pub url: String,
+    /// The HTTP response code
+    pub status_code: u16,
     /// The response headers
     pub headers: HashMap<String, String>,
     /// The response body
@@ -247,12 +249,14 @@ impl UrlResponse {
         headers: HashMap<String, String>,
         body: &str,
         request_type: UrlRequestType,
+        status_code: u16
     ) -> Self {
         UrlResponse {
             url: url.to_string(),
             headers,
             body: body.to_string(),
             request_type,
+            status_code: status_code
         }
     }
 
@@ -394,6 +398,7 @@ mod tests {
             headers_1,
             "",
             UrlRequestType::Default,
+            200
         );
 
         let extracted_headers =
