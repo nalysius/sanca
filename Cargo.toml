@@ -1,6 +1,6 @@
 [package]
 name = "sanca"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 description = "A scanner to discover what technologies are running on a remote host. Focus on providing evidences."
 readme = "README.md"
@@ -12,10 +12,10 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-regex = "1.9.3"
-clap = { version = "4.3.21", features = ["derive"] }
-reqwest = { version = "0.11.18", features = ["gzip"] }
-tokio = "1.31.0"
+regex = "1.9.4"
+clap = { version = "4.4.1", features = ["derive"] }
+reqwest = { version = "0.11.20", features = ["gzip"] }
+tokio = "1.32.0"
 futures = "0.3.28"
 log = "0.4.20"
 simple_logger = "4.2.0"
