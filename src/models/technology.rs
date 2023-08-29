@@ -97,12 +97,14 @@ impl Technology {
                     UrlRequest::from_path(main_url, "phpinfo.php", false),
                     UrlRequest::from_path(main_url, "info.php", false),
                     UrlRequest::from_path(main_url, "/pageNotFoundNotFound", false),
+                    UrlRequest::from_path(main_url, "/phpmyadmin/", false),
                 ]
             }
             Self::Httpd | Self::Nginx | Self::OpenSSL => {
                 vec![
                     UrlRequest::new(main_url, false),
                     UrlRequest::from_path(main_url, "/pageNotFoundNotFound", false),
+                    UrlRequest::from_path(main_url, "/phpmyadmin/", false),
                 ]
             }
             Self::Tomcat => {

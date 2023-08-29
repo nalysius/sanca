@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   library installed several times on a same website.
 - The HTTP status code is now available to all HttpCheckers. WordPress
   use it to reduce false positive.
+- Path /phpmyadmin/ is fetched for PHPChecker, since phpMyAdmin sometimes
+  reveals the PHP version.
 
 ### Fixed
 
