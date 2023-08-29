@@ -187,7 +187,7 @@ impl HttpReader {
             headers,
             &body,
             request_type,
-            status_code
+            status_code,
         ))
     }
 

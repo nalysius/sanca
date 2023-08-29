@@ -249,14 +249,14 @@ impl UrlResponse {
         headers: HashMap<String, String>,
         body: &str,
         request_type: UrlRequestType,
-        status_code: u16
+        status_code: u16,
     ) -> Self {
         UrlResponse {
             url: url.to_string(),
             headers,
             body: body.to_string(),
             request_type,
-            status_code: status_code
+            status_code: status_code,
         }
     }
 
@@ -398,7 +398,7 @@ mod tests {
             headers_1,
             "",
             UrlRequestType::Default,
-            200
+            200,
         );
 
         let extracted_headers =

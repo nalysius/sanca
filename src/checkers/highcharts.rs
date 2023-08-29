@@ -118,7 +118,7 @@ mod tests {
             HashMap::new(),
             body,
             UrlRequestType::Default,
-            200
+            200,
         );
         let finding = checker.check_http_body(&url_response_invalid);
         assert!(finding.is_none());
@@ -137,7 +137,7 @@ mod tests {
             HashMap::new(),
             "nothing to find in body",
             UrlRequestType::Default,
-            200
+            200,
         );
         let findings = checker.check_http(&[url_response_invalid, url_response_valid]);
         assert_eq!(1, findings.len());
@@ -159,7 +159,7 @@ mod tests {
             HashMap::new(),
             "nothing to find in body",
             UrlRequestType::Default,
-            200
+            200,
         );
         let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
         assert_eq!(1, findings.len());
@@ -181,7 +181,7 @@ mod tests {
             HashMap::new(),
             body1,
             UrlRequestType::Default,
-            200
+            200,
         );
         let body2 = r#"It should not be detected"#;
         let url_response_invalid2 = UrlResponse::new(
@@ -189,7 +189,7 @@ mod tests {
             HashMap::new(),
             body2,
             UrlRequestType::Default,
-            200
+            200,
         );
         let findings = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(findings.is_empty());
