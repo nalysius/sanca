@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Highcharts detection.
 - Support for gzip-encoded response body.
+- Detection for Debian 7 when Apache 2.2.22 is used.
 
 ### Changed
 

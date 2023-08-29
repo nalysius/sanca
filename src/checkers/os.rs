@@ -219,6 +219,7 @@ impl<'a> OSChecker<'a> {
         versions.insert(("ubuntu", "openssh", "9.0"), "22.10|23.04");
 
         // Debian / Apache httpd
+        versions.insert(("debian", "apache", "2.2.22"), "7");
         versions.insert(("debian", "apache", "2.4.25"), "9");
         versions.insert(("debian", "apache", "2.4.38"), "10");
         versions.insert(("debian", "apache", "2.4.54"), "11");
