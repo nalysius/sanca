@@ -144,10 +144,16 @@ impl HttpReader {
         request_type: UrlRequestType,
     ) -> Result<UrlResponse, String> {
         trace!("Running HttpReader::http_request()");
+        let mime_type = if request_type == UrlRequestType::JavaScript {
+            "application/javascript"
+        } else {
+            "text/html"
+        };
+
         let response_result = http_client
             .get(&url_request.url)
             .header("User-Agent", "Sanca")
-            .header("Accept", "text/html")
+            .header("Accept", mime_type)
             .send()
             .await;
 
