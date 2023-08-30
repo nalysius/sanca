@@ -224,13 +224,20 @@ impl Application {
             // technologies we're looking for
             if technologies.contains(&http_checker.get_technology()) {
                 debug!("Using HTTP checker {:?}", http_checker.get_technology());
-                let mut found_findings = http_checker.check_http(&url_responses);
+                let found_findings = http_checker.check_http(&url_responses);
                 if !found_findings.is_empty() {
                     info!(
                         "HTTP checker {:?} found finding(s)",
                         http_checker.get_technology()
                     );
-                    findings.append(&mut found_findings);
+                    // Avoid storing duplicate findings
+                    // That's especially for JavaScript libraries with plugins,
+                    // that could be detected several times in different files.
+                    for found_finding in found_findings {
+                        if !findings.contains(&found_finding) {
+                            findings.push(found_finding);
+                        }
+                    }
                 }
             }
         }

@@ -66,6 +66,13 @@ impl Finding {
     }
 }
 
+impl PartialEq for Finding {
+    /// Two findings are equal if their technology and version are the same
+    fn eq(&self, other: &Self) -> bool {
+        return self.technology == other.technology && self.version == other.version
+    }
+}
+
 /// An enum to match the available writers
 #[derive(Clone, Debug)]
 pub enum Writers {
