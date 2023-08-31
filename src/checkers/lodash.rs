@@ -42,12 +42,25 @@ impl<'a> LodashChecker<'a> {
         .unwrap();
 
         let body_minified_regex = Regex::new(
-            r#"(?P<wholematch>VERSION ?= ?[a-zA-Z0-9]+[,;].+[a-zA-Z0-9]+=['"](?P<version>\d+\.\d+\.\d+)['"]).+lodash_placeholder"#,
+            r#"(?P<wholematch>VERSION\s*=\s*[a-zA-Z0-9]+[,;].+[a-zA-Z0-9]+=['"](?P<version>\d+\.\d+\.\d+)['"]).+lodash_placeholder"#,
         )
         .unwrap();
 
+        let body_minified_regex_alternative = Regex::new(
+            r#"(?s)(?P<wholematch>[a-zA-z0-9]+\s*=\s*['"](?P<version>\d+\.\d+\.\d+)['"][,;].+lodash_placeholder.+VERSION\s*=\s*[a-zA-Z0-9]+)"#,
+        )
+        .unwrap();
+
+        let body_comment_compat =
+            Regex::new(r#"\s*\*\s*(?P<wholematch>Lo-Dash (?P<version>\d+\.\d+\.\d+))"#).unwrap();
+
         regexes.insert("http-body", body_regex);
         regexes.insert("http-body-minified", body_minified_regex);
+        regexes.insert(
+            "http-body-minified-alternative",
+            body_minified_regex_alternative,
+        );
+        regexes.insert("http-body-comment-compat", body_comment_compat);
         Self { regexes: regexes }
     }
 
@@ -57,6 +70,19 @@ impl<'a> LodashChecker<'a> {
             "Running LodashChecker::check_http_body() on {}",
             url_response.url
         );
+
+        let caps_result = self
+            .regexes
+            .get("http-body-comment-compat")
+            .expect("Regex \"http-body-comment-compat\"")
+            .captures(&url_response.body);
+
+        if caps_result.is_some() {
+            info!("Regex Lodash/http-body-comment-compat matches");
+            let caps = caps_result.unwrap();
+            return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "Lodash", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+        }
+
         let caps_result = self
             .regexes
             .get("http-body")
@@ -79,6 +105,19 @@ impl<'a> LodashChecker<'a> {
         // The regex matches
         if caps_result.is_some() {
             info!("Regex Lodash/http-body-minified matches");
+            let caps = caps_result.unwrap();
+            return Some(self.extract_finding_from_captures(caps, url_response, 10, 30, "Lodash", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+        }
+
+        let caps_result = self
+            .regexes
+            .get("http-body-minified-alternative")
+            .expect("Regex \"http-body-minified-alternative\" not found.")
+            .captures(&url_response.body);
+
+        // The regex matches
+        if caps_result.is_some() {
+            info!("Regex Lodash/http-body-minified-alternative matches");
             let caps = caps_result.unwrap();
             return Some(self.extract_finding_from_captures(caps, url_response, 10, 30, "Lodash", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }

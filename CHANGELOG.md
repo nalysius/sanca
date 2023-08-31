@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Two regexes for a better detection of Lodash.
+
 ### Fixed
 
 - The right MIME type is given when sending HTTP request to fetch JavaScript files.
