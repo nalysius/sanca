@@ -179,10 +179,22 @@ impl HttpReader {
                 .get_mut(0..1)
                 .unwrap()
                 .make_ascii_uppercase();
-            headers.insert(
-                header_name_text,
-                header_value.to_str().unwrap_or("").to_string(),
-            );
+
+            // When a header is given several times (e.g. x-powered-by), concatenate
+            if headers.contains_key(&header_name_text) {
+                let concat_header = format!(
+                    "{}, {}",
+                    headers.get(&header_name_text).unwrap(),
+                    header_value.to_str().unwrap_or("").to_string(),
+                );
+
+                headers.insert(header_name_text, concat_header);
+            } else {
+                headers.insert(
+                    header_name_text,
+                    header_value.to_str().unwrap_or("").to_string(),
+                );
+            }
         }
 
         let status_code = response.status().as_u16();

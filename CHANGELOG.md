@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The right MIME type is given when sending HTTP request to fetch JavaScript files.
 - Findings are deduplicated. A technology / version pair is reported only once,
   even if detected in several files.
+- When a HTTP header was present several times, only the last value was kept. It
+  was possible to lost a value (typically x-powered-by).
 
 ## [0.4.0]
 
