@@ -37,7 +37,7 @@ impl HttpReader {
     /// Reads via HTTP(S)
     /// Sends HTTP requests to each URL to fetch the response, and
     /// optionally requests the JavaScript files found in the response body.
-    pub async fn read(&self, url_requests: &[UrlRequest]) -> Vec<UrlResponse> {
+    pub async fn read(&self, url_requests: &[UrlRequest], user_agent: &str) -> Vec<UrlResponse> {
         trace!("Running HttpReader::read()");
         let http_client = Client::builder()
             .danger_accept_invalid_certs(true)
@@ -54,7 +54,7 @@ impl HttpReader {
                 url_request.url,
                 url_request.fetch_js
             );
-            url_responses_futures.push(self.read_one_page(url_request, &http_client));
+            url_responses_futures.push(self.read_one_page(url_request, &http_client, user_agent));
         }
 
         trace!("Waiting for all the UrlRequests to be handled");
@@ -82,12 +82,18 @@ impl HttpReader {
         &self,
         url_request: &UrlRequest,
         http_client: &Client,
+        user_agent: &str,
     ) -> Result<Vec<UrlResponse>, String> {
         trace!("Running HttpChecker::read_one_page()");
         debug!("Sending HTTP request for URL {}", url_request.url);
         let mut responses: Vec<UrlResponse> = Vec::new();
         let main_response_result = self
-            .http_request(&url_request, http_client, UrlRequestType::Default)
+            .http_request(
+                &url_request,
+                http_client,
+                UrlRequestType::Default,
+                user_agent,
+            )
             .await;
         if let Err(e) = main_response_result {
             error!("An error occured while reading one page: {:?}", e);
@@ -113,7 +119,7 @@ impl HttpReader {
             // They will be handled all together in parallel
             let url_responses_futures = url_requests_js.iter().map(|i| {
                 let response_future =
-                    self.http_request(&i, &http_client, UrlRequestType::JavaScript);
+                    self.http_request(&i, &http_client, UrlRequestType::JavaScript, user_agent);
                 response_future
             });
 
@@ -142,6 +148,7 @@ impl HttpReader {
         url_request: &UrlRequest,
         http_client: &Client,
         request_type: UrlRequestType,
+        user_agent: &str,
     ) -> Result<UrlResponse, String> {
         trace!("Running HttpReader::http_request()");
         let mime_type = if request_type == UrlRequestType::JavaScript {
@@ -152,7 +159,7 @@ impl HttpReader {
 
         let response_result = http_client
             .get(&url_request.url)
-            .header("User-Agent", "Sanca")
+            .header("User-Agent", user_agent)
             .header("Accept", mime_type)
             .send()
             .await;

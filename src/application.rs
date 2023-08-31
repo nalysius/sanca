@@ -203,7 +203,12 @@ impl Application {
     }
 
     /// Performs a HTTP scan on a given set of UrlRequest
-    fn http_scan(&self, url_requests: &[UrlRequest], technologies: &[Technology]) -> Vec<Finding> {
+    fn http_scan(
+        &self,
+        url_requests: &[UrlRequest],
+        technologies: &[Technology],
+        user_agent: &str,
+    ) -> Vec<Finding> {
         trace!("Performing a HTTP scan");
         let tk_runtime = tokio::runtime::Builder::new_current_thread()
             .enable_all()
@@ -213,7 +218,7 @@ impl Application {
         let http_reader = HttpReader::new();
         trace!("Sending the HTTP requests...");
         // Wait for all the HTTP requests to be finished
-        let url_responses = tk_runtime.block_on(http_reader.read(&url_requests));
+        let url_responses = tk_runtime.block_on(http_reader.read(&url_requests, user_agent));
 
         trace!("HTTP requests sent");
         trace!("Looping over all HTTP checkers");
@@ -279,7 +284,11 @@ impl Application {
                     &args.technologies.as_ref().unwrap(),
                 );
                 debug!("URL requests: {:?}", url_requests);
-                self.http_scan(&url_requests, &args.technologies.as_ref().unwrap())
+                self.http_scan(
+                    &url_requests,
+                    &args.technologies.as_ref().unwrap(),
+                    &args.user_agent,
+                )
             }
         };
 
@@ -322,4 +331,7 @@ struct Args {
     /// The writer to use
     #[arg(short, long, value_name = "WRITER", default_value = "textstdout")]
     pub writer: Writers,
+    /// The user agent
+    #[arg(short('a'), long, value_name = "USER_AGENT", default_value = "Sanca")]
+    pub user_agent: String,
 }
