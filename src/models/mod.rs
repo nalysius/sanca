@@ -69,7 +69,7 @@ impl Finding {
 impl PartialEq for Finding {
     /// Two findings are equal if their technology and version are the same
     fn eq(&self, other: &Self) -> bool {
-        return self.technology == other.technology && self.version == other.version
+        return self.technology == other.technology && self.version == other.version;
     }
 }
 
