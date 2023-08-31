@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Two regexes for a better detection of Lodash.
+- Two more regexes for a better detection of Lodash.
+- -a|--user-agent option to use a custom user-agent.
 
 ### Fixed
 
