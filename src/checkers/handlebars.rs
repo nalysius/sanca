@@ -32,8 +32,15 @@ impl<'a> HandlebarsChecker<'a> {
         // Example: HandlebarsEnvironment;[...]b="4.7.7";An.VERSION=b;
         let source_code_regex = Regex::new(r#"(?P<wholematch>HandlebarsEnvironment;.*[a-zA-Z0-9]+\s*=\s*"(?P<version>\d+\.\d+\.\d+)";[a-zA-Z0-9]+\.VERSION=[a-zA-Z0-9]+;)"#).unwrap();
 
+        // Example: VERSION="2.0.0";__exports__.VERSION=VERSION[...]HandlebarsEnvironment
+        let source_code_regex_alternative = Regex::new(r#"(?P<wholematch>VERSION\s*=\s*['"](?P<version>\d+\.\d+\.\d+)['"]+[,;]__exports__\.VERSION\s*=\s*VERSION.+HandlebarsEnvironment)"#).unwrap();
+
         regexes.insert("http-body-comment", comment_regex);
         regexes.insert("http-body-source", source_code_regex);
+        regexes.insert(
+            "http-body-source-alternative",
+            source_code_regex_alternative,
+        );
         Self { regexes: regexes }
     }
 
@@ -72,6 +79,26 @@ impl<'a> HandlebarsChecker<'a> {
         // The regex matches
         if caps_result.is_some() {
             info!("Regex Handlebars/http-body-source matches");
+            let caps = caps_result.unwrap();
+            return Some(self.extract_finding_from_captures(
+                caps,
+                url_response,
+                30,
+                30,
+                "Handlebars",
+                "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
+            ));
+        }
+
+        let caps_result = self
+            .regexes
+            .get("http-body-source-alternative")
+            .expect("Regex \"http-body-source-alternative\" not found.")
+            .captures(&url_response.body);
+
+        // The regex matches
+        if caps_result.is_some() {
+            info!("Regex Handlebars/http-body-source-alternative matches");
             let caps = caps_result.unwrap();
             return Some(self.extract_finding_from_captures(
                 caps,

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Two more regexes for a better detection of Lodash.
 - -a|--user-agent option to use a custom user-agent.
+- One more regex for a better detection of Handlebars.
 
 ### Fixed
 
