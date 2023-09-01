@@ -21,6 +21,12 @@ impl<'a> HighchartsChecker<'a> {
     /// reused.
     pub fn new() -> Self {
         let mut regexes = HashMap::new();
+
+        // Example: Highcharts JS v11.1.0 (2023-06-05)
+        // TODO: add unit tests for this
+        let body_comment_regex = Regex::new(r#"\s*(?P<wholematch>Highcharts JS v(?P<version>\d+\.\d+\.\d+)\s*\(\d\d\d\d-\d\d-\d\d\))"#)
+        .unwrap();
+
         // Example: {product:"Highstock",version:"6.0.3",
         let body_regex = Regex::new(
             r#"(?P<wholematch>Highcharts.+\{\s*product\s*:\s*"High[a-zA-Z0-9]+"\s*,\s*version\s*:\s*"(?P<version>\d+\.\d+\.\d+)")"#,
@@ -28,6 +34,7 @@ impl<'a> HighchartsChecker<'a> {
         .unwrap();
 
         regexes.insert("http-body", body_regex);
+        regexes.insert("http-body-comment", body_comment_regex);
         Self { regexes: regexes }
     }
 
@@ -37,6 +44,20 @@ impl<'a> HighchartsChecker<'a> {
             "Running HighchartsChecker::check_http_body() on {}",
             url_response.url
         );
+
+        let caps_result = self
+            .regexes
+            .get("http-body-comment")
+            .expect("Regex \"http-body-comment\" not found.")
+            .captures(&url_response.body);
+
+        // The regex matches
+        if caps_result.is_some() {
+            info!("Regex Highcharts/http-body-comment matches");
+            let caps = caps_result.unwrap();
+            return Some(self.extract_finding_from_captures(caps, url_response, 20, 20, "Highcharts", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+        }
+
         let caps_result = self
             .regexes
             .get("http-body")
