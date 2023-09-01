@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   even if detected in several files.
 - When a HTTP header was present several times, only the last value was kept. It
   was possible to lost a value (typically x-powered-by).
+- WordPress wasn't detected in the <meta HTML tag if its version was only X.Y and
+  not X.Y.Z.
 
 ## [0.4.0]
 
