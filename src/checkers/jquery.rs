@@ -27,7 +27,7 @@ impl<'a> JQueryChecker<'a> {
         // or
         //
         // /*! jQuery v3.7.0 |
-        let comment_regex = Regex::new(r"\/\*![\s\*]+(?P<wholematch>jQuery (JavaScript Library )?(v(?P<version>\d+\.\d+\.\d+)))( |)?").unwrap();
+        let comment_regex = Regex::new(r"\/\*![\s\*]+(?P<wholematch>jQuery (JavaScript Library )?(v@?(?P<version>\d+\.\d+\.\d+)))( |)?").unwrap();
         regexes.insert("http-body-comment", comment_regex);
         Self { regexes: regexes }
     }
