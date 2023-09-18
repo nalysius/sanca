@@ -6,7 +6,7 @@
 use std::collections::HashMap;
 
 use futures::future::join_all;
-use log::{debug, error, trace};
+use log::{debug, error, info, trace};
 use regex::Regex;
 use reqwest::Client;
 
@@ -110,7 +110,7 @@ impl HttpReader {
             let url_requests_js =
                 // Don't provide extension here, some scripts don't use the .js
                 self.extract_urls(&url_request.url, &main_response_body, None);
-            trace!(
+            info!(
                 "The following URLs have been found in the response body: {:?}",
                 url_requests_js
             );
