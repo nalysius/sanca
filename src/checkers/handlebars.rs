@@ -24,8 +24,13 @@ impl<'a> HandlebarsChecker<'a> {
         // Example: /**!
         //          @license
         //          handlebars v4.7.7
+        //
+        // OR
+        //
+        // /*!
+        //  handlebars v2.0.0
         let comment_regex = Regex::new(
-            r"\/\*\*![\s\*]+@license\s+(?P<wholematch>handlebars (v(?P<version>\d\.\d\.\d)))",
+            r"\/\*\*?![\s\*]+(@license)?\s+(?P<wholematch>handlebars (v(?P<version>\d\.\d\.\d)))",
         )
         .unwrap();
 
