@@ -28,7 +28,7 @@ impl<'a> OSChecker<'a> {
         // Also use the OpenSSH version & the OS name to determine which version
         // of OS is used
         let openssh_regex = Regex::new(
-            r"^SSH-\d+\.\d+-OpenSSH_(?P<version>\d+\.\d+)([a-z]\d+)?( (?P<os>[a-zA-Z0-9]+))?",
+            r"^SSH-\d+\.\d+-OpenSSH_(?P<version>\d+\.\d+)([a-z]\d+)?( (?P<os>[a-zA-Z0-9]+))",
         )
         .unwrap();
         // Example: Apache/2.4.52 (Debian)

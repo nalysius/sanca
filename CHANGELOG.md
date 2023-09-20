@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- OSChecker panicked when OpenSSH was detected without OS in banner.
 - Variants of comment header for jQuery and Handlebars weren't detected.
 - The right MIME type is given when sending HTTP request to fetch JavaScript files.
 - Findings are deduplicated. A technology / version pair is reported only once,
