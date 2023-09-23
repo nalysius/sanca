@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Detection of WordPress plugin YoastSEO.
+- Detection of WordPress plugin RevSlider.
 
 ## [0.5.0]
 

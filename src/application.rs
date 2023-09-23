@@ -45,6 +45,7 @@ use crate::checkers::reactjs::ReactJSChecker;
 use crate::checkers::tomcat::TomcatChecker;
 use crate::checkers::typo3::Typo3Checker;
 use crate::checkers::wordpress::WordPressChecker;
+use crate::checkers::wp_plugins::revslider::RevSliderChecker;
 use crate::checkers::wp_plugins::yoast_seo::YoastSEOChecker;
 use crate::checkers::{HttpChecker, TcpChecker};
 use crate::models::{reqres::UrlRequest, technology::Technology, Finding, ScanType, Writers};
@@ -107,6 +108,7 @@ impl Application {
             Box::new(CKEditorChecker::new()),
             Box::new(HighchartsChecker::new()),
             Box::new(YoastSEOChecker::new()),
+            Box::new(RevSliderChecker::new()),
         ];
 
         trace!("Returning the Application");
