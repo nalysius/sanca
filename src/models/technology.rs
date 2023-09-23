@@ -48,6 +48,8 @@ pub enum Technology {
     Plesk,
     CKEditor,
     Highcharts,
+    // WPP = WordPress Plugin
+    WPPYoastSEO,
 }
 
 impl Technology {
@@ -178,6 +180,7 @@ impl ValueEnum for Technology {
             Technology::Plesk,
             Technology::CKEditor,
             Technology::Highcharts,
+            Technology::WPPYoastSEO,
         ]
     }
 
@@ -212,6 +215,7 @@ impl ValueEnum for Technology {
             Technology::Plesk => Some(PossibleValue::new("plesk")),
             Technology::CKEditor => Some(PossibleValue::new("ckeditor")),
             Technology::Highcharts => Some(PossibleValue::new("highcharts")),
+            Technology::WPPYoastSEO => Some(PossibleValue::new("yoastseo")),
         }
     }
 }
