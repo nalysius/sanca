@@ -265,7 +265,20 @@ impl<'a> TcpChecker for OSChecker<'a> {
                 let caps = caps_result.unwrap();
                 let os_name = caps["os"].to_string();
                 let software_version = caps["version"].to_string();
-                let os_version = self.get_os_version(&os_name, "openssh", &software_version);
+                let bpo_os_version: String;
+                let mut os_version = self.get_os_version(&os_name, "openssh", &software_version);
+
+                // Handle backports
+                // OSes like Debian provide backports, so a software shipped with Debian 11
+                // can be found on Debian 10.
+                if os_version.is_some() && item.contains("bpo") {
+                    let os_version_result = os_version.unwrap().parse::<i8>();
+                    if let Ok(v) = os_version_result {
+                        bpo_os_version = format!("{}", v - 1);
+                        os_version = Some(&bpo_os_version);
+                    }
+                }
+
                 let mut version_text = "".to_string();
                 if os_version.is_some() {
                     version_text = format!(" {}", os_version.as_ref().unwrap());
