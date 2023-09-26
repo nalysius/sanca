@@ -13,7 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detection of WordPress plugin RevSlider (Slider Revolution).
 - Detection of WordPress plugin js_composer.
 
-## Fixed
+### Changed
+
+- Improve OS version detection from OpenSSH by using the deb / bpo part of the banner.
+
+### Fixed
 
 - The wrong OS version was detected when OpenSSH was installed from
   backports.

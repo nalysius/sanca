@@ -24,13 +24,11 @@ impl<'a> OSChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: SSH-2.0-OpenSSH_6.7p1 Debian-5
         // SSH-2.0-OpenSSH_6.7p1 Debian-5+deb8u2
-        // TODO: use the deb8u2 part.
-        // Also use the OpenSSH version & the OS name to determine which version
-        // of OS is used
         let openssh_regex = Regex::new(
-            r"^SSH-\d+\.\d+-OpenSSH_(?P<version>\d+\.\d+)([a-z]\d+)?( (?P<os>[a-zA-Z0-9]+))",
+            r"^SSH-\d+\.\d+-OpenSSH_(?P<version>\d+\.\d+)([a-z]\d+)?( (?P<os>[a-zA-Z0-9]+)(.+((deb|bpo)(?P<osversion>\d+)))?)",
         )
         .unwrap();
+
         // Example: Apache/2.4.52 (Debian)
         // TODO: if available, handle the OpenSSL version
         let header_regex = Regex::new(
@@ -183,8 +181,6 @@ impl<'a> OSChecker<'a> {
 
     /// Get the OS version according to the OS name, the software name and version.
     /// Example: Ubuntu 18.04 comes with Apache httpd 2.4.29
-    ///
-    /// TODO: handle backports to avoid false positive
     fn get_os_version(
         &self,
         os_name: &str,
@@ -265,18 +261,14 @@ impl<'a> TcpChecker for OSChecker<'a> {
                 let caps = caps_result.unwrap();
                 let os_name = caps["os"].to_string();
                 let software_version = caps["version"].to_string();
-                let bpo_os_version: String;
-                let mut os_version = self.get_os_version(&os_name, "openssh", &software_version);
-
-                // Handle backports
-                // OSes like Debian provide backports, so a software shipped with Debian 11
-                // can be found on Debian 10.
-                if os_version.is_some() && item.contains("bpo") {
-                    let os_version_result = os_version.unwrap().parse::<i8>();
-                    if let Ok(v) = os_version_result {
-                        bpo_os_version = format!("{}", v - 1);
-                        os_version = Some(&bpo_os_version);
-                    }
+                let os_version_result = caps.name("osversion");
+                let os_version: Option<&str>;
+                // Check at the end of the banner first, if the debX is present
+                if let Some(v) = os_version_result {
+                    os_version = Some(v.as_str());
+                } else {
+                    // Try to deduce the OS version based on the OS name & OpenSSH version
+                    os_version = self.get_os_version(&os_name, "openssh", &software_version);
                 }
 
                 let mut version_text = "".to_string();
@@ -540,6 +532,16 @@ mod tests {
         let finding = checker.check_tcp(&[banner.to_string()]);
         assert!(finding.is_some());
         check_finding_fields(&finding.unwrap(), banner, "Ubuntu", Some("20.04"), None);
+
+        let banner = "SSH-2.0-OpenSSH_8.4p1 Debian-2~bpo10+1";
+        let finding = checker.check_tcp(&[banner.to_string()]);
+        assert!(finding.is_some());
+        check_finding_fields(&finding.unwrap(), banner, "Debian", Some("10"), None);
+
+        let banner = "SSH-2.0-OpenSSH_8.4p1 Debian-2~deb11+1";
+        let finding = checker.check_tcp(&[banner.to_string()]);
+        assert!(finding.is_some());
+        check_finding_fields(&finding.unwrap(), banner, "Debian", Some("11"), None);
     }
 
     #[test]
