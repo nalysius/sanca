@@ -29,6 +29,14 @@ impl<'a> OSChecker<'a> {
         )
         .unwrap();
 
+        // Example: 5.5.5-10.3.17-MariaDB-0+deb10u1�4H1\\9H?D��-��s8\H3e'-Lx9Omysql_native_password
+        //
+        // Actually, detect only Debian with deb|bpo
+        let mariadb_regex = Regex::new(
+            r"\d+\.\d+\.\d+\-(?P<version>\d+\.\d+\.\d+)-MariaDB(.+(deb|bpo)(?P<osversion>\d+))",
+        )
+        .unwrap();
+
         // Example: Apache/2.4.52 (Debian)
         // TODO: if available, handle the OpenSSL version
         let header_regex = Regex::new(
@@ -43,6 +51,7 @@ impl<'a> OSChecker<'a> {
         let body_nginx_regex = Regex::new(r"<hr><center>(?P<wholematch>nginx(\/(?P<version>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\))))</center>").unwrap();
 
         regexes.insert("openssh-banner", openssh_regex);
+        regexes.insert("mariadb-banner", mariadb_regex);
         regexes.insert("http-header", header_regex);
         regexes.insert("http-body-apache", body_apache_regex);
         regexes.insert("http-body-nginx", body_nginx_regex);
@@ -278,6 +287,48 @@ impl<'a> TcpChecker for OSChecker<'a> {
 
                 let os_evidence_text = format!(
                         "The operating system {}{} has been identified using the banner presented by OpenSSH: {}.",
+                        os_name,
+                        version_text,
+                        item
+                    );
+                return Some(Finding::new(
+                    &os_name,
+                    os_version,
+                    item,
+                    &os_evidence_text,
+                    None,
+                ));
+            }
+
+            let caps_result = self
+                .regexes
+                .get("mariadb-banner")
+                .expect("Regex \"mariadb-banner\" not found.")
+                .captures(item);
+            // The regex matches
+            if caps_result.is_some() {
+                info!("Regex OS/mariadb-banner matches");
+                let caps = caps_result.unwrap();
+                // Only Debian is supported currently
+                let os_name = "Debian".to_string();
+                let software_version = caps["version"].to_string();
+                let os_version_result = caps.name("osversion");
+                let os_version: Option<&str>;
+                // Check at the end of the banner first, if the debX is present
+                if let Some(v) = os_version_result {
+                    os_version = Some(v.as_str());
+                } else {
+                    // Try to deduce the OS version based on the OS name & MariaDB version
+                    os_version = self.get_os_version(&os_name, "mariadb", &software_version);
+                }
+
+                let mut version_text = "".to_string();
+                if os_version.is_some() {
+                    version_text = format!(" {}", os_version.as_ref().unwrap());
+                }
+
+                let os_evidence_text = format!(
+                        "The operating system {}{} has been identified using the banner presented by MariaDB: {}.",
                         os_name,
                         version_text,
                         item
@@ -542,6 +593,11 @@ mod tests {
         let finding = checker.check_tcp(&[banner.to_string()]);
         assert!(finding.is_some());
         check_finding_fields(&finding.unwrap(), banner, "Debian", Some("11"), None);
+
+        let banner = "c5.5.5-10.3.17-MariaDB-0+deb10u1�42g0YPc##��-��#%3mMz=aPLlZmysql_native_password";
+        let finding = checker.check_tcp(&[banner.to_string()]);
+        assert!(finding.is_some());
+        check_finding_fields(&finding.unwrap(), banner, "Debian", Some("10"), None);
     }
 
     #[test]
