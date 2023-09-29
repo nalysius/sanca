@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detection of WordPress plugin RevSlider (Slider Revolution).
 - Detection of WordPress plugin js_composer.
 - Detection of OS (Debian only) & OS version from MariaDB banner.
+- Detection of Ubuntu 23.10 (Mantic) from Apache httpd.
 
 ### Changed
 

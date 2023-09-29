@@ -211,6 +211,7 @@ impl<'a> OSChecker<'a> {
         versions.insert(("ubuntu", "apache", "2.4.52"), "22.04");
         versions.insert(("ubuntu", "apache", "2.4.54"), "22.10");
         versions.insert(("ubuntu", "apache", "2.4.55"), "23.04");
+        versions.insert(("ubuntu", "apache", "2.4.57"), "23.10");
 
         // Ubuntu / Nginx
         versions.insert(("ubuntu", "nginx", "1.14.0"), "18.04");
