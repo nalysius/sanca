@@ -21,6 +21,16 @@ impl<'a> LodashChecker<'a> {
     /// reused.
     pub fn new() -> Self {
         let mut regexes = HashMap::new();
+        // Example:
+        //
+        //  [...]
+        // lodash[...],An.VERSION="4.17.15"
+        //
+        let body_regex = Regex::new(
+            r#"lodash.+(?P<wholematch>(var )?VERSION ?= ?['"](?P<version>\d+\.\d+\.\d+)['"])[;,]?"#,
+        )
+        .unwrap();
+
         // Example: /**
         //            * @license
         //            * Lodash <https://lodash.com/>
@@ -33,12 +43,9 @@ impl<'a> LodashChecker<'a> {
         //   * @license
         //   * Lodash lodash.com/license | Underscore.js 1.8.3 underscorejs.org/LICENSE
         //   */
-        //  [...]
-        // lodash[...],An.VERSION="4.17.15"
         //
-        let body_regex = Regex::new(
-            r#"lodash.+(?P<wholematch>(var )?VERSION ?= ?['"](?P<version>\d+\.\d+\.\d+)['"])[;,]?"#,
-        )
+        // Note: (?s) means . matches also newlines
+        let body_not_minified = Regex::new(r#"(?s)\*\s+@license.\s+\*\s+(?P<wholematch>Lodash.+var\s+VERSION\s*=\s*['"](?P<version>\d+\.\d+\.\d+)['"]);"#)
         .unwrap();
 
         let body_minified_regex = Regex::new(
@@ -60,6 +67,7 @@ impl<'a> LodashChecker<'a> {
             "http-body-minified-alternative",
             body_minified_regex_alternative,
         );
+        regexes.insert("http-body-not-minified", body_not_minified);
         regexes.insert("http-body-comment-compat", body_comment_compat);
         Self { regexes: regexes }
     }
@@ -121,6 +129,32 @@ impl<'a> LodashChecker<'a> {
             let caps = caps_result.unwrap();
             return Some(self.extract_finding_from_captures(caps, url_response, 10, 30, "Lodash", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
+
+        let caps_result = self
+            .regexes
+            .get("http-body-comment-compat")
+            .expect("Regex \"http-body-comment-compat\"")
+            .captures(&url_response.body);
+
+        if caps_result.is_some() {
+            info!("Regex Lodash/http-body-comment-compat matches");
+            let caps = caps_result.unwrap();
+            return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "Lodash", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+        }
+
+        let caps_result = self
+            .regexes
+            .get("http-body-not-minified")
+            .expect("Regex \"http-body-not-minified\" not found.")
+            .captures(&url_response.body);
+
+        // The regex matches
+        if caps_result.is_some() {
+            info!("Regex Lodash/http-body-not-minified matches");
+            let caps = caps_result.unwrap();
+            return Some(self.extract_finding_from_captures(caps, url_response, 6, 15, "Lodash", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+        }
+
         None
     }
 }
