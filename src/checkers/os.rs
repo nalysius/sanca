@@ -595,7 +595,8 @@ mod tests {
         assert!(finding.is_some());
         check_finding_fields(&finding.unwrap(), banner, "Debian", Some("11"), None);
 
-        let banner = "c5.5.5-10.3.17-MariaDB-0+deb10u1�42g0YPc##��-��#%3mMz=aPLlZmysql_native_password";
+        let banner =
+            "c5.5.5-10.3.17-MariaDB-0+deb10u1�42g0YPc##��-��#%3mMz=aPLlZmysql_native_password";
         let finding = checker.check_tcp(&[banner.to_string()]);
         assert!(finding.is_some());
         check_finding_fields(&finding.unwrap(), banner, "Debian", Some("10"), None);
