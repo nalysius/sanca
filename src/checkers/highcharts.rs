@@ -33,7 +33,13 @@ impl<'a> HighchartsChecker<'a> {
         )
         .unwrap();
 
+        let body_regex_alternative = Regex::new(
+            r#"(?P<wholematch>Highcharts.+version\s*=\s*['"](?P<version>\d+\.\d+\.\d+)['"])"#,
+        )
+        .unwrap();
+
         regexes.insert("http-body", body_regex);
+        regexes.insert("http-body-alternative", body_regex_alternative);
         regexes.insert("http-body-comment", body_comment_regex);
         Self { regexes: regexes }
     }
@@ -67,6 +73,19 @@ impl<'a> HighchartsChecker<'a> {
         // The regex matches
         if caps_result.is_some() {
             info!("Regex Highcharts/http-body matches");
+            let caps = caps_result.unwrap();
+            return Some(self.extract_finding_from_captures(caps, url_response, 10, 20, "Highcharts", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+        }
+
+        let caps_result = self
+            .regexes
+            .get("http-body-alternative")
+            .expect("Regex \"http-body-alternative\" not found.")
+            .captures(&url_response.body);
+
+        // The regex matches
+        if caps_result.is_some() {
+            info!("Regex Highcharts/http-body-alternative matches");
             let caps = caps_result.unwrap();
             return Some(self.extract_finding_from_captures(caps, url_response, 10, 20, "Highcharts", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
