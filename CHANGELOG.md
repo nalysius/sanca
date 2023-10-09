@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The wrong OS version was detected when OpenSSH was installed from
   backports.
+- The MySQL version's last digit was not always read.
 
 ## [0.5.0]
 

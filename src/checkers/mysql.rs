@@ -23,7 +23,8 @@ impl<'a> MySQLChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: S
         // 5.7.37-nmm1-logm{pX^4gw9JD]Sg4mysql_native_password
-        let regex = Regex::new(r"(?P<mysqlversion>\d+\.\d+\.\d+?).+mysql_native_password").unwrap();
+        let regex =
+            Regex::new(r"(?P<mysqlversion>\d+\.\d+(\.\d+)?).+mysql_native_password").unwrap();
         regexes.insert("mysql-banner", regex);
         Self { regexes: regexes }
     }
