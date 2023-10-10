@@ -24,7 +24,7 @@ impl<'a> NginxChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: nginx/1.22.3 (Debian)
         let header_regex =
-            Regex::new(r"^(?P<wholematch>nginx(\/(?P<version>\d+(\.\d+(\.\d+)?)?))?)").unwrap();
+            Regex::new(r"^(?P<wholematch>nginx(\/(?P<version>\d+(\.\d+(\.\d+(\.\d+)?)?)?))?)").unwrap();
         // Example: <hr><center>nginx/1.22.3</center>
         let body_regex = Regex::new(r"<hr><center>(?P<wholematch>nginx(\/(?P<version>\d+\.\d+\.\d+)( \([^\)]+\)))?)</center>").unwrap();
 
@@ -186,15 +186,29 @@ mod tests {
 
         let mut headers2 = HashMap::new();
         headers2.insert("Accept".to_string(), "text/html".to_string());
-        headers2.insert("Server".to_string(), "nginx/1.22.0 (CentOS)".to_string());
+        headers2.insert("Server".to_string(), "nginx/1.22.0.1 (CentOS)".to_string());
         url_response_valid.headers = headers2;
         let finding = checker.check_http_headers(&url_response_valid);
         assert!(finding.is_some());
         check_finding_fields(
             &finding.unwrap(),
-            "nginx/1.22.0",
+            "nginx/1.22.0.1",
             "Nginx",
-            Some("1.22.0"),
+            Some("1.22.0.1"),
+            Some(url1),
+        );
+
+        let mut headers3 = HashMap::new();
+        headers3.insert("Accept".to_string(), "text/html".to_string());
+        headers3.insert("Server".to_string(), "nginx/1.22 (CentOS)".to_string());
+        url_response_valid.headers = headers3;
+        let finding = checker.check_http_headers(&url_response_valid);
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "nginx/1.22",
+            "Nginx",
+            Some("1.22"),
             Some(url1),
         );
     }
