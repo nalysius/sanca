@@ -52,6 +52,7 @@ pub enum Technology {
     WPPYoastSEO,
     WPPRevSlider,
     WPPJSComposer,
+    WPPContactForm,
 }
 
 impl Technology {
@@ -145,6 +146,20 @@ impl Technology {
             Self::Plesk => {
                 vec![UrlRequest::from_path(main_url, "/login_up.php", false)]
             }
+            Self::WPPContactForm => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/contact-form-7/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/contact-form-7/readme.txt",
+                        false,
+                    ),
+                ]
+            }
             _ => vec![UrlRequest::new(main_url, true)],
         }
     }
@@ -185,6 +200,7 @@ impl ValueEnum for Technology {
             Technology::WPPYoastSEO,
             Technology::WPPRevSlider,
             Technology::WPPJSComposer,
+            Technology::WPPContactForm,
         ]
     }
 
@@ -222,6 +238,7 @@ impl ValueEnum for Technology {
             Technology::WPPYoastSEO => Some(PossibleValue::new("yoastseo")),
             Technology::WPPRevSlider => Some(PossibleValue::new("revslider")),
             Technology::WPPJSComposer => Some(PossibleValue::new("jscomposer")),
+            Technology::WPPContactForm => Some(PossibleValue::new("contactform")),
         }
     }
 }
