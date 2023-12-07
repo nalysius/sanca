@@ -38,17 +38,21 @@ impl<'a> ContactFormChecker<'a> {
             url_response.url
         );
 
-        let caps_result = self
-            .regexes
-            .get("http-body-source")
-            .expect("Regex \"http-body-source\" not found.")
-            .captures(&url_response.body);
+        if url_response
+            .url
+            .contains("/wp-content/plugins/contact-form-7/readme.txt")
+        {
+            let caps_result = self
+                .regexes
+                .get("http-body-source")
+                .expect("Regex \"http-body-source\" not found.")
+                .captures(&url_response.body);
 
-        // The regex matches
-        if caps_result.is_some() {
-            info!("Regex ContactForm/http-body-source matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(
+            // The regex matches
+            if caps_result.is_some() {
+                info!("Regex ContactForm/http-body-source matches");
+                let caps = caps_result.unwrap();
+                return Some(self.extract_finding_from_captures(
                 caps,
                 url_response,
                 65,
@@ -56,6 +60,7 @@ impl<'a> ContactFormChecker<'a> {
                 "ContactForm",
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
+            }
         }
         None
     }
@@ -68,11 +73,7 @@ impl<'a> HttpChecker for ContactFormChecker<'a> {
         let mut findings = Vec::new();
         for url_response in data {
             // Search on the main page only
-            if url_response.request_type != UrlRequestType::Default
-                || !url_response
-                    .url
-                    .contains("/wp-content/plugins/contact-form-7/readme.txt")
-            {
+            if url_response.request_type != UrlRequestType::Default {
                 continue;
             }
             let response = self.check_http_body(&url_response);
