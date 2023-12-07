@@ -26,6 +26,7 @@ pub mod httpd;
 pub mod jquery;
 pub mod lodash;
 pub mod mariadb;
+pub mod melis;
 pub mod mysql;
 pub mod nginx;
 pub mod openssh;

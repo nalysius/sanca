@@ -31,6 +31,7 @@ use crate::checkers::httpd::ApacheHttpdChecker;
 use crate::checkers::jquery::JQueryChecker;
 use crate::checkers::lodash::LodashChecker;
 use crate::checkers::mariadb::MariaDBChecker;
+use crate::checkers::melis::MelisChecker;
 use crate::checkers::mysql::MySQLChecker;
 use crate::checkers::nginx::NginxChecker;
 use crate::checkers::openssh::OpenSSHChecker;
@@ -113,6 +114,7 @@ impl Application {
             Box::new(RevSliderChecker::new()),
             Box::new(JSComposerChecker::new()),
             Box::new(ContactFormChecker::new()),
+            Box::new(MelisChecker::new()),
         ];
 
         trace!("Returning the Application");
