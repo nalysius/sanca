@@ -55,6 +55,7 @@ pub enum Technology {
     WPPContactForm,
     Melis,
     WPPElementor,
+    WPPElementsReadyLite,
 }
 
 impl Technology {
@@ -176,6 +177,20 @@ impl Technology {
                     ),
                 ]
             }
+            Self::WPPElementsReadyLite => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/element-ready-lite/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/element-ready-lite/readme.txt",
+                        false,
+                    ),
+                ]
+            }
             Self::Melis => {
                 vec![UrlRequest::from_path(main_url, "/melis/login", false)]
             }
@@ -222,6 +237,7 @@ impl ValueEnum for Technology {
             Technology::WPPContactForm,
             Technology::Melis,
             Technology::WPPElementor,
+            Technology::WPPElementsReadyLite,
         ]
     }
 
@@ -262,6 +278,7 @@ impl ValueEnum for Technology {
             Technology::WPPContactForm => Some(PossibleValue::new("contactform")),
             Technology::Melis => Some(PossibleValue::new("melis")),
             Technology::WPPElementor => Some(PossibleValue::new("elementor")),
+            Technology::WPPElementsReadyLite => Some(PossibleValue::new("elementreadylite")),
         }
     }
 }
