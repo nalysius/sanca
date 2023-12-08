@@ -54,6 +54,7 @@ pub enum Technology {
     WPPJSComposer,
     WPPContactForm,
     Melis,
+    WPPElementor,
 }
 
 impl Technology {
@@ -161,6 +162,20 @@ impl Technology {
                     ),
                 ]
             }
+            Self::WPPElementor => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/elementor/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/elementor/readme.txt",
+                        false,
+                    ),
+                ]
+            }
             Self::Melis => {
                 vec![UrlRequest::from_path(main_url, "/melis/login", false)]
             }
@@ -206,6 +221,7 @@ impl ValueEnum for Technology {
             Technology::WPPJSComposer,
             Technology::WPPContactForm,
             Technology::Melis,
+            Technology::WPPElementor,
         ]
     }
 
@@ -245,6 +261,7 @@ impl ValueEnum for Technology {
             Technology::WPPJSComposer => Some(PossibleValue::new("jscomposer")),
             Technology::WPPContactForm => Some(PossibleValue::new("contactform")),
             Technology::Melis => Some(PossibleValue::new("melis")),
+            Technology::WPPElementor => Some(PossibleValue::new("elementor")),
         }
     }
 }

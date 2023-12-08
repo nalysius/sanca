@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detection of OS (Debian only) & OS version from MariaDB banner.
 - Detection of Ubuntu 23.10 (Mantic) from Apache httpd.
 - Detection of Melis CMS.
+- Detection of WordPress plugin Elementor.
 - New regex for not minified Lodash JS.
 - New regex for minified Highcharts JS.
 
