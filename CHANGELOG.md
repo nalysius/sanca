@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detection of WordPress plugin Elementor.
 - Detection of WordPress plugin ElementsReady Elementor Addons.
 - Detection of WordPress plugin GTranslate.
+- Detection of WordPress plugin WooCommerce.
 - New regex for not minified Lodash JS.
 - New regex for minified Highcharts JS.
 

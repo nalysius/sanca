@@ -57,6 +57,7 @@ pub enum Technology {
     WPPElementor,
     WPPElementsReadyLite,
     WPPGTranslate,
+    WPPWooCommerce,
 }
 
 impl Technology {
@@ -254,6 +255,7 @@ impl ValueEnum for Technology {
             Technology::WPPElementor,
             Technology::WPPElementsReadyLite,
             Technology::WPPGTranslate,
+            Technology::WPPWooCommerce,
         ]
     }
 
@@ -296,6 +298,7 @@ impl ValueEnum for Technology {
             Technology::WPPElementor => Some(PossibleValue::new("elementor")),
             Technology::WPPElementsReadyLite => Some(PossibleValue::new("elementreadylite")),
             Technology::WPPGTranslate => Some(PossibleValue::new("gtranslate")),
+            Technology::WPPWooCommerce => Some(PossibleValue::new("woocommerce")),
         }
     }
 }
