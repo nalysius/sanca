@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Improve OS version detection from OpenSSH by using the deb / bpo part of the banner.
+- Improve the writers by giving them the whole Args structure.
 
 ### Fixed
 

@@ -3,7 +3,7 @@
 //! format and prints it on STDOUT.
 
 use super::Writer;
-use crate::models::Finding;
+use crate::{application::Args, models::Finding};
 
 /// A writer to print the findings in the terminal.
 pub struct TextStdoutWriter {
@@ -17,11 +17,11 @@ pub struct TextStdoutWriter {
 
 impl Writer for TextStdoutWriter {
     /// Create a new TextStdoutWriter
-    fn new(ip_hostname: Option<String>, port: Option<u16>, url: Option<String>) -> Self {
+    fn new(argv: &Args) -> Self {
         Self {
-            ip_hostname,
-            port,
-            url,
+            ip_hostname: argv.ip_hostname.clone(),
+            port: argv.port,
+            url: argv.url.clone(),
         }
     }
 

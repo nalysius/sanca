@@ -7,18 +7,16 @@
 pub mod csv;
 pub mod textstdout;
 
-use crate::models::Finding;
+use crate::{application::Args, models::Finding};
 
 /// A trait to have a common interface between writers.
 /// A writer has the responsibility to write the [`Finding`]s in a way,
 /// be it on standard output, in a file, or to an API.
 pub trait Writer {
     /// Create a new writer
-    /// Due to the different kind of readers (TCP/UDP, HTTP), different options
-    /// are allowed as parameter. Only set the right one(s).
-    /// In an HTTP scan, set the `url` to Some(...).
-    /// In a TCP or UDP scan, set the `ip_hostname` and `port` to Some(...).
-    fn new(ip_hostname: Option<String>, port: Option<u16>, url: Option<String>) -> Self
+    /// Due to the different kind of readers (TCP/UDP, HTTP), the whole argv is given.
+    /// Only set the right one(s).
+    fn new(argv: &Args) -> Self
     where
         Self: Sized;
 

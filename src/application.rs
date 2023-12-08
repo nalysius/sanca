@@ -123,7 +123,7 @@ impl Application {
             Box::new(ElementorChecker::new()),
             Box::new(ElementsReadyLiteChecker::new()),
             Box::new(GTranslateChecker::new()),
-            Box::new(WooCommerceChecker::new())
+            Box::new(WooCommerceChecker::new()),
         ];
 
         trace!("Returning the Application");
@@ -313,16 +313,8 @@ impl Application {
 
         info!("Scan finished, writing output");
         let writer: Box<dyn Writer> = match args.writer {
-            Writers::TextStdout => Box::new(TextStdoutWriter::new(
-                args.ip_hostname.clone(),
-                args.port.clone(),
-                args.url.clone(),
-            )),
-            Writers::Csv => Box::new(CsvWriter::new(
-                args.ip_hostname.clone(),
-                args.port.clone(),
-                args.url.clone(),
-            )),
+            Writers::TextStdout => Box::new(TextStdoutWriter::new(args)),
+            Writers::Csv => Box::new(CsvWriter::new(args)),
         };
         writer.write(findings);
     }
@@ -331,7 +323,7 @@ impl Application {
 /// Represents the CLI arguments accepted by Sanca
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
-struct Args {
+pub struct Args {
     /// The URL where to send an HTTP request
     #[arg(short, long, value_name = "URL")]
     pub url: Option<String>,
