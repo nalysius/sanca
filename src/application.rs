@@ -47,8 +47,12 @@ use crate::checkers::tomcat::TomcatChecker;
 use crate::checkers::typo3::Typo3Checker;
 use crate::checkers::wordpress::WordPressChecker;
 use crate::checkers::wp_plugins::contact_form::ContactFormChecker;
+use crate::checkers::wp_plugins::elementor::ElementorChecker;
+use crate::checkers::wp_plugins::elements_ready_lite::ElementsReadyLiteChecker;
+use crate::checkers::wp_plugins::gtranslate::GTranslateChecker;
 use crate::checkers::wp_plugins::js_composer::JSComposerChecker;
 use crate::checkers::wp_plugins::revslider::RevSliderChecker;
+use crate::checkers::wp_plugins::woocommerce::WooCommerceChecker;
 use crate::checkers::wp_plugins::yoast_seo::YoastSEOChecker;
 use crate::checkers::{HttpChecker, TcpChecker};
 use crate::models::{reqres::UrlRequest, technology::Technology, Finding, ScanType, Writers};
@@ -115,6 +119,11 @@ impl Application {
             Box::new(JSComposerChecker::new()),
             Box::new(ContactFormChecker::new()),
             Box::new(MelisChecker::new()),
+            Box::new(ContactFormChecker::new()),
+            Box::new(ElementorChecker::new()),
+            Box::new(ElementsReadyLiteChecker::new()),
+            Box::new(GTranslateChecker::new()),
+            Box::new(WooCommerceChecker::new())
         ];
 
         trace!("Returning the Application");

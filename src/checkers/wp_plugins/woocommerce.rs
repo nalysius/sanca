@@ -146,7 +146,7 @@ mod tests {
             &findings[0],
             "WooCommerce 6.1.4",
             "WooCommerce",
-            Some("6.1.5"),
+            Some("6.1.4"),
             Some(url1),
         );
     }
