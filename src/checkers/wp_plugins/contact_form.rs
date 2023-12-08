@@ -55,8 +55,8 @@ impl<'a> ContactFormChecker<'a> {
                 return Some(self.extract_finding_from_captures(
                 caps,
                 url_response,
-                65,
-                10,
+                30,
+                30,
                 "ContactForm",
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
@@ -86,7 +86,7 @@ impl<'a> HttpChecker for ContactFormChecker<'a> {
 
     /// The technology supported by the checker
     fn get_technology(&self) -> Technology {
-        Technology::WPPYoastSEO
+        Technology::WPPContactForm
     }
 }
 
