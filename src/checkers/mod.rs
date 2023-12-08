@@ -42,6 +42,7 @@ pub mod tomcat;
 pub mod typo3;
 pub mod wordpress;
 pub mod wp_plugins;
+pub mod wp_themes;
 
 use crate::models::{reqres::UrlResponse, technology::Technology, Finding};
 use log::trace;

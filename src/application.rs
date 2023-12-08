@@ -54,6 +54,7 @@ use crate::checkers::wp_plugins::js_composer::JSComposerChecker;
 use crate::checkers::wp_plugins::revslider::RevSliderChecker;
 use crate::checkers::wp_plugins::woocommerce::WooCommerceChecker;
 use crate::checkers::wp_plugins::yoast_seo::YoastSEOChecker;
+use crate::checkers::wp_themes::divi::DiviChecker;
 use crate::checkers::{HttpChecker, TcpChecker};
 use crate::models::{reqres::UrlRequest, technology::Technology, Finding, ScanType, Writers};
 use crate::readers::http::HttpReader;
@@ -124,6 +125,7 @@ impl Application {
             Box::new(ElementsReadyLiteChecker::new()),
             Box::new(GTranslateChecker::new()),
             Box::new(WooCommerceChecker::new()),
+            Box::new(DiviChecker::new()),
         ];
 
         trace!("Returning the Application");

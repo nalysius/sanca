@@ -58,6 +58,8 @@ pub enum Technology {
     WPPElementsReadyLite,
     WPPGTranslate,
     WPPWooCommerce,
+    // WPT = WordPress Theme
+    WPTDivi,
 }
 
 impl Technology {
@@ -207,6 +209,12 @@ impl Technology {
                     ),
                 ]
             }
+            Self::WPTDivi => {
+                vec![
+                    UrlRequest::from_path(main_url, "/wp-content/themes/Divi/style.css", false),
+                    UrlRequest::from_path(main_url, "wp-content/themes/Divi/style.css", false),
+                ]
+            }
             Self::Melis => {
                 vec![UrlRequest::from_path(main_url, "/melis/login", false)]
             }
@@ -256,6 +264,7 @@ impl ValueEnum for Technology {
             Technology::WPPElementsReadyLite,
             Technology::WPPGTranslate,
             Technology::WPPWooCommerce,
+            Technology::WPTDivi,
         ]
     }
 
@@ -299,6 +308,7 @@ impl ValueEnum for Technology {
             Technology::WPPElementsReadyLite => Some(PossibleValue::new("elementreadylite")),
             Technology::WPPGTranslate => Some(PossibleValue::new("gtranslate")),
             Technology::WPPWooCommerce => Some(PossibleValue::new("woocommerce")),
+            Technology::WPTDivi => Some(PossibleValue::new("divi")),
         }
     }
 }
