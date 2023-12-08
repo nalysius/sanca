@@ -56,6 +56,7 @@ pub enum Technology {
     Melis,
     WPPElementor,
     WPPElementsReadyLite,
+    WPPGTranslate,
 }
 
 impl Technology {
@@ -191,6 +192,20 @@ impl Technology {
                     ),
                 ]
             }
+            Self::WPPGTranslate => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/gtranslate/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/gtranslate/readme.txt",
+                        false,
+                    ),
+                ]
+            }
             Self::Melis => {
                 vec![UrlRequest::from_path(main_url, "/melis/login", false)]
             }
@@ -238,6 +253,7 @@ impl ValueEnum for Technology {
             Technology::Melis,
             Technology::WPPElementor,
             Technology::WPPElementsReadyLite,
+            Technology::WPPGTranslate,
         ]
     }
 
@@ -279,6 +295,7 @@ impl ValueEnum for Technology {
             Technology::Melis => Some(PossibleValue::new("melis")),
             Technology::WPPElementor => Some(PossibleValue::new("elementor")),
             Technology::WPPElementsReadyLite => Some(PossibleValue::new("elementreadylite")),
+            Technology::WPPGTranslate => Some(PossibleValue::new("gtranslate")),
         }
     }
 }
