@@ -159,6 +159,20 @@ impl Technology {
             Self::Plesk => {
                 vec![UrlRequest::from_path(main_url, "/login_up.php", false)]
             }
+            Self::WPPYoastSEO => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/wordpress-seo/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/wordpress-seo/readme.txt",
+                        false,
+                    ),
+                ]
+            }
             Self::WPPContactForm => {
                 vec![
                     UrlRequest::from_path(

@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detection of WordPress plugin Really Simple SSL.
 - Detection of WordPress plugin Jetpack.
 
+### Changed
+
+- Detection of WordPress plugin YoastSEO can be done using a second way.
+
 ### Fixed
 
 - The reported URL of finding when a redirection occured.

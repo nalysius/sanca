@@ -29,7 +29,12 @@ impl<'a> YoastSEOChecker<'a> {
         )
         .unwrap();
 
+        // Example: Stable tag: 20.11
+        let readme_regex =
+            Regex::new(r#"(?P<wholematch>Stable tag: (?P<version>\d+\.\d+(\.\d+)?))"#).unwrap();
+
         regexes.insert("http-body-source", source_code_regex);
+        regexes.insert("http-body-readme", readme_regex);
         Self { regexes: regexes }
     }
 
@@ -59,6 +64,32 @@ impl<'a> YoastSEOChecker<'a> {
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
         }
+
+        if url_response
+            .url
+            .contains("/wp-content/plugins/wordpress-seo/readme.txt")
+        {
+            let caps_result = self
+                .regexes
+                .get("http-body-readme")
+                .expect("Regex \"http-body-readme\" not found.")
+                .captures(&url_response.body);
+
+            // The regex matches
+            if caps_result.is_some() {
+                info!("Regex YoaseSEO/http-body-readme matches");
+                let caps = caps_result.unwrap();
+                return Some(self.extract_finding_from_captures(
+                caps,
+                url_response,
+                30,
+                30,
+                "YoastSEO",
+                "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
+            ));
+            }
+        }
+
         None
     }
 }
@@ -69,7 +100,7 @@ impl<'a> HttpChecker for YoastSEOChecker<'a> {
         trace!("Running YoastSEOChecker::check_http()");
         let mut findings = Vec::new();
         for url_response in data {
-            // Search on the main page only
+            // Search on the main pages only
             if url_response.request_type != UrlRequestType::Default {
                 continue;
             }
@@ -108,6 +139,28 @@ mod tests {
             "YoastSEO",
             Some("20.11"),
             Some(url1),
+        );
+
+        let body2 = r#"=== Yoast SEO ===
+        Contributors: yoast, joostdevalk, tdevalk
+        Donate link: https://yoa.st/1up
+        License: GPLv3
+        License URI: http://www.gnu.org/licenses/gpl.html
+        Tags: SEO, XML sitemap, Content analysis, Readability, Schema
+        Tested up to: 6.4
+        Stable tag: 21.6
+        Requires PHP: 7.2.5"#;
+        let url2 = "https://www.example.com/blog/wp-content/plugins/wordpress-seo/readme.txt";
+        let url_response_valid =
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::Default, 200);
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "Stable tag: 21.6",
+            "YoastSEO",
+            Some("21.6"),
+            Some(url2),
         );
     }
 
@@ -148,6 +201,28 @@ mod tests {
             "YoastSEO",
             Some("20.01"),
             Some(url1),
+        );
+
+        let body2 = r#"=== Yoast SEO ===
+        Contributors: yoast, joostdevalk, tdevalk
+        Donate link: https://yoa.st/1up
+        License: GPLv3
+        License URI: http://www.gnu.org/licenses/gpl.html
+        Tags: SEO, XML sitemap, Content analysis, Readability, Schema
+        Tested up to: 6.4
+        Stable tag: 20.5
+        Requires PHP: 7.2.5"#;
+        let url2 = "https://www.example.com/wp-content/plugins/wordpress-seo/readme.txt";
+        let url_response_valid =
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::Default, 200);
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "Stable tag: 20.5",
+            "YoastSEO",
+            Some("20.5"),
+            Some(url2),
         );
     }
 
