@@ -63,6 +63,7 @@ pub enum Technology {
     WPPClassicEditor,
     WPPAkismet,
     WPPWpformsLite,
+    WPPAllInOneWpMigration,
 }
 
 impl Technology {
@@ -250,6 +251,20 @@ impl Technology {
                     ),
                 ]
             }
+            Self::WPPAllInOneWpMigration => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/all-in-one-wp-migration/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/all-in-one-wp-migration/readme.txt",
+                        false,
+                    ),
+                ]
+            }
             Self::WPTDivi => {
                 vec![
                     UrlRequest::from_path(main_url, "/wp-content/themes/Divi/style.css", false),
@@ -309,6 +324,7 @@ impl ValueEnum for Technology {
             Technology::WPPClassicEditor,
             Technology::WPPAkismet,
             Technology::WPPWpformsLite,
+            Technology::WPPAllInOneWpMigration,
         ]
     }
 
@@ -356,6 +372,7 @@ impl ValueEnum for Technology {
             Technology::WPPClassicEditor => Some(PossibleValue::new("classiceditor")),
             Technology::WPPAkismet => Some(PossibleValue::new("akismet")),
             Technology::WPPWpformsLite => Some(PossibleValue::new("wpformslite")),
+            Technology::WPPAllInOneWpMigration => Some(PossibleValue::new("allinonewpmigration")),
         }
     }
 }
