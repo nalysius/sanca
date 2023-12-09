@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detection of WordPress plugin Akismet.
 - Detection of WordPress plugin Wpforms lite.
 
+### Fixed
+
+- The reported URL of finding when a redirection occured.
+
 ## [1.0.0]
 
 ### Added

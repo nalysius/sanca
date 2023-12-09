@@ -205,10 +205,12 @@ impl HttpReader {
         }
 
         let status_code = response.status().as_u16();
+        // In case of redirection, the final URL will be stored & printed
+        let response_url = response.url().to_string();
         let body = response.text().await.unwrap_or("".to_string());
 
         Ok(UrlResponse::new(
-            &url_request.url,
+            &response_url,
             headers,
             &body,
             request_type,
