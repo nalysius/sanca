@@ -10,6 +10,7 @@ pub mod elementor;
 pub mod elements_ready_lite;
 pub mod gtranslate;
 pub mod js_composer;
+pub mod really_simple_ssl;
 pub mod revslider;
 pub mod woocommerce;
 pub mod wpforms_lite;
