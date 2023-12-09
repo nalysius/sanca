@@ -62,6 +62,7 @@ pub enum Technology {
     WPTDivi,
     WPPClassicEditor,
     WPPAkismet,
+    WPPWpformsLite,
 }
 
 impl Technology {
@@ -235,6 +236,20 @@ impl Technology {
                     UrlRequest::from_path(main_url, "wp-content/plugins/akismet/readme.txt", false),
                 ]
             }
+            Self::WPPWpformsLite => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/wpforms-lite/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/wpforms-lite/readme.txt",
+                        false,
+                    ),
+                ]
+            }
             Self::WPTDivi => {
                 vec![
                     UrlRequest::from_path(main_url, "/wp-content/themes/Divi/style.css", false),
@@ -293,6 +308,7 @@ impl ValueEnum for Technology {
             Technology::WPTDivi,
             Technology::WPPClassicEditor,
             Technology::WPPAkismet,
+            Technology::WPPWpformsLite,
         ]
     }
 
@@ -339,6 +355,7 @@ impl ValueEnum for Technology {
             Technology::WPTDivi => Some(PossibleValue::new("divi")),
             Technology::WPPClassicEditor => Some(PossibleValue::new("classiceditor")),
             Technology::WPPAkismet => Some(PossibleValue::new("akismet")),
+            Technology::WPPWpformsLite => Some(PossibleValue::new("wpformslite")),
         }
     }
 }

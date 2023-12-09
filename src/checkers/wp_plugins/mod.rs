@@ -11,4 +11,5 @@ pub mod gtranslate;
 pub mod js_composer;
 pub mod revslider;
 pub mod woocommerce;
+pub mod wpforms_lite;
 pub mod yoast_seo;

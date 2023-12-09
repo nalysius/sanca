@@ -55,6 +55,7 @@ use crate::checkers::wp_plugins::gtranslate::GTranslateChecker;
 use crate::checkers::wp_plugins::js_composer::JSComposerChecker;
 use crate::checkers::wp_plugins::revslider::RevSliderChecker;
 use crate::checkers::wp_plugins::woocommerce::WooCommerceChecker;
+use crate::checkers::wp_plugins::wpforms_lite::WpformsLiteChecker;
 use crate::checkers::wp_plugins::yoast_seo::YoastSEOChecker;
 use crate::checkers::wp_themes::divi::DiviChecker;
 use crate::checkers::{HttpChecker, TcpChecker};
@@ -130,6 +131,7 @@ impl Application {
             Box::new(DiviChecker::new()),
             Box::new(ClassicEditorChecker::new()),
             Box::new(AkismetChecker::new()),
+            Box::new(WpformsLiteChecker::new()),
         ];
 
         trace!("Returning the Application");
