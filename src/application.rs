@@ -46,6 +46,7 @@ use crate::checkers::reactjs::ReactJSChecker;
 use crate::checkers::tomcat::TomcatChecker;
 use crate::checkers::typo3::Typo3Checker;
 use crate::checkers::wordpress::WordPressChecker;
+use crate::checkers::wp_plugins::akismet::AkismetChecker;
 use crate::checkers::wp_plugins::classic_editor::ClassicEditorChecker;
 use crate::checkers::wp_plugins::contact_form::ContactFormChecker;
 use crate::checkers::wp_plugins::elementor::ElementorChecker;
@@ -128,6 +129,7 @@ impl Application {
             Box::new(WooCommerceChecker::new()),
             Box::new(DiviChecker::new()),
             Box::new(ClassicEditorChecker::new()),
+            Box::new(AkismetChecker::new()),
         ];
 
         trace!("Returning the Application");

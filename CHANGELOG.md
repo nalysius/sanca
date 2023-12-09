@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Detection of WordPress theme Divi.
 - Detection of WordPress plugin Classic Editor.
+- Detection of WordPress plugin Akismet.
 
 ## [1.0.0]
 

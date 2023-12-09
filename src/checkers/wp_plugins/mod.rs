@@ -2,6 +2,7 @@
 //! They have nothing special, they are standard checkers, but they are
 //! similar and grouping them in a module helps keeping a clean architecture.
 
+pub mod akismet;
 pub mod classic_editor;
 pub mod contact_form;
 pub mod elementor;
