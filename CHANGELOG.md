@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detection of WordPress plugin Wpforms lite.
 - Detection of WordPress plugin All-in-One WP Migration.
 - Detection of WordPress plugin Really Simple SSL.
+- Detection of WordPress plugin Jetpack.
 
 ### Fixed
 

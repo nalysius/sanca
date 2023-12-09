@@ -9,6 +9,7 @@ pub mod contact_form;
 pub mod elementor;
 pub mod elements_ready_lite;
 pub mod gtranslate;
+pub mod jetpack;
 pub mod js_composer;
 pub mod really_simple_ssl;
 pub mod revslider;

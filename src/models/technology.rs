@@ -65,6 +65,7 @@ pub enum Technology {
     WPPWpformsLite,
     WPPAllInOneWpMigration,
     WPPReallySimpleSSL,
+    WPPJetpack,
 }
 
 impl Technology {
@@ -280,6 +281,16 @@ impl Technology {
                     ),
                 ]
             }
+            Self::WPPJetpack => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/jetpack/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(main_url, "wp-content/plugins/jetpack/readme.txt", false),
+                ]
+            }
             Self::WPTDivi => {
                 vec![
                     UrlRequest::from_path(main_url, "/wp-content/themes/Divi/style.css", false),
@@ -341,6 +352,7 @@ impl ValueEnum for Technology {
             Technology::WPPWpformsLite,
             Technology::WPPAllInOneWpMigration,
             Technology::WPPReallySimpleSSL,
+            Technology::WPPJetpack,
         ]
     }
 
@@ -390,6 +402,7 @@ impl ValueEnum for Technology {
             Technology::WPPWpformsLite => Some(PossibleValue::new("wpformslite")),
             Technology::WPPAllInOneWpMigration => Some(PossibleValue::new("allinonewpmigration")),
             Technology::WPPReallySimpleSSL => Some(PossibleValue::new("reallysimplessl")),
+            Technology::WPPJetpack => Some(PossibleValue::new("jetpack")),
         }
     }
 }

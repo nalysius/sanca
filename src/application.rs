@@ -53,6 +53,7 @@ use crate::checkers::wp_plugins::contact_form::ContactFormChecker;
 use crate::checkers::wp_plugins::elementor::ElementorChecker;
 use crate::checkers::wp_plugins::elements_ready_lite::ElementsReadyLiteChecker;
 use crate::checkers::wp_plugins::gtranslate::GTranslateChecker;
+use crate::checkers::wp_plugins::jetpack::JetpackChecker;
 use crate::checkers::wp_plugins::js_composer::JSComposerChecker;
 use crate::checkers::wp_plugins::really_simple_ssl::ReallySimpleSSLChecker;
 use crate::checkers::wp_plugins::revslider::RevSliderChecker;
@@ -136,6 +137,7 @@ impl Application {
             Box::new(WpformsLiteChecker::new()),
             Box::new(AllInOneWpMigrationChecker::new()),
             Box::new(ReallySimpleSSLChecker::new()),
+            Box::new(JetpackChecker::new()),
         ];
 
         trace!("Returning the Application");
