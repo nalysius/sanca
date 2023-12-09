@@ -60,6 +60,7 @@ pub enum Technology {
     WPPWooCommerce,
     // WPT = WordPress Theme
     WPTDivi,
+    WPPClassicEditor,
 }
 
 impl Technology {
@@ -209,6 +210,20 @@ impl Technology {
                     ),
                 ]
             }
+            Self::WPPClassicEditor => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/classic-editor/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/classic-editor/readme.txt",
+                        false,
+                    ),
+                ]
+            }
             Self::WPTDivi => {
                 vec![
                     UrlRequest::from_path(main_url, "/wp-content/themes/Divi/style.css", false),
@@ -265,6 +280,7 @@ impl ValueEnum for Technology {
             Technology::WPPGTranslate,
             Technology::WPPWooCommerce,
             Technology::WPTDivi,
+            Technology::WPPClassicEditor,
         ]
     }
 
@@ -309,6 +325,7 @@ impl ValueEnum for Technology {
             Technology::WPPGTranslate => Some(PossibleValue::new("gtranslate")),
             Technology::WPPWooCommerce => Some(PossibleValue::new("woocommerce")),
             Technology::WPTDivi => Some(PossibleValue::new("divi")),
+            Technology::WPPClassicEditor => Some(PossibleValue::new("classiceditor")),
         }
     }
 }
