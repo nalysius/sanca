@@ -17,5 +17,6 @@ pub mod really_simple_ssl;
 pub mod revslider;
 pub mod woocommerce;
 pub mod wordfence;
+pub mod wp_mail_smtp;
 pub mod wpforms_lite;
 pub mod yoast_seo;

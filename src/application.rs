@@ -61,6 +61,7 @@ use crate::checkers::wp_plugins::really_simple_ssl::ReallySimpleSSLChecker;
 use crate::checkers::wp_plugins::revslider::RevSliderChecker;
 use crate::checkers::wp_plugins::woocommerce::WooCommerceChecker;
 use crate::checkers::wp_plugins::wordfence::WordfenceChecker;
+use crate::checkers::wp_plugins::wp_mail_smtp::WpMailSmtpChecker;
 use crate::checkers::wp_plugins::wpforms_lite::WpformsLiteChecker;
 use crate::checkers::wp_plugins::yoast_seo::YoastSEOChecker;
 use crate::checkers::wp_themes::divi::DiviChecker;
@@ -144,6 +145,7 @@ impl Application {
             Box::new(LiteSpeedCacheChecker::new()),
             Box::new(AllInOneSEOChecker::new()),
             Box::new(WordfenceChecker::new()),
+            Box::new(WpMailSmtpChecker::new()),
         ];
 
         trace!("Returning the Application");
