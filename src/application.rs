@@ -47,6 +47,7 @@ use crate::checkers::tomcat::TomcatChecker;
 use crate::checkers::typo3::Typo3Checker;
 use crate::checkers::wordpress::WordPressChecker;
 use crate::checkers::wp_plugins::akismet::AkismetChecker;
+use crate::checkers::wp_plugins::all_in_one_seo::AllInOneSEOChecker;
 use crate::checkers::wp_plugins::all_in_one_wp_migration::AllInOneWpMigrationChecker;
 use crate::checkers::wp_plugins::classic_editor::ClassicEditorChecker;
 use crate::checkers::wp_plugins::contact_form::ContactFormChecker;
@@ -140,6 +141,7 @@ impl Application {
             Box::new(ReallySimpleSSLChecker::new()),
             Box::new(JetpackChecker::new()),
             Box::new(LiteSpeedCacheChecker::new()),
+            Box::new(AllInOneSEOChecker::new()),
         ];
 
         trace!("Returning the Application");

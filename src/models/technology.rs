@@ -67,6 +67,7 @@ pub enum Technology {
     WPPReallySimpleSSL,
     WPPJetpack,
     WPPLiteSpeedCache,
+    WPPAllInOneSEO,
 }
 
 impl Technology {
@@ -162,6 +163,7 @@ impl Technology {
             }
             Self::WPPYoastSEO => {
                 vec![
+                    UrlRequest::new(main_url, false),
                     UrlRequest::from_path(
                         main_url,
                         "/wp-content/plugins/wordpress-seo/readme.txt",
@@ -316,6 +318,21 @@ impl Technology {
                     UrlRequest::from_path(main_url, "wp-content/plugins/jetpack/readme.txt", false),
                 ]
             }
+            Self::WPPAllInOneSEO => {
+                vec![
+                    UrlRequest::new(main_url, false),
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/all-in-one-seo-pack/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/all-in-one-seo-pack/readme.txt",
+                        false,
+                    ),
+                ]
+            }
             Self::WPTDivi => {
                 vec![
                     UrlRequest::from_path(main_url, "/wp-content/themes/Divi/style.css", false),
@@ -379,6 +396,7 @@ impl ValueEnum for Technology {
             Technology::WPPReallySimpleSSL,
             Technology::WPPJetpack,
             Technology::WPPLiteSpeedCache,
+            Technology::WPPAllInOneSEO,
         ]
     }
 
@@ -430,6 +448,7 @@ impl ValueEnum for Technology {
             Technology::WPPReallySimpleSSL => Some(PossibleValue::new("reallysimplessl")),
             Technology::WPPJetpack => Some(PossibleValue::new("jetpack")),
             Technology::WPPLiteSpeedCache => Some(PossibleValue::new("litespeedcache")),
+            Technology::WPPAllInOneSEO => Some(PossibleValue::new("allinoneseo")),
         }
     }
 }

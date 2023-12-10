@@ -3,6 +3,7 @@
 //! similar and grouping them in a module helps keeping a clean architecture.
 
 pub mod akismet;
+pub mod all_in_one_seo;
 pub mod all_in_one_wp_migration;
 pub mod classic_editor;
 pub mod contact_form;
