@@ -215,10 +215,10 @@ mod tests {
         let url2 = "https://www.example.com/wp-content/plugins/wordpress-seo/readme.txt";
         let url_response_valid =
             UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::Default, 200);
-        let finding = checker.check_http_body(&url_response_valid);
-        assert!(finding.is_some());
+        let finding = checker.check_http(&[url_response_valid]);
+        assert_eq!(1, finding.len());
         check_finding_fields(
-            &finding.unwrap(),
+            &finding[0],
             "Stable tag: 20.5",
             "YoastSEO",
             Some("20.5"),
