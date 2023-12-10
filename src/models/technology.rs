@@ -68,6 +68,7 @@ pub enum Technology {
     WPPJetpack,
     WPPLiteSpeedCache,
     WPPAllInOneSEO,
+    WPPWordfence,
 }
 
 impl Technology {
@@ -315,7 +316,11 @@ impl Technology {
                         "/wp-content/plugins/litespeed-cache/readme.txt",
                         false,
                     ),
-                    UrlRequest::from_path(main_url, "wp-content/plugins/jetpack/readme.txt", false),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/litespeed-cache/readme.txt",
+                        false,
+                    ),
                 ]
             }
             Self::WPPAllInOneSEO => {
@@ -329,6 +334,20 @@ impl Technology {
                     UrlRequest::from_path(
                         main_url,
                         "wp-content/plugins/all-in-one-seo-pack/readme.txt",
+                        false,
+                    ),
+                ]
+            }
+            Self::WPPWordfence => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/wordfence/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/wordfence/readme.txt",
                         false,
                     ),
                 ]
@@ -397,6 +416,7 @@ impl ValueEnum for Technology {
             Technology::WPPJetpack,
             Technology::WPPLiteSpeedCache,
             Technology::WPPAllInOneSEO,
+            Technology::WPPWordfence,
         ]
     }
 
@@ -449,6 +469,7 @@ impl ValueEnum for Technology {
             Technology::WPPJetpack => Some(PossibleValue::new("jetpack")),
             Technology::WPPLiteSpeedCache => Some(PossibleValue::new("litespeedcache")),
             Technology::WPPAllInOneSEO => Some(PossibleValue::new("allinoneseo")),
+            Technology::WPPWordfence => Some(PossibleValue::new("wordfence")),
         }
     }
 }

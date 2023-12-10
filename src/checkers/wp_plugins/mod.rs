@@ -16,5 +16,6 @@ pub mod litespeed_cache;
 pub mod really_simple_ssl;
 pub mod revslider;
 pub mod woocommerce;
+pub mod wordfence;
 pub mod wpforms_lite;
 pub mod yoast_seo;
