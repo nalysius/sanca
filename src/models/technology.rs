@@ -70,6 +70,7 @@ pub enum Technology {
     WPPAllInOneSEO,
     WPPWordfence,
     WPPWpMailSmtp,
+    WPPMc4wp,
 }
 
 impl Technology {
@@ -367,6 +368,20 @@ impl Technology {
                     ),
                 ]
             }
+            Self::WPPMc4wp => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/mailchimp-for-wp/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/mailchimp-for-wp/readme.txt",
+                        false,
+                    ),
+                ]
+            }
             Self::WPTDivi => {
                 vec![
                     UrlRequest::from_path(main_url, "/wp-content/themes/Divi/style.css", false),
@@ -433,6 +448,7 @@ impl ValueEnum for Technology {
             Technology::WPPAllInOneSEO,
             Technology::WPPWordfence,
             Technology::WPPWpMailSmtp,
+            Technology::WPPMc4wp,
         ]
     }
 
@@ -487,6 +503,7 @@ impl ValueEnum for Technology {
             Technology::WPPAllInOneSEO => Some(PossibleValue::new("allinoneseo")),
             Technology::WPPWordfence => Some(PossibleValue::new("wordfence")),
             Technology::WPPWpMailSmtp => Some(PossibleValue::new("wpmailsmtp")),
+            Technology::WPPMc4wp => Some(PossibleValue::new("mc4wp")),
         }
     }
 }

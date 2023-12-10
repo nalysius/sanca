@@ -57,6 +57,7 @@ use crate::checkers::wp_plugins::gtranslate::GTranslateChecker;
 use crate::checkers::wp_plugins::jetpack::JetpackChecker;
 use crate::checkers::wp_plugins::js_composer::JSComposerChecker;
 use crate::checkers::wp_plugins::litespeed_cache::LiteSpeedCacheChecker;
+use crate::checkers::wp_plugins::mailchimp_for_wp::Mc4wpChecker;
 use crate::checkers::wp_plugins::really_simple_ssl::ReallySimpleSSLChecker;
 use crate::checkers::wp_plugins::revslider::RevSliderChecker;
 use crate::checkers::wp_plugins::woocommerce::WooCommerceChecker;
@@ -146,6 +147,7 @@ impl Application {
             Box::new(AllInOneSEOChecker::new()),
             Box::new(WordfenceChecker::new()),
             Box::new(WpMailSmtpChecker::new()),
+            Box::new(Mc4wpChecker::new()),
         ];
 
         trace!("Returning the Application");
