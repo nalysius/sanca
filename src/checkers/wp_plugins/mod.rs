@@ -16,6 +16,7 @@ pub mod litespeed_cache;
 pub mod mailchimp_for_wp;
 pub mod really_simple_ssl;
 pub mod revslider;
+pub mod spectra;
 pub mod woocommerce;
 pub mod wordfence;
 pub mod wp_mail_smtp;

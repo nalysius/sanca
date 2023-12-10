@@ -71,6 +71,7 @@ pub enum Technology {
     WPPWordfence,
     WPPWpMailSmtp,
     WPPMc4wp,
+    WPPSpectra,
 }
 
 impl Technology {
@@ -382,6 +383,20 @@ impl Technology {
                     ),
                 ]
             }
+            Self::WPPSpectra => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/ultimate-addons-for-gutenberg/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/ultimate-addons-for-gutenberg/readme.txt",
+                        false,
+                    ),
+                ]
+            }
             Self::WPTDivi => {
                 vec![
                     UrlRequest::from_path(main_url, "/wp-content/themes/Divi/style.css", false),
@@ -449,6 +464,7 @@ impl ValueEnum for Technology {
             Technology::WPPWordfence,
             Technology::WPPWpMailSmtp,
             Technology::WPPMc4wp,
+            Technology::WPPSpectra,
         ]
     }
 
@@ -504,6 +520,7 @@ impl ValueEnum for Technology {
             Technology::WPPWordfence => Some(PossibleValue::new("wordfence")),
             Technology::WPPWpMailSmtp => Some(PossibleValue::new("wpmailsmtp")),
             Technology::WPPMc4wp => Some(PossibleValue::new("mc4wp")),
+            Technology::WPPSpectra => Some(PossibleValue::new("spectra")),
         }
     }
 }

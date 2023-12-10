@@ -60,6 +60,7 @@ use crate::checkers::wp_plugins::litespeed_cache::LiteSpeedCacheChecker;
 use crate::checkers::wp_plugins::mailchimp_for_wp::Mc4wpChecker;
 use crate::checkers::wp_plugins::really_simple_ssl::ReallySimpleSSLChecker;
 use crate::checkers::wp_plugins::revslider::RevSliderChecker;
+use crate::checkers::wp_plugins::spectra::SpectraChecker;
 use crate::checkers::wp_plugins::woocommerce::WooCommerceChecker;
 use crate::checkers::wp_plugins::wordfence::WordfenceChecker;
 use crate::checkers::wp_plugins::wp_mail_smtp::WpMailSmtpChecker;
@@ -148,6 +149,7 @@ impl Application {
             Box::new(WordfenceChecker::new()),
             Box::new(WpMailSmtpChecker::new()),
             Box::new(Mc4wpChecker::new()),
+            Box::new(SpectraChecker::new()),
         ];
 
         trace!("Returning the Application");

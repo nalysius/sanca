@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0]
+
 ### Added
 
 - Detection of WordPress theme Divi.
@@ -21,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detection of WordPress plugin Wordfence.
 - Detection of WordPress plugin WP Mail SMTP.
 - Detection of WordPress plugin MC4WP: Mailchimp for WordPress.
+- Detection of WordPress plugin Spectra.
 
 ### Changed
 
