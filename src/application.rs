@@ -55,6 +55,7 @@ use crate::checkers::wp_plugins::elements_ready_lite::ElementsReadyLiteChecker;
 use crate::checkers::wp_plugins::gtranslate::GTranslateChecker;
 use crate::checkers::wp_plugins::jetpack::JetpackChecker;
 use crate::checkers::wp_plugins::js_composer::JSComposerChecker;
+use crate::checkers::wp_plugins::litespeed_cache::LiteSpeedCacheChecker;
 use crate::checkers::wp_plugins::really_simple_ssl::ReallySimpleSSLChecker;
 use crate::checkers::wp_plugins::revslider::RevSliderChecker;
 use crate::checkers::wp_plugins::woocommerce::WooCommerceChecker;
@@ -138,6 +139,7 @@ impl Application {
             Box::new(AllInOneWpMigrationChecker::new()),
             Box::new(ReallySimpleSSLChecker::new()),
             Box::new(JetpackChecker::new()),
+            Box::new(LiteSpeedCacheChecker::new()),
         ];
 
         trace!("Returning the Application");
