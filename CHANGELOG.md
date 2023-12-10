@@ -27,7 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- The reported URL of finding when a redirection occured.
+- The reported URL of finding when a redirection occured is now the one from
+  the redirect, no longer the one of initial request.
+- The reported URL of finding no longer contains a single quote if there was
+  a query string and the HTML contained the URL between single quotes.
 
 ## [1.0.0]
 
