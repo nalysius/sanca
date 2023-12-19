@@ -27,7 +27,15 @@ impl<'a> Typo3Checker<'a> {
             r#"(?P<wholematch>"typo3\/cms-core" *: *"(?P<version>\d+\.\d+\.\d+(\.\d+)?)")"#,
         )
         .unwrap();
+
+        // Example: <meta name="generator" content="TYPO3 4.7 CMS">
+        let source_code_regex = Regex::new(
+            r#"(?P<wholematch><meta\s+name\s*=\s*['"][Gg]enerator['"]\s+content\s*=\s*['"]TYPO3 (?P<version>\d+\.\d+(\.\d+)?)\s+CMS['"]\s*/?>)"#,
+        )
+        .unwrap();
+
         regexes.insert("http-body-composer", composer_regex);
+        regexes.insert("http-body-source", source_code_regex);
         Self { regexes: regexes }
     }
 
@@ -37,6 +45,26 @@ impl<'a> Typo3Checker<'a> {
             "Running Typo3Checker::check_http_body() on {}",
             url_response.url
         );
+
+        let caps_result = self
+            .regexes
+            .get("http-body-source")
+            .expect("Regex \"http-body-source\" not found.")
+            .captures(&url_response.body);
+
+        // The regex matches
+        if caps_result.is_some() {
+            info!("Regex TYPO3/http-body-source matches");
+            let caps = caps_result.unwrap();
+            return Some(self.extract_finding_from_captures(
+                caps,
+                url_response,
+                30,
+                30,
+                "TYPO3",
+                "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$")
+        );
+        }
 
         // This regex is not restrictive and could generate false positive
         // results, so restrict its usage on URLs containing composer.json
@@ -110,6 +138,14 @@ mod tests {
             Some("4.7.1"),
             Some(url),
         );
+
+        let url2 = "http://www.example.com/";
+        let body2 = r#"<title>test</title><meta name = "generator" content="TYPO3 4.7 CMS">"#;
+        let url_response_valid1 =
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::Default, 200);
+        let finding = checker.check_http_body(&url_response_valid1);
+        assert!(finding.is_some());
+        check_finding_fields(&finding.unwrap(), "4.7", "TYPO3", Some("4.7"), Some(url2));
     }
 
     #[test]
@@ -124,6 +160,13 @@ mod tests {
             200,
         );
         let finding = checker.check_http_body(&url_response_invalid);
+        assert!(finding.is_none());
+
+        let url2 = "http://www.example.com/";
+        let body2 = r#"&lt;title&gt;test&lt;/title&gt;&lt;meta name="Generator"  content ="TYPO3 4.7 CMS" /&gt;"#;
+        let url_response_valid1 =
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::Default, 200);
+        let finding = checker.check_http_body(&url_response_valid1);
         assert!(finding.is_none());
     }
 
@@ -150,6 +193,14 @@ mod tests {
             Some("4.7.2.8"),
             Some(url1),
         );
+
+        let url2 = "http://www.example.com/";
+        let body2 = r#"<title>test</title><meta name = "generator" content="TYPO3 4.7 CMS">"#;
+        let url_response_valid1 =
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::Default, 200);
+        let finding = checker.check_http(&[url_response_valid1]);
+        assert_eq!(1, finding.len());
+        check_finding_fields(&finding[0], "4.7", "TYPO3", Some("4.7"), Some(url2));
     }
 
     #[test]
@@ -174,5 +225,13 @@ mod tests {
         );
         let findings = checker.check_http(&[url_response_invalid1, url_response_invalid2]);
         assert!(findings.is_empty());
+
+        let url3 = "http://www.example.com/";
+        let body3 =
+            r#"&lt;title>test&lt;/title>&lt;meta name= "Generator" content="TYPO3 4.7 CMS"/>"#;
+        let url_response_valid3 =
+            UrlResponse::new(url3, HashMap::new(), body3, UrlRequestType::Default, 200);
+        let finding = checker.check_http(&[url_response_valid3]);
+        assert!(finding.is_empty());
     }
 }

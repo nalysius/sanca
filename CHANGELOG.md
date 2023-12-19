@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Detection of TYPO3 CMS using the <meta> tag.
+
 ## [1.1.0]
 
 ### Added
