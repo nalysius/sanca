@@ -40,11 +40,18 @@ impl<'a> HandlebarsChecker<'a> {
         // Example: VERSION="2.0.0";__exports__.VERSION=VERSION[...]HandlebarsEnvironment
         let source_code_regex_alternative = Regex::new(r#"(?P<wholematch>VERSION\s*=\s*['"](?P<version>\d+\.\d+\.\d+)['"]+[,;]__exports__\.VERSION\s*=\s*VERSION.+HandlebarsEnvironment)"#).unwrap();
 
+        // Example: HandlebarsEnvironment;[...]b="4.7.7";An.VERSION=b;
+        let source_code_regex_alternative_2 = Regex::new(r#"(?P<wholematch>VERSION\s*=\s*['"](?P<version>\d+\.\d+\.\d+)['"];.+HandlebarsEnvironment)"#).unwrap();
+
         regexes.insert("http-body-comment", comment_regex);
         regexes.insert("http-body-source", source_code_regex);
         regexes.insert(
             "http-body-source-alternative",
             source_code_regex_alternative,
+        );
+        regexes.insert(
+            "http-body-source-alternative-2",
+            source_code_regex_alternative_2,
         );
         Self { regexes: regexes }
     }
@@ -114,6 +121,27 @@ impl<'a> HandlebarsChecker<'a> {
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
         }
+
+        let caps_result = self
+            .regexes
+            .get("http-body-source-alternative-2")
+            .expect("Regex \"http-body-source-alternative-2\" not found.")
+            .captures(&url_response.body);
+
+        // The regex matches
+        if caps_result.is_some() {
+            info!("Regex Handlebars/http-body-source-alternative-2 matches");
+            let caps = caps_result.unwrap();
+            return Some(self.extract_finding_from_captures(
+                caps,
+                url_response,
+                30,
+                30,
+                "Handlebars",
+                "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
+            ));
+        }
+
         None
     }
 }
@@ -170,6 +198,18 @@ mod tests {
             "var1=\"4.7.7\"",
             "Handlebars",
             Some("4.7.7"),
+            Some(url1),
+        );
+
+        let body3 = r#"VERSION="3.0.1";a=2;start.HandlebarsEnvironment;e=mc2"#;
+        url_response_valid.body = body3.to_string();
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "VERSION=\"3.0.1\"",
+            "Handlebars",
+            Some("3.0.1"),
             Some(url1),
         );
     }
@@ -288,6 +328,27 @@ mod tests {
             "handlebars v4.7.7",
             "Handlebars",
             Some("4.7.7"),
+            Some(url2),
+        );
+
+        let body3 = r#"r.VERSION ='3.0.0';c=6;r.COMPILER_REVISION=c;y="[object Object]";return r.HandlebarsEnvironment=s"#;
+        let url3 = "https://www.example.com/g.js";
+        let url_response_valid =
+            UrlResponse::new(url3, HashMap::new(), body3, UrlRequestType::JavaScript, 200);
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/invalid/path.php",
+            HashMap::new(),
+            "nothing to find in body",
+            UrlRequestType::Default,
+            200,
+        );
+        let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
+        assert_eq!(1, findings.len());
+        check_finding_fields(
+            &findings[0],
+            "VERSION ='3.0.0'",
+            "Handlebars",
+            Some("3.0.0"),
             Some(url2),
         );
     }

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New regex for minified Handlebars JS.
+
 ### Changed
 
 - Detection of TYPO3 CMS using the <meta> tag.
