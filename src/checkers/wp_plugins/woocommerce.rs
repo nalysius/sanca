@@ -25,7 +25,7 @@ impl<'a> WooCommerceChecker<'a> {
 
         // Example: <meta name="generator" content="WooCommerce 7.1.0" />
         let source_code_regex = Regex::new(
-            r#"<meta\s+name\s*=\s*"[Gg]enerator"\s+content\s*=\s*"(?P<wholematch>WooCommerce\s+(?P<version>\d+\.\d+(\.\d+)?)" />)"#,
+            r#"(?P<wholematch><meta\s+name\s*=\s*"[Gg]enerator"\s+content\s*=\s*"WooCommerce\s+(?P<version>\d+\.\d+(\.\d+)?)"\s*/>)"#,
         )
         .unwrap();
 

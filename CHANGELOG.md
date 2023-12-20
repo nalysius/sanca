@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Detection of TYPO3 CMS using the <meta> tag.
 
+### Fixed
+
+- The evidence for WooCommerce was incomplete.
+
 ## [1.1.0]
 
 ### Added
