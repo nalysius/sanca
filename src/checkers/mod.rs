@@ -38,6 +38,7 @@ pub mod plesk;
 pub mod proftpd;
 pub mod pureftpd;
 pub mod reactjs;
+pub mod squirrel_mail;
 pub mod tomcat;
 pub mod typo3;
 pub mod wordpress;

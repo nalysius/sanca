@@ -72,6 +72,7 @@ pub enum Technology {
     WPPWpMailSmtp,
     WPPMc4wp,
     WPPSpectra,
+    SquirrelMail,
 }
 
 impl Technology {
@@ -406,6 +407,12 @@ impl Technology {
             Self::Melis => {
                 vec![UrlRequest::from_path(main_url, "/melis/login", false)]
             }
+            Self::SquirrelMail => {
+                vec![
+                    UrlRequest::from_path(main_url, "src/login.php", false),
+                    UrlRequest::from_path(main_url, "/squirrelmail/src/login.php", false),
+                ]
+            }
             _ => vec![UrlRequest::new(main_url, true)],
         }
     }
@@ -465,6 +472,7 @@ impl ValueEnum for Technology {
             Technology::WPPWpMailSmtp,
             Technology::WPPMc4wp,
             Technology::WPPSpectra,
+            Technology::SquirrelMail,
         ]
     }
 
@@ -521,6 +529,7 @@ impl ValueEnum for Technology {
             Technology::WPPWpMailSmtp => Some(PossibleValue::new("wpmailsmtp")),
             Technology::WPPMc4wp => Some(PossibleValue::new("mc4wp")),
             Technology::WPPSpectra => Some(PossibleValue::new("spectra")),
+            Technology::SquirrelMail => Some(PossibleValue::new("squirrelmail")),
         }
     }
 }

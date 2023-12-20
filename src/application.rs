@@ -43,6 +43,7 @@ use crate::checkers::plesk::PleskChecker;
 use crate::checkers::proftpd::ProFTPDChecker;
 use crate::checkers::pureftpd::PureFTPdChecker;
 use crate::checkers::reactjs::ReactJSChecker;
+use crate::checkers::squirrel_mail::SquirrelMailChecker;
 use crate::checkers::tomcat::TomcatChecker;
 use crate::checkers::typo3::Typo3Checker;
 use crate::checkers::wordpress::WordPressChecker;
@@ -150,6 +151,7 @@ impl Application {
             Box::new(WpMailSmtpChecker::new()),
             Box::new(Mc4wpChecker::new()),
             Box::new(SpectraChecker::new()),
+            Box::new(SquirrelMailChecker::new()),
         ];
 
         trace!("Returning the Application");
