@@ -212,17 +212,20 @@ impl<'a> OSChecker<'a> {
         versions.insert(("ubuntu", "apache", "2.4.54"), "22.10");
         versions.insert(("ubuntu", "apache", "2.4.55"), "23.04");
         versions.insert(("ubuntu", "apache", "2.4.57"), "23.10");
+        versions.insert(("ubuntu", "apache", "2.4.58"), "24.04");
 
         // Ubuntu / Nginx
         versions.insert(("ubuntu", "nginx", "1.14.0"), "18.04");
         versions.insert(("ubuntu", "nginx", "1.18.0"), "20.04|22.04");
         versions.insert(("ubuntu", "nginx", "1.22.0"), "22.10|23.04");
+        versions.insert(("ubuntu", "nginx", "1.24.0"), "24.04");
 
         // Ubuntu / OpenSSH
         versions.insert(("ubuntu", "openssh", "7.6"), "18.04");
         versions.insert(("ubuntu", "openssh", "8.2"), "20.04");
         versions.insert(("ubuntu", "openssh", "8.9"), "22.04");
         versions.insert(("ubuntu", "openssh", "9.0"), "22.10|23.04");
+        versions.insert(("ubuntu", "openssh", "9.4"), "24.04");
 
         // Debian / Apache httpd
         versions.insert(("debian", "apache", "2.2.22"), "7");
@@ -230,17 +233,20 @@ impl<'a> OSChecker<'a> {
         versions.insert(("debian", "apache", "2.4.38"), "10");
         versions.insert(("debian", "apache", "2.4.54"), "11");
         versions.insert(("debian", "apache", "2.4.57"), "12");
+        versions.insert(("debian", "apache", "2.4.58"), "13");
 
         // Debian / Nginx
         versions.insert(("debian", "nginx", "1.14.2"), "10");
         versions.insert(("debian", "nginx", "1.18.0"), "11");
         versions.insert(("debian", "nginx", "1.22.1"), "12");
+        versions.insert(("debian", "nginx", "1.24.0"), "13");
 
         // Debian / OpenSSH
         versions.insert(("debian", "openssh", "6.7"), "8");
         versions.insert(("debian", "openssh", "7.9"), "10");
         versions.insert(("debian", "openssh", "8.4"), "11");
         versions.insert(("debian", "openssh", "9.2"), "12");
+        versions.insert(("debian", "openssh", "9.5"), "13");
 
         // Oracle / OpenSSL
         versions.insert(("oracle", "openssl", "3.0.1"), "9.1");
