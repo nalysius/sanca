@@ -30,7 +30,7 @@ impl<'a> PhpMyAdminChecker<'a> {
         // Example: 5.2.0 (2022-05-10)
         // The first version encountered in the ChangeLog is the latest
         let changelog_regex = Regex::new(
-            r"^(?P<wholematch>(?P<version>\d+\.\d+\.\d+(\.\d+)?) \(\d\d\d\d-\d\d-\d\d\))",
+            r"(?P<wholematch>(?P<version>\d+\.\d+\.\d+(\.\d+)?) \(\d\d\d\d-\d\d-\d\d\))",
         )
         .unwrap();
         regexes.insert("http-body-documentation", documentation_regex);

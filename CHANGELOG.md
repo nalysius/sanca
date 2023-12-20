@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - The evidence for WooCommerce was incomplete.
+- Detection for phpMyAdmin from ChangeLog.
 
 ## [1.1.0]
 
