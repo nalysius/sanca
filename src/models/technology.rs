@@ -146,6 +146,8 @@ impl Technology {
                     UrlRequest::from_path(main_url, "/mysql/doc/html/index.html", false),
                     UrlRequest::from_path(main_url, "ChangeLog", false),
                     UrlRequest::from_path(main_url, "/phpmyadmin/ChangeLog", false),
+                    UrlRequest::from_path(main_url, "/phpMyAdmin/ChangeLog", false),
+                    UrlRequest::from_path(main_url, "/phpMyAdmin/doc/html/index.html", false),
                 ]
             }
             Self::Typo3 => {

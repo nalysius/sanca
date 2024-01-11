@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New regex for minified Handlebars JS.
 - Detection of SquirrelMail.
 - Detection of Ubuntu 24.04 & Debian 13.
+- Two new paths to search for phpMyAdmin.
 
 ### Changed
 
