@@ -29,6 +29,12 @@ impl<'a> OSChecker<'a> {
         )
         .unwrap();
 
+        // Example: SSH-2.0-OpenSSH_for_Windows_9.5
+        let openssh_windows_regex = Regex::new(
+            r"^SSH-\d+\.\d+-OpenSSH_for_(?P<os>Windows)_(?P<version>\d+\.\d+)([a-z]\d+)?",
+        )
+        .unwrap();
+
         // Example: 5.5.5-10.3.17-MariaDB-0+deb10u1�4H1\\9H?D��-��s8\H3e'-Lx9Omysql_native_password
         //
         // Actually, detect only Debian with deb|bpo
@@ -51,6 +57,7 @@ impl<'a> OSChecker<'a> {
         let body_nginx_regex = Regex::new(r"<hr><center>(?P<wholematch>nginx(\/(?P<version>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\))))</center>").unwrap();
 
         regexes.insert("openssh-banner", openssh_regex);
+        regexes.insert("openssh-windows-banner", openssh_windows_regex);
         regexes.insert("mariadb-banner", mariadb_regex);
         regexes.insert("http-header", header_regex);
         regexes.insert("http-body-apache", body_apache_regex);
@@ -266,11 +273,30 @@ impl<'a> TcpChecker for OSChecker<'a> {
         // For each item, check if it's an OpenSSH banner
         for item in data {
             trace!("Checking item: {}", item);
-            let caps_result = self
+
+            // Avoid duplicating the whole handling of OpenSSH
+            // It's similar between Windows and the rest, only the regex
+            // is different to keep them clean.
+            let caps_result_default = self
                 .regexes
                 .get("openssh-banner")
                 .expect("Regex \"openssh-banner\" not found.")
                 .captures(item);
+
+            let caps_result_windows = self
+                .regexes
+                .get("openssh-windows-banner")
+                .expect("Regex \"openssh-windows-banner\" not found.")
+                .captures(item);
+
+            let caps_result = if caps_result_default.is_some() {
+                caps_result_default
+            } else if caps_result_windows.is_some() {
+                caps_result_windows
+            } else {
+                None
+            };
+
             // The regex matches
             if caps_result.is_some() {
                 info!("Regex OS/openssh-banner matches");

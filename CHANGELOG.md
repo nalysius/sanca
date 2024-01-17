@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detection of SquirrelMail.
 - Detection of Ubuntu 24.04 & Debian 13.
 - Two new paths to search for phpMyAdmin.
+- Detection of OpenSSH for Windows.
+- Detection of Windows OS.
 
 ### Changed
 
