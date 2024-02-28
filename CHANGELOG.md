@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Two new paths to search for phpMyAdmin.
 - Detection of OpenSSH for Windows.
 - Detection of Windows OS.
+- Detection of CentOS 8 and 9.
 
 ### Changed
 

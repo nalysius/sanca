@@ -260,6 +260,8 @@ impl<'a> OSChecker<'a> {
 
         // CentOS / Apache httpd
         versions.insert(("centos", "apache", "2.4.6"), "7");
+        versions.insert(("centos", "apache", "2.4.37"), "8");
+        versions.insert(("centos", "apache", "2.4.57"), "9");
 
         versions.get(&(&os, &software, &version)).copied()
     }
