@@ -37,6 +37,7 @@ use crate::checkers::nginx::NginxChecker;
 use crate::checkers::openssh::OpenSSHChecker;
 use crate::checkers::openssl::OpenSSLChecker;
 use crate::checkers::os::OSChecker;
+use crate::checkers::phonesystem_3cx::PhoneSystem3CXChecker;
 use crate::checkers::php::PHPChecker;
 use crate::checkers::phpmyadmin::PhpMyAdminChecker;
 use crate::checkers::plesk::PleskChecker;
@@ -152,6 +153,7 @@ impl Application {
             Box::new(Mc4wpChecker::new()),
             Box::new(SpectraChecker::new()),
             Box::new(SquirrelMailChecker::new()),
+            Box::new(PhoneSystem3CXChecker::new()),
         ];
 
         trace!("Returning the Application");

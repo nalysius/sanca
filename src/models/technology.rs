@@ -73,6 +73,7 @@ pub enum Technology {
     WPPMc4wp,
     WPPSpectra,
     SquirrelMail,
+    PhoneSystem3CX,
 }
 
 impl Technology {
@@ -416,6 +417,9 @@ impl Technology {
                     UrlRequest::from_path(main_url, "/squirrelmail/src/login.php", false),
                 ]
             }
+            Self::PhoneSystem3CX => {
+                vec![UrlRequest::from_path(main_url, "/webclient/", true)]
+            }
             _ => vec![UrlRequest::new(main_url, true)],
         }
     }
@@ -476,6 +480,7 @@ impl ValueEnum for Technology {
             Technology::WPPMc4wp,
             Technology::WPPSpectra,
             Technology::SquirrelMail,
+            Technology::PhoneSystem3CX,
         ]
     }
 
@@ -533,6 +538,7 @@ impl ValueEnum for Technology {
             Technology::WPPMc4wp => Some(PossibleValue::new("mc4wp")),
             Technology::WPPSpectra => Some(PossibleValue::new("spectra")),
             Technology::SquirrelMail => Some(PossibleValue::new("squirrelmail")),
+            Technology::PhoneSystem3CX => Some(PossibleValue::new("phonesystem3cx")),
         }
     }
 }

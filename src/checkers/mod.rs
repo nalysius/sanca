@@ -32,6 +32,7 @@ pub mod nginx;
 pub mod openssh;
 pub mod openssl;
 pub mod os;
+pub mod phonesystem_3cx;
 pub mod php;
 pub mod phpmyadmin;
 pub mod plesk;
