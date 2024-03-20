@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detection of Windows OS.
 - Detection of CentOS 8 and 9.
 - Detection of 3CX Phone System.
+- Detection of Prestashop CMS.
 
 ### Changed
 

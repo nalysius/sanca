@@ -36,6 +36,7 @@ pub mod phonesystem_3cx;
 pub mod php;
 pub mod phpmyadmin;
 pub mod plesk;
+pub mod prestashop;
 pub mod proftpd;
 pub mod pureftpd;
 pub mod reactjs;

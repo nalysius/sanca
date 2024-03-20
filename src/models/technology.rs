@@ -74,6 +74,7 @@ pub enum Technology {
     WPPSpectra,
     SquirrelMail,
     PhoneSystem3CX,
+    Prestashop,
 }
 
 impl Technology {
@@ -420,6 +421,13 @@ impl Technology {
             Self::PhoneSystem3CX => {
                 vec![UrlRequest::from_path(main_url, "/webclient/", true)]
             }
+            Self::Prestashop => {
+                vec![UrlRequest::from_path(
+                    main_url,
+                    "/docs/CHANGELOG.txt",
+                    false,
+                )]
+            }
             _ => vec![UrlRequest::new(main_url, true)],
         }
     }
@@ -481,6 +489,7 @@ impl ValueEnum for Technology {
             Technology::WPPSpectra,
             Technology::SquirrelMail,
             Technology::PhoneSystem3CX,
+            Technology::Prestashop,
         ]
     }
 
@@ -539,6 +548,7 @@ impl ValueEnum for Technology {
             Technology::WPPSpectra => Some(PossibleValue::new("spectra")),
             Technology::SquirrelMail => Some(PossibleValue::new("squirrelmail")),
             Technology::PhoneSystem3CX => Some(PossibleValue::new("phonesystem3cx")),
+            Technology::Prestashop => Some(PossibleValue::new("prestashop")),
         }
     }
 }

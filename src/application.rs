@@ -41,6 +41,7 @@ use crate::checkers::phonesystem_3cx::PhoneSystem3CXChecker;
 use crate::checkers::php::PHPChecker;
 use crate::checkers::phpmyadmin::PhpMyAdminChecker;
 use crate::checkers::plesk::PleskChecker;
+use crate::checkers::prestashop::PrestashopChecker;
 use crate::checkers::proftpd::ProFTPDChecker;
 use crate::checkers::pureftpd::PureFTPdChecker;
 use crate::checkers::reactjs::ReactJSChecker;
@@ -154,6 +155,7 @@ impl Application {
             Box::new(SpectraChecker::new()),
             Box::new(SquirrelMailChecker::new()),
             Box::new(PhoneSystem3CXChecker::new()),
+            Box::new(PrestashopChecker::new()),
         ];
 
         trace!("Returning the Application");
