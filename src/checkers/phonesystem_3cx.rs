@@ -76,7 +76,7 @@ mod tests {
     use crate::models::reqres::UrlRequestType;
 
     #[test]
-    fn comment_matches() {
+    fn source_matches() {
         let checker = PhoneSystem3CXChecker::new();
         let body1 = r#"var a = {name:"Webclient",version: "18.0.9.20"}"#;
         let url1 = "https://www.example.com/that.jsp?abc=def";
@@ -98,7 +98,7 @@ mod tests {
         assert!(finding.is_some());
         check_finding_fields(
             &finding.unwrap(),
-            "version: '18.0.8.17'",
+            "version:'18.0.8.17'",
             "3CXPhoneSystem",
             Some("18.0.8.17"),
             Some(url1),

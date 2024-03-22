@@ -24,11 +24,21 @@ impl<'a> PrestashopChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: Release Notes for PrestaShop 1.7
         //
-        // #   v1.7.8.7 - (2022-07-20)
+        // ####################################
+        // #   v1.7.4 - (2022-10-04)
+        // ####################################
+        //
+        // OR
+        //
+        // Changelog for PrestaShop 8
+        //
+        // ####################################
+        // #   v8.1.4 - (2024-02-12)
+        // ####################################
         //
         // The first version encountered in the ChangeLog is the latest
         let changelog_regex = Regex::new(
-            r"(?s).+Release\s+Notes\s+for\s+PrestaShop\s+\d\.\d..####################################.#\s+(?P<wholematch>v(?P<version>\d+\.\d+\.\d+(\.\d+)?)\s+-\s+\(\d\d\d\d-\d\d-\d\d\))",
+            r"(?s).*(Release\s+Notes\s+for\s+PrestaShop\s+\d\.\d|Changelog\s+for\s+PrestaShop\s+\d)..\s*#+.\s*#\s+(?P<wholematch>v(?P<version>\d+\.\d+\.\d+(\.\d+)?)\s+-\s+\(\d\d\d\d-\d\d-\d\d\))",
         )
         .unwrap();
         regexes.insert("http-body-changelog", changelog_regex);
@@ -101,17 +111,19 @@ mod tests {
     #[test]
     fn source_code_matches() {
         let checker = PrestashopChecker::new();
-        let body1 = r#"Release Notes for PrestaShop 1.7\n\n#   1.7.3 - (2022-05-10)"#;
+        let body1 = "Release Notes for PrestaShop 1.7\n\n####################################\n#   v1.7.4 - (2022-10-04)";
         let url1 = "https://www.example.com/docs/CHANGELOG.txt";
+        let mut url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default, 200);
         url_response_valid.body = body1.to_string();
         url_response_valid.url = url1.to_string();
         let finding = checker.check_http_body(&url_response_valid);
         assert!(finding.is_some());
         check_finding_fields(
             &finding.unwrap(),
-            "1.7.3 - (2022-05-10)",
+            "1.7.4 - (2022-10-04)",
             "Prestashop",
-            Some("1.7.3"),
+            Some("1.7.4"),
             Some(url1),
         );
     }
@@ -134,8 +146,8 @@ mod tests {
     #[test]
     fn finds_match_in_url_responses() {
         let checker = PrestashopChecker::new();
-        let body1 = "Release Notes for PrestaShop 1.6\n\n#   v1.6.4.1 - (2020-05-17)";
-        let url1 = "https://www.example.com/shop/docs/mysql/ChangeLog";
+        let body1 = "Changelog for PrestaShop 8\n\n####################################\n#   v8.1.4 - (2024-02-12)";
+        let url1 = "https://www.example.com/shop/docs/CHANGELOG.txt";
         let url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default, 200);
         let url_response_invalid = UrlResponse::new(
@@ -149,9 +161,9 @@ mod tests {
         assert_eq!(1, findings.len());
         check_finding_fields(
             &findings[0],
-            "1.6.4.1 (2020-05-17)",
+            "8.1.4 - (2024-02-12)",
             "Prestashop",
-            Some("1.6.4.1"),
+            Some("8.1.4"),
             Some(url1),
         );
     }
