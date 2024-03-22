@@ -28,6 +28,7 @@ use crate::checkers::gsap::GsapChecker;
 use crate::checkers::handlebars::HandlebarsChecker;
 use crate::checkers::highcharts::HighchartsChecker;
 use crate::checkers::httpd::ApacheHttpdChecker;
+use crate::checkers::jira::JiraChecker;
 use crate::checkers::jquery::JQueryChecker;
 use crate::checkers::lodash::LodashChecker;
 use crate::checkers::mariadb::MariaDBChecker;
@@ -156,6 +157,7 @@ impl Application {
             Box::new(SquirrelMailChecker::new()),
             Box::new(PhoneSystem3CXChecker::new()),
             Box::new(PrestashopChecker::new()),
+            Box::new(JiraChecker::new()),
         ];
 
         trace!("Returning the Application");

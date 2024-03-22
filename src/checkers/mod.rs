@@ -23,6 +23,7 @@ pub mod gsap;
 pub mod handlebars;
 pub mod highcharts;
 pub mod httpd;
+pub mod jira;
 pub mod jquery;
 pub mod lodash;
 pub mod mariadb;

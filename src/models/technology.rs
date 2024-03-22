@@ -75,6 +75,7 @@ pub enum Technology {
     SquirrelMail,
     PhoneSystem3CX,
     Prestashop,
+    Jira,
 }
 
 impl Technology {
@@ -490,6 +491,7 @@ impl ValueEnum for Technology {
             Technology::SquirrelMail,
             Technology::PhoneSystem3CX,
             Technology::Prestashop,
+            Technology::Jira,
         ]
     }
 
@@ -549,6 +551,7 @@ impl ValueEnum for Technology {
             Technology::SquirrelMail => Some(PossibleValue::new("squirrelmail")),
             Technology::PhoneSystem3CX => Some(PossibleValue::new("phonesystem3cx")),
             Technology::Prestashop => Some(PossibleValue::new("prestashop")),
+            Technology::Jira => Some(PossibleValue::new("jira")),
         }
     }
 }
