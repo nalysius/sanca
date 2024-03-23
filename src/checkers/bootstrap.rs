@@ -24,7 +24,7 @@ impl<'a> BootstrapChecker<'a> {
         // Example: /*!
         //           * Bootstrap v5.2.3 (https://getbootstrap.com/)
         let comment_regex = Regex::new(
-            r"\s*\*\s*(?P<wholematch>Bootstrap v(?P<version>\d+\.\d+\.\d+))\s+\(https?:\/\/getbootstrap.com\/?\)",
+            r".*\*\s*(?P<wholematch>Bootstrap v(?P<version>\d+\.\d+\.\d+(-[a-z0-9]+)?))\s+\(https?:\/\/getbootstrap.com\/?\)",
         )
         .unwrap();
 
@@ -216,7 +216,7 @@ mod tests {
     #[test]
     fn finds_match_in_url_responses() {
         let checker = BootstrapChecker::new();
-        let body1 = r#"* Bootstrap v5.3.0 (https://getbootstrap.com/)"#;
+        let body1 = r#"* Bootstrap v5.3.0-beta (https://getbootstrap.com/)"#;
         let url1 = "https://www.example.com/a.js";
         let url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript, 200);
@@ -231,9 +231,9 @@ mod tests {
         assert_eq!(1, findings.len());
         check_finding_fields(
             &findings[0],
-            "Bootstrap v5.3.0",
+            "Bootstrap v5.3.0-beta",
             "Bootstrap",
-            Some("5.3.0"),
+            Some("5.3.0-beta"),
             Some(url1),
         );
 

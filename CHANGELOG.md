@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The evidence for WooCommerce was incomplete.
 - Detection for phpMyAdmin from ChangeLog.
+- Bootstrap wasn't detected in some situations.
 
 ## [1.1.0]
 
