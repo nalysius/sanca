@@ -42,7 +42,7 @@ impl HttpReader {
         let http_client = Client::builder()
             .danger_accept_invalid_certs(true)
             .build()
-            .expect("Unable to create an HTTP client.");
+            .expect("Unable to create a HTTP client.");
 
         // Here we store all the Futures of the http requests
         // They will be handled all together in parallel
