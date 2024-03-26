@@ -1,5 +1,5 @@
 use log::debug;
-use sanca::application::Application;
+use sanca_software::application::Application;
 
 fn main() {
     //simple_logger::init_with_level(log::Level::Info).unwrap();
