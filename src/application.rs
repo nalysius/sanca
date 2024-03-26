@@ -48,6 +48,8 @@ use crate::checkers::pureftpd::PureFTPdChecker;
 use crate::checkers::reactjs::ReactJSChecker;
 use crate::checkers::squirrel_mail::SquirrelMailChecker;
 use crate::checkers::tomcat::TomcatChecker;
+use crate::checkers::twisted::TwistedChecker;
+use crate::checkers::twistedweb::TwistedWebChecker;
 use crate::checkers::typo3::Typo3Checker;
 use crate::checkers::wordpress::WordPressChecker;
 use crate::checkers::wp_plugins::akismet::AkismetChecker;
@@ -158,6 +160,8 @@ impl Application {
             Box::new(PhoneSystem3CXChecker::new()),
             Box::new(PrestashopChecker::new()),
             Box::new(JiraChecker::new()),
+	    Box::new(TwistedChecker::new()),
+	    Box::new(TwistedWebChecker::new()),
         ];
 
         trace!("Returning the Application");

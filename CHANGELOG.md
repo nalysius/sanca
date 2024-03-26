@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detection of 3CX Phone System.
 - Detection of Prestashop CMS.
 - Detection of Jira.
+- Detection or Twisted.
+- Detection of TwistedWeb.
 
 ### Changed
 

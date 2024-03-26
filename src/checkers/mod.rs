@@ -43,6 +43,8 @@ pub mod pureftpd;
 pub mod reactjs;
 pub mod squirrel_mail;
 pub mod tomcat;
+pub mod twisted;
+pub mod twistedweb;
 pub mod typo3;
 pub mod wordpress;
 pub mod wp_plugins;

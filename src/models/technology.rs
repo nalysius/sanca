@@ -76,6 +76,8 @@ pub enum Technology {
     PhoneSystem3CX,
     Prestashop,
     Jira,
+    Twisted,
+    TwistedWeb,
 }
 
 impl Technology {
@@ -492,6 +494,8 @@ impl ValueEnum for Technology {
             Technology::PhoneSystem3CX,
             Technology::Prestashop,
             Technology::Jira,
+	    Technology::Twisted,
+	    Technology::TwistedWeb,
         ]
     }
 
@@ -552,6 +556,8 @@ impl ValueEnum for Technology {
             Technology::PhoneSystem3CX => Some(PossibleValue::new("phonesystem3cx")),
             Technology::Prestashop => Some(PossibleValue::new("prestashop")),
             Technology::Jira => Some(PossibleValue::new("jira")),
+	    Technology::Twisted => Some(PossibleValue::new("twisted")),
+	    Technology::TwistedWeb => Some(PossibleValue::new("twistedweb")),
         }
     }
 }
