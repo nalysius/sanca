@@ -78,6 +78,7 @@ pub enum Technology {
     Jira,
     Twisted,
     TwistedWeb,
+    Symfony,
 }
 
 impl Technology {
@@ -101,8 +102,8 @@ impl Technology {
     /// # Examples
     ///
     /// ```rust
-    /// let technology = sanca::models::technology::Technology::OpenSSH;
-    /// assert!(technology.supports_scan(sanca::models::ScanType::Tcp));
+    /// let technology = sanca_software::models::technology::Technology::OpenSSH;
+    /// assert!(technology.supports_scan(sanca_software::models::ScanType::Tcp));
     /// ```
     pub fn supports_scan(&self, scan_type: ScanType) -> bool {
         self.get_scans().contains(&scan_type)
@@ -431,6 +432,9 @@ impl Technology {
                     false,
                 )]
             }
+            Self::Symfony => {
+                vec![UrlRequest::new(main_url, false)]
+            }
             _ => vec![UrlRequest::new(main_url, true)],
         }
     }
@@ -494,8 +498,9 @@ impl ValueEnum for Technology {
             Technology::PhoneSystem3CX,
             Technology::Prestashop,
             Technology::Jira,
-	    Technology::Twisted,
-	    Technology::TwistedWeb,
+            Technology::Twisted,
+            Technology::TwistedWeb,
+            Technology::Symfony,
         ]
     }
 
@@ -556,8 +561,9 @@ impl ValueEnum for Technology {
             Technology::PhoneSystem3CX => Some(PossibleValue::new("phonesystem3cx")),
             Technology::Prestashop => Some(PossibleValue::new("prestashop")),
             Technology::Jira => Some(PossibleValue::new("jira")),
-	    Technology::Twisted => Some(PossibleValue::new("twisted")),
-	    Technology::TwistedWeb => Some(PossibleValue::new("twistedweb")),
+            Technology::Twisted => Some(PossibleValue::new("twisted")),
+            Technology::TwistedWeb => Some(PossibleValue::new("twistedweb")),
+            Technology::Symfony => Some(PossibleValue::new("symfony")),
         }
     }
 }

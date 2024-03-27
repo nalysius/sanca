@@ -47,6 +47,7 @@ use crate::checkers::proftpd::ProFTPDChecker;
 use crate::checkers::pureftpd::PureFTPdChecker;
 use crate::checkers::reactjs::ReactJSChecker;
 use crate::checkers::squirrel_mail::SquirrelMailChecker;
+use crate::checkers::symfony::SymfonyChecker;
 use crate::checkers::tomcat::TomcatChecker;
 use crate::checkers::twisted::TwistedChecker;
 use crate::checkers::twistedweb::TwistedWebChecker;
@@ -160,8 +161,9 @@ impl Application {
             Box::new(PhoneSystem3CXChecker::new()),
             Box::new(PrestashopChecker::new()),
             Box::new(JiraChecker::new()),
-	    Box::new(TwistedChecker::new()),
-	    Box::new(TwistedWebChecker::new()),
+            Box::new(TwistedChecker::new()),
+            Box::new(TwistedWebChecker::new()),
+            Box::new(SymfonyChecker::new()),
         ];
 
         trace!("Returning the Application");

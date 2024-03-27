@@ -42,6 +42,7 @@ pub mod proftpd;
 pub mod pureftpd;
 pub mod reactjs;
 pub mod squirrel_mail;
+pub mod symfony;
 pub mod tomcat;
 pub mod twisted;
 pub mod twistedweb;
