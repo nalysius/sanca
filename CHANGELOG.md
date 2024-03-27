@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Detection of Symfony.
 
+### Changed
+
+- PHP can be detected from the Symfony profiler.
+
 ## [1.2.0]
 
 ### Added
