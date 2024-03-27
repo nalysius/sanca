@@ -22,7 +22,7 @@ impl<'a> TwistedChecker<'a> {
     /// reused.
     pub fn new() -> Self {
         let mut regexes = HashMap::new();
-	// Example: Twisted/16.5.0 TwistedWeb/8.3.0
+        // Example: Twisted/16.5.0 TwistedWeb/8.3.0
         let header_regex =
             Regex::new(r"(?P<wholematch>.*Twisted\/(?P<version>\d+\.\d+\.\d+).*)").unwrap();
 
@@ -37,8 +37,7 @@ impl<'a> TwistedChecker<'a> {
             url_response.url
         );
         // Check the HTTP headers of each UrlResponse
-        let headers_to_check =
-            url_response.get_headers(&vec!["Server".to_string()]);
+        let headers_to_check = url_response.get_headers(&vec!["Server".to_string()]);
 
         // Check in the headers to check that were present in this UrlResponse
         for (header_name, header_value) in headers_to_check {
@@ -129,12 +128,17 @@ mod tests {
 
         let mut headers2 = HashMap::new();
         headers2.insert("Accept".to_string(), "text/html".to_string());
-        headers2.insert("Server".to_string(), "nginx/1.22.0 (CentOS)".to_string());
-        headers2.insert("X-powered-by".to_string(), "Twisted/7.4.9".to_string());
+        headers2.insert("Server".to_string(), "nginx/1.22.0 (CentOS) Twisted/7.4.8" .to_string());
         url_response_valid.headers = headers2;
         let finding = checker.check_http_headers(&url_response_valid);
         assert!(finding.is_some());
-        check_finding_fields(&finding.unwrap(), "Twisted/7.4.9", "Twisted", Some("7.4.9"), Some(url1));
+        check_finding_fields(
+            &finding.unwrap(),
+            "Twisted/7.4.8",
+            "Twisted",
+            Some("7.4.8"),
+            Some(url1),
+        );
     }
 
     #[test]
@@ -182,7 +186,13 @@ mod tests {
         );
         let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
         assert_eq!(1, findings.len());
-        check_finding_fields(&findings[0], "Twisted/8.1.1", "Twisted", Some("8.1.1"), Some(url2));
+        check_finding_fields(
+            &findings[0],
+            "Twisted/8.1.1",
+            "Twisted",
+            Some("8.1.1"),
+            Some(url1),
+        );
     }
 
     #[test]
@@ -190,7 +200,10 @@ mod tests {
         let checker = TwistedChecker::new();
         let mut headers1 = HashMap::new();
         headers1.insert("Accept".to_string(), "text/html".to_string());
-        headers1.insert("Server".to_string(), "Twisted/7.1.4 Apache/2.4.52".to_string());
+        headers1.insert(
+            "Server".to_string(),
+            "Twisted/7.1.4 Apache/2.4.52".to_string(),
+        );
         let url_response_invalid1 = UrlResponse::new(
             "https://www.example.com/abc-1/de-f1",
             headers1,
