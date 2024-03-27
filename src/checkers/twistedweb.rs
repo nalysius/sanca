@@ -128,7 +128,10 @@ mod tests {
 
         let mut headers2 = HashMap::new();
         headers2.insert("Accept".to_string(), "text/html".to_string());
-        headers2.insert("Server".to_string(), "nginx/1.22.0 (CentOS) TwistedWeb/7.4.9".to_string());
+        headers2.insert(
+            "Server".to_string(),
+            "nginx/1.22.0 (CentOS) TwistedWeb/7.4.9".to_string(),
+        );
         url_response_valid.headers = headers2;
         let finding = checker.check_http_headers(&url_response_valid);
         assert!(finding.is_some());
