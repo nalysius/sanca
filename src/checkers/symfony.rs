@@ -31,7 +31,7 @@ impl<'a> SymfonyChecker<'a> {
         //    </div>
         // (?s) means the . character matches also newlines
         let source_code_regex =
-            Regex::new(r#"(?s).*<h2>Symfony Configuration</h2>.+(?P<wholematch><span\s+class\s*=\s*['"]value['"]>(?P<version>\d+\.\d+\.\d+)</span>).+<span class="label">Symfony version</span>"#).unwrap();
+            Regex::new(r#"(?s).*<h2>Symfony Configuration</h2>.+(?P<wholematch><span\s+class\s*=\s*['"]value['"]\s*>(?P<version>\d+\.\d+\.\d+)</span>).+<span class="label">Symfony version</span>"#).unwrap();
         regexes.insert("http-body-source", source_code_regex);
         Self { regexes: regexes }
     }
@@ -99,17 +99,22 @@ mod tests {
     #[test]
     fn source_code_matches() {
         let checker = SymfonyChecker::new();
-        let body1 = r#"   <span class="sf-toolbar-value">4.6.19</span> "#;
-        let url1 = "https://www.example.com/";
+        let body1 = r#" <h2>Symfony Configuration</h2>
+            <div class="metrics">
+              <div class="metric">
+               <span class="value">4.1.2</span>
+               <span class="label">Symfony version</span>
+            </div>"#;
+        let url1 = "https://www.example.com/_profiler/abc123?panel=config";
         let url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default, 200);
         let finding = checker.check_http_body(&url_response_valid);
         assert!(finding.is_some());
         check_finding_fields(
             &finding.unwrap(),
-            "sf-toolbar-value\">4.6.19",
+            "<span class=\"value\">4.1.2</span>",
             "Symfony",
-            Some("4.6.19"),
+            Some("4.1.2"),
             Some(url1),
         );
     }
@@ -132,8 +137,12 @@ mod tests {
     #[test]
     fn finds_match_in_url_responses() {
         let checker = SymfonyChecker::new();
-        let body1 = r#"    <span class = 'sf-toolbar-value'>5.4.11</span>   "#;
-        let url1 = "https://www.example.com/app/";
+        let body1 = r#"<h2>Symfony Configuration</h2>
+              <div class='metrics'>
+               <div class = "metric">
+                <span class='value'>4.1.2</span>
+                 <span class="label">Symfony version</span>"#;
+        let url1 = "https://www.example.com/app/_profiler/1f3a8c?panel=config";
         let url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default, 200);
         let url_response_invalid = UrlResponse::new(
@@ -147,9 +156,9 @@ mod tests {
         assert_eq!(1, findings.len());
         check_finding_fields(
             &findings[0],
-            "sf-toolbar-value'>5.4.11",
+            "<span class='value'>4.1.2</span>",
             "Symfony",
-            Some("5.4.11"),
+            Some("4.1.2"),
             Some(url1),
         );
     }
