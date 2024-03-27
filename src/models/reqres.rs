@@ -84,14 +84,14 @@ impl UrlRequest {
     /// ```rust
     /// let main_url = "https://example.com/blog/index.php";
     /// let path = "/phpinfo.php";
-    /// let url_request = sanca::models::reqres::UrlRequest::from_path(main_url, path, false);
+    /// let url_request = sanca_software::models::reqres::UrlRequest::from_path(main_url, path, false);
     /// assert_eq!("https://example.com/phpinfo.php", url_request.url);
     /// ```
     ///
     /// ```rust
     /// let main_url = "https://example.com/blog/index.php";
     /// let path = "phpinfo.php"; // Note the absence of / at the beginning
-    /// let url_request = sanca::models::reqres::UrlRequest::from_path(main_url, path, false);
+    /// let url_request = sanca_software::models::reqres::UrlRequest::from_path(main_url, path, false);
     /// assert_eq!("https://example.com/blog/phpinfo.php", url_request.url);
     /// ```
     pub fn from_path(main_url: &str, path_to: &str, fetch_js: bool) -> Self {
@@ -190,7 +190,7 @@ impl UrlRequest {
     /// # Examples
     ///
     /// ```rust
-    /// let url_request = sanca::models::reqres::UrlRequest::new("https://www.example.com/index.php", false);
+    /// let url_request = sanca_software::models::reqres::UrlRequest::new("https://www.example.com/index.php", false);
     /// let (hostname, port) = url_request.get_hostname_port();
     /// assert_eq!("www.example.com", hostname);
     /// assert_eq!(443, port);
