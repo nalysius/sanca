@@ -34,8 +34,9 @@ impl HttpReader<'_> {
 
         // Example: Sfjs.loadToolbar('c32ea2')
         let symfony_debug_toolbar_regex = Regex::new(
-            r#"<script[^>]*>.*Sfjs.loadToolbar\(['"](?P<profilertoken>[a-f0-9]+)['"]\)"#
-        ).unwrap();
+            r#"<script[^>]*>.*Sfjs.loadToolbar\(['"](?P<profilertoken>[a-f0-9]+)['"]\)"#,
+        )
+        .unwrap();
 
         let mut url_regexes = HashMap::new();
         url_regexes.insert("scripts", script_regex);
@@ -116,7 +117,7 @@ impl HttpReader<'_> {
         let main_response_body = main_response.body.clone();
         responses.push(main_response);
 
-	let mut next_urls_requests = Vec::new();
+        let mut next_urls_requests = Vec::new();
         if url_request.fetch_js {
             debug!("Fetch JS is true for URL {}", url_request.url);
             next_urls_requests =
@@ -125,26 +126,25 @@ impl HttpReader<'_> {
                 "The following URLs have been found in the response body: {:?}",
                 next_urls_requests
             );
-	}
+        }
 
-	// Search if the Symfony toolbar is present on the page. If so, generate
-	// a UrlRequest for the profiler
-	let url_requests_symfony = self.extract_symfony(&url_request.url, &main_response_body);
-	if url_requests_symfony.is_some() {
-	    next_urls_requests.push(url_requests_symfony.unwrap());
-	}
-	
+        // Search if the Symfony toolbar is present on the page. If so, generate
+        // a UrlRequest for the profiler
+        let url_requests_symfony = self.extract_symfony(&url_request.url, &main_response_body);
+        if url_requests_symfony.is_some() {
+            next_urls_requests.push(url_requests_symfony.unwrap());
+        }
+
         // Here we store all the Futures of the http requests
         // They will be handled all together in parallel
         let url_responses_futures = next_urls_requests.iter().map(|i| {
-	    let request_type = if i.fetch_js {
-		UrlRequestType::JavaScript
-	    } else {
-		UrlRequestType::Default
-	    };
+            let request_type = if i.fetch_js {
+                UrlRequestType::JavaScript
+            } else {
+                UrlRequestType::Default
+            };
 
-            let response_future =
-                self.http_request(&i, &http_client, request_type, user_agent);
+            let response_future = self.http_request(&i, &http_client, request_type, user_agent);
             response_future
         });
 
@@ -175,12 +175,7 @@ impl HttpReader<'_> {
         user_agent: &str,
     ) -> Result<UrlResponse, String> {
         trace!("Running HttpReader::http_request()");
-        let mime_type = if request_type == UrlRequestType::JavaScript {
-            "application/javascript"
-        } else {
-            "text/html"
-        };
-
+        let mime_type = "text/html,application/javascript,*/*;q=0.8";
         let response_result = http_client
             .get(&url_request.url)
             .header("User-Agent", user_agent)
@@ -254,7 +249,11 @@ impl HttpReader<'_> {
     ) -> Vec<UrlRequest> {
         let mut url_requests: Vec<UrlRequest> = Vec::new();
 
-        let caps = self.url_regexes.get(regex_name).unwrap().captures_iter(data);
+        let caps = self
+            .url_regexes
+            .get(regex_name)
+            .unwrap()
+            .captures_iter(data);
         for rmatch in caps {
             let mut url_or_path = rmatch.name("url").unwrap().as_str().to_string();
             let found_protocol = rmatch.name("protocol");
@@ -293,13 +292,21 @@ impl HttpReader<'_> {
     /// Search the Symfony toolbar and if found, return a UrlRequest to
     /// find the Symfony version.
     pub fn extract_symfony(&self, url: &str, data: &str) -> Option<UrlRequest> {
-	let caps = self.url_regexes.get("symfony_debug_toolbar").unwrap().captures_iter(data);
+        let caps = self
+            .url_regexes
+            .get("symfony_debug_toolbar")
+            .unwrap()
+            .captures_iter(data);
         for rmatch in caps {
             let token = rmatch.name("profilertoken");
             if token.is_some() {
-		return Some(UrlRequest::from_path(url, &format!("_profiler/{}/?panel=config",token.unwrap().as_str()), false))
+                return Some(UrlRequest::from_path(
+                    url,
+                    &format!("_profiler/{}/?panel=config", token.unwrap().as_str()),
+                    false,
+                ));
             }
         }
-	return None
+        return None;
     }
 }
