@@ -20,18 +20,29 @@ use crate::models::reqres::{UrlRequest, UrlRequestType, UrlResponse};
 ///
 /// The `HttpReader` works asynchronously, to fetch all data in a minimum amount
 /// of time.
-pub struct HttpReader {
+pub struct HttpReader<'a> {
     /// The regex to find URLs
-    url_regex: Regex,
+    url_regexes: HashMap<&'a str, Regex>,
 }
 
-impl HttpReader {
+impl HttpReader<'_> {
     /// Creates a new HttpReader
     pub fn new() -> Self {
-        let url_regex = Regex::new(
+        let script_regex = Regex::new(
             r#"<script[^>]+src\s*=\s*["']?\s*(?P<url>(((?P<protocol>[a-z0-9]+):)?\/\/(?P<hostname>[^\/:]+)(:(?P<port>\d{1,5}))?)?(?P<path>\/?[a-zA-Z0-9\/._ %@-]*(?P<extension>\.[a-zA-Z0-9_-]+)?)?(?P<querystring>\?[^#\s'">]*)?(#[^'">\s]*)?)\s*["']?"#
         ).unwrap();
-        HttpReader { url_regex }
+
+        // Example: Sfjs.loadToolbar('c32ea2')
+        let symfony_debug_toolbar_regex = Regex::new(
+            r#"<script[^>]*>.*Sfjs.loadToolbar\(['"](?P<profilertoken>[a-f0-9]+)['"]\)"#
+        ).unwrap();
+
+        let mut url_regexes = HashMap::new();
+        url_regexes.insert("scripts", script_regex);
+        url_regexes.insert("symfony_debug_toolbar", symfony_debug_toolbar_regex);
+        HttpReader {
+            url_regexes: url_regexes,
+        }
     }
 
     /// Reads via HTTP(S)
@@ -105,37 +116,50 @@ impl HttpReader {
         let main_response_body = main_response.body.clone();
         responses.push(main_response);
 
+	let mut next_urls_requests = Vec::new();
         if url_request.fetch_js {
             debug!("Fetch JS is true for URL {}", url_request.url);
-            let url_requests_js =
-                // Don't provide extension here, some scripts don't use the .js
-                self.extract_urls(&url_request.url, &main_response_body, None);
+            next_urls_requests =
+                self.extract_urls(&url_request.url, &main_response_body, None, "scripts");
             info!(
                 "The following URLs have been found in the response body: {:?}",
-                url_requests_js
+                next_urls_requests
             );
+	}
 
-            // Here we store all the Futures of the http requests
-            // They will be handled all together in parallel
-            let url_responses_futures = url_requests_js.iter().map(|i| {
-                let response_future =
-                    self.http_request(&i, &http_client, UrlRequestType::JavaScript, user_agent);
-                response_future
-            });
+	// Search if the Symfony toolbar is present on the page. If so, generate
+	// a UrlRequest for the profiler
+	let url_requests_symfony = self.extract_symfony(&url_request.url, &main_response_body);
+	if url_requests_symfony.is_some() {
+	    next_urls_requests.push(url_requests_symfony.unwrap());
+	}
+	
+        // Here we store all the Futures of the http requests
+        // They will be handled all together in parallel
+        let url_responses_futures = next_urls_requests.iter().map(|i| {
+	    let request_type = if i.fetch_js {
+		UrlRequestType::JavaScript
+	    } else {
+		UrlRequestType::Default
+	    };
 
-            trace!("Waiting for all the subsequent HTTP requests to be handled");
-            // Send all the HTTP requests, and wait for the result
-            let responses_results = join_all(url_responses_futures).await;
-            trace!("Subsequent HTTP requests handled");
-            // Add each successfull response to the list
-            // responses_results is a Vec<Result<Vec<UrlResponse>, String>>
-            // so we have to unpack each Result and concatenate all the
-            // Vec<UrlResponse>
-            for response_result in responses_results {
-                if response_result.is_ok() {
-                    let response = response_result.unwrap();
-                    responses.push(response);
-                }
+            let response_future =
+                self.http_request(&i, &http_client, request_type, user_agent);
+            response_future
+        });
+
+        trace!("Waiting for all the subsequent HTTP requests to be handled");
+        // Send all the HTTP requests, and wait for the result
+        let responses_results = join_all(url_responses_futures).await;
+        trace!("Subsequent HTTP requests handled");
+        // Add each successfull response to the list
+        // responses_results is a Vec<Result<Vec<UrlResponse>, String>>
+        // so we have to unpack each Result and concatenate all the
+        // Vec<UrlResponse>
+        for response_result in responses_results {
+            if response_result.is_ok() {
+                let response = response_result.unwrap();
+                responses.push(response);
             }
         }
 
@@ -221,16 +245,16 @@ impl HttpReader {
     /// Extract all URLs from a given string, and return them optionnally
     /// filtered on the given extension.
     /// It can be used to extract only JavaScript or CSS files.
-    ///
-    /// Note: the extension MUST contain the dot: ".js", ".css" etc
     pub fn extract_urls(
         &self,
         request_url: &str,
         data: &str,
         extension: Option<&str>,
+        regex_name: &str,
     ) -> Vec<UrlRequest> {
         let mut url_requests: Vec<UrlRequest> = Vec::new();
-        let caps = self.url_regex.captures_iter(data);
+
+        let caps = self.url_regexes.get(regex_name).unwrap().captures_iter(data);
         for rmatch in caps {
             let mut url_or_path = rmatch.name("url").unwrap().as_str().to_string();
             let found_protocol = rmatch.name("protocol");
@@ -262,6 +286,20 @@ impl HttpReader {
                 url_requests.push(UrlRequest::from_path(request_url, &url_or_path, false));
             }
         }
+
         url_requests
+    }
+
+    /// Search the Symfony toolbar and if found, return a UrlRequest to
+    /// find the Symfony version.
+    pub fn extract_symfony(&self, url: &str, data: &str) -> Option<UrlRequest> {
+	let caps = self.url_regexes.get("symfony_debug_toolbar").unwrap().captures_iter(data);
+        for rmatch in caps {
+            let token = rmatch.name("profilertoken");
+            if token.is_some() {
+		return Some(UrlRequest::from_path(url, &format!("_profiler/{}/?panel=config",token.unwrap().as_str()), false))
+            }
+        }
+	return None
     }
 }
