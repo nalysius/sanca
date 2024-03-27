@@ -22,14 +22,14 @@ impl<'a> SymfonyChecker<'a> {
     /// reused.
     pub fn new() -> Self {
         let mut regexes = HashMap::new();
-	// Example:
-	// <h2>Symfony Configuration</h2>
-	//    <div class="metrics">
+        // Example:
+        // <h2>Symfony Configuration</h2>
+        //    <div class="metrics">
         //      <div class="metric">
         //       <span class="value">4.1.21</span>
         //       <span class="label">Symfony version</span>
         //    </div>
-	// (?s) means the . character matches also newlines
+        // (?s) means the . character matches also newlines
         let source_code_regex =
             Regex::new(r#"(?s).*<h2>Symfony Configuration</h2>.+(?P<wholematch><span\s+class\s*=\s*['"]value['"]>(?P<version>\d+\.\d+\.\d+)</span>).+<span class="label">Symfony version</span>"#).unwrap();
         regexes.insert("http-body-source", source_code_regex);
