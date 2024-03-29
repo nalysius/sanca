@@ -74,7 +74,7 @@ impl PartialEq for Finding {
 }
 
 /// An enum to match the available writers
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Writers {
     /// StdoutWriter
     TextStdout,

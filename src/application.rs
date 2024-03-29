@@ -84,6 +84,8 @@ use crate::writers::Writer;
 
 use log::{debug, error, info, trace};
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 /// Represents the application
 pub struct Application {
     /// The list of TCP checkers available to the application.
@@ -92,11 +94,13 @@ pub struct Application {
     http_checkers: Vec<Box<dyn HttpChecker>>,
     /// The arguments given on the command line.
     argv: Option<Args>,
+    /// Whether to print the header
+    show_header: bool,
 }
 
 impl Application {
     /// Creates a new application
-    pub fn new() -> Self {
+    pub fn new(show_header: bool) -> Self {
         trace!("In Application::new()");
         trace!("About to create the tcp_checkers list");
         // When a new checker is created, it has to be instanciated here
@@ -171,6 +175,7 @@ impl Application {
             tcp_checkers,
             http_checkers,
             argv: None,
+            show_header,
         }
     }
 
@@ -308,14 +313,26 @@ impl Application {
         findings
     }
 
+    /// Prints the header of the program.
+    pub fn print_header(&self) {
+        println!("Sanca software v{} - https://www.sanca.io\n", VERSION);
+    }
+
     /// Runs the global application
     /// read_argv() MUST have been called before
     pub fn run(&self) {
         trace!("Running Application::run()");
+
         let args = self
             .argv
             .as_ref()
             .expect("CLI arguments haven't been read.");
+
+        if self.show_header && Writers::TextStdout == args.writer {
+            trace!("Showing header");
+            self.print_header();
+        }
+
         trace!("Checking args.scan_type");
         let findings: Vec<Finding> = match args.scan_type {
             ScanType::Tcp | ScanType::Udp => {
