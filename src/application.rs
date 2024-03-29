@@ -94,13 +94,11 @@ pub struct Application {
     http_checkers: Vec<Box<dyn HttpChecker>>,
     /// The arguments given on the command line.
     argv: Option<Args>,
-    /// Whether to print the header
-    show_header: bool,
 }
 
 impl Application {
     /// Creates a new application
-    pub fn new(show_header: bool) -> Self {
+    pub fn new() -> Self {
         trace!("In Application::new()");
         trace!("About to create the tcp_checkers list");
         // When a new checker is created, it has to be instanciated here
@@ -175,7 +173,6 @@ impl Application {
             tcp_checkers,
             http_checkers,
             argv: None,
-            show_header,
         }
     }
 
@@ -328,7 +325,7 @@ impl Application {
             .as_ref()
             .expect("CLI arguments haven't been read.");
 
-        if self.show_header && Writers::TextStdout == args.writer {
+        if !args.hide_header && Writers::TextStdout == args.writer {
             trace!("Showing header");
             self.print_header();
         }
@@ -402,4 +399,7 @@ pub struct Args {
     /// The user agent
     #[arg(short('a'), long, value_name = "USER_AGENT", default_value = "Sanca")]
     pub user_agent: String,
+    /// Hide the header with the URL to the Sanca's website
+    #[arg(short('e'), long)]
+    pub hide_header: bool,
 }
