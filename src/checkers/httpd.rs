@@ -26,8 +26,8 @@ impl<'a> ApacheHttpdChecker<'a> {
         let header_regex =
             Regex::new(r"^(?P<wholematch>.*Apache(\/(?P<version>\d+(\.\d+(\.\d+)?)?))?.*)")
                 .unwrap();
-        // Example: <address>Apache/2.4.52 (Debian) Server at localhost Port 80</address>
-        let body_regex = Regex::new(r"<address>(?P<wholematch>Apache((\/(?P<version>\d+\.\d+\.\d+)( \([^\)]+\)))? Server at (<a href=.[a-zA-Z0-9.@:+_-]*.>)?[a-zA-Z0-9-.]+(</a>)? Port \d+)?)</address>").unwrap();
+        // Example: <address>Apache/2.4.52 (Debian) OpenSSL/1.1.1 Server at localhost Port 80</address>
+        let body_regex = Regex::new(r"<address>(?P<wholematch>Apache((\/(?P<version>\d+\.\d+\.\d+)( \([^\)]+\)))?( [a-zA-Z0-9/\.]+)? Server at (<a href=.[a-zA-Z0-9.@:+_-]*.>)?[a-zA-Z0-9-.]+(</a>)? Port \d+)?)</address>").unwrap();
 
         regexes.insert("http-header", header_regex);
         regexes.insert("http-body", body_regex);
@@ -55,7 +55,7 @@ impl<'a> ApacheHttpdChecker<'a> {
 
             // The regex matches
             if caps_result.is_some() {
-                info!("Regex ApacheHttpd/http-header matches");
+                info!("Regex ApacheHttpdChecker/http-header matches");
                 let caps = caps_result.unwrap();
                 return Some(self.extract_finding_from_captures(caps, url_response, 45, 45, "Apache httpd", &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)));
             }
@@ -77,7 +77,7 @@ impl<'a> ApacheHttpdChecker<'a> {
 
         // The regex matches
         if caps_result.is_some() {
-            info!("Regex ApacheHttpd/http-body matches");
+            info!("Regex ApacheHttpdChecker/http-body matches");
             let caps = caps_result.unwrap();
             return Some(self.extract_finding_from_captures(caps, url_response, 45, 45, "Apache httpd", "$techno_name$$techno_version$ has been identified by looking at its signature \"$evidence$\" at this page: $url_of_finding$"));
         }
