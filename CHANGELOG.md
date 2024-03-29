@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - PHP can be detected from the Symfony profiler.
 - Apache httpd can be detected from its 404 page even if OpenSSL is listed.
+- OpenSSL can be detected from the Apache httpd's 404 page.
 
 ## [1.2.0]
 

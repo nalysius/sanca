@@ -27,7 +27,10 @@ impl<'a> OpenSSLChecker<'a> {
             r"(?P<wholematch>.*OpenSSL\/(?P<version>\d+\.\d+\.\d+([a-z])?(-[a-z]+)?).*)",
         )
         .unwrap();
+        // Example: <address>Apache/2.4.52 (Debian) OpenSSL/1.1.1 Server at localhost Port 80</address>
+        let body_regex_httpd = Regex::new(r"<address>(?P<wholematch>Apache(\/\d+\.\d+\.\d+( \([^\)]+\)))? OpenSSL/(?P<version>\d+\.\d+\.\d+) Server at (<a href=.[a-zA-Z0-9.@:+_-]*.>)?[a-zA-Z0-9-.]+(</a>)? Port \d+?)</address>").unwrap();
         regexes.insert("http-header", header_regex);
+        regexes.insert("http-body-httpd", body_regex_httpd);
         Self { regexes: regexes }
     }
 
@@ -59,6 +62,27 @@ impl<'a> OpenSSLChecker<'a> {
         }
         None
     }
+
+    /// Check for the technology in the body.
+    fn check_http_body(&self, url_response: &UrlResponse) -> Option<Finding> {
+        trace!(
+            "Running OpenSSLChecker::check_http_body() on {}",
+            url_response.url
+        );
+        let caps_result = self
+            .regexes
+            .get("http-body-httpd")
+            .expect("Regex \"http-body-httpd\" not found.")
+            .captures(&url_response.body);
+
+        // The regex matches
+        if caps_result.is_some() {
+            info!("Regex OpenSSLChecker/http-body-httpd matches");
+            let caps = caps_result.unwrap();
+            return Some(self.extract_finding_from_captures(caps, url_response, 45, 45, "OpenSSL", "$techno_name$$techno_version$ has been identified by looking at its signature \"$evidence$\" at this page: $url_of_finding$"));
+        }
+        None
+    }
 }
 
 impl<'a> HttpChecker for OpenSSLChecker<'a> {
@@ -83,6 +107,12 @@ impl<'a> HttpChecker for OpenSSLChecker<'a> {
             if response.is_some() {
                 return vec![response.unwrap()];
             }
+
+            // Check in response body then
+            let body_finding = self.check_http_body(url_response);
+            if body_finding.is_some() {
+                return vec![body_finding.unwrap()];
+            }
         }
         return Vec::new();
     }
@@ -97,6 +127,51 @@ impl<'a> HttpChecker for OpenSSLChecker<'a> {
 mod tests {
     use super::*;
     use crate::checkers::check_finding_fields;
+
+    #[test]
+    fn source_code_matches() {
+        let checker = OpenSSLChecker::new();
+        let body1 = r#"<p><address>Apache OpenSSL/3.0.1 Server at www.test-domain.com Port 80</address></p>"#;
+        let url1 = "https://www.example.com/pageNotFound";
+        let mut url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default, 200);
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "OpenSSL/3.0.1",
+            "OpenSSL",
+            Some("3.0.1"),
+            Some(url1),
+        );
+
+        let body2 = r#"<p><address>Apache/2.4.52 (Debian) OpenSSL/1.1.1 Server at <a href="mailto:webmaster@test-domain.com">www.test-domain.com</a> Port 80</address></p>"#;
+        url_response_valid.body = body2.to_string();
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "OpenSSL/1.1.1",
+            "OpenSSL",
+            Some("1.1.1"),
+            Some(url1),
+        );
+    }
+
+    #[test]
+    fn source_code_doesnt_match() {
+        let checker = OpenSSLChecker::new();
+        let body = r#"<address>Apache 2.4.52 server</address>"#;
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/not-found.php?abc=def",
+            HashMap::new(),
+            body,
+            UrlRequestType::Default,
+            200,
+        );
+        let finding = checker.check_http_body(&url_response_invalid);
+        assert!(finding.is_none());
+    }
 
     #[test]
     fn header_matches() {
