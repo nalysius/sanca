@@ -23,10 +23,10 @@ impl<'a> WordPressChecker<'a> {
     pub fn new() -> Self {
         let mut regexes = HashMap::new();
         // Example: <meta name="generator" content="WordPress 6.1.2" />
-        let body_meta_regex = Regex::new(r#"(?P<wholematch><meta\s+name\s*=\s*['"]generator['"]\s+content\s*=\s*['"]WordPress (?P<version>\d+\.\d+(\.\d+)?)['"]\s*\/>)"#).unwrap();
+        let body_meta_regex = Regex::new(r#"(?P<wholematch><meta\s+name\s*=\s*['"]generator['"]\s+content\s*=\s*['"]WordPress (?P<version1>\d+\.\d+(\.\d+)?)['"]\s*\/>)"#).unwrap();
         // Example: [...]/style.min.css?ver=6.2.2'
         let body_login_regex =
-            Regex::new(r#"(?P<wholematch>\?ver=(?P<version>\d+\.\d+\.\d+))"#).unwrap();
+            Regex::new(r#"(?P<wholematch>\?ver=(?P<version1>\d+\.\d+\.\d+))"#).unwrap();
         regexes.insert("http-body-meta", body_meta_regex);
         regexes.insert("http-body-login", body_login_regex);
         Self { regexes: regexes }

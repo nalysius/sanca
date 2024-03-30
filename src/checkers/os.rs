@@ -25,7 +25,7 @@ impl<'a> OSChecker<'a> {
         // Example: SSH-2.0-OpenSSH_6.7p1 Debian-5
         // SSH-2.0-OpenSSH_6.7p1 Debian-5+deb8u2
         let openssh_regex = Regex::new(
-            r"^SSH-\d+\.\d+-OpenSSH_(?P<version>\d+\.\d+)([a-z]\d+)?( (?P<os>[a-zA-Z0-9]+)(.+((deb|bpo)(?P<osversion>\d+)))?)",
+            r"^SSH-\d+\.\d+-OpenSSH_(?P<version1>\d+\.\d+)([a-z]\d+)?( (?P<os>[a-zA-Z0-9]+)(.+((deb|bpo)(?P<osversion>\d+)))?)",
         )
         .unwrap();
 
@@ -39,22 +39,22 @@ impl<'a> OSChecker<'a> {
         //
         // Actually, detect only Debian with deb|bpo
         let mariadb_regex = Regex::new(
-            r"\d+\.\d+\.\d+\-(?P<version>\d+\.\d+\.\d+)-MariaDB(.+(deb|bpo)(?P<osversion>\d+))",
+            r"\d+\.\d+\.\d+\-(?P<version1>\d+\.\d+\.\d+)-MariaDB(.+(deb|bpo)(?P<osversion>\d+))",
         )
         .unwrap();
 
         // Example: Apache/2.4.52 (Debian)
         // TODO: if available, handle the OpenSSL version
         let header_regex = Regex::new(
-            r"^(?P<software>Apache|nginx)\/(?P<version>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\))",
+            r"^(?P<software>Apache|nginx)\/(?P<version1>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\))",
         )
         .unwrap();
         // Example: <address>Apache/2.4.52 (Debian) Server at localhost Port 80</address>
         // TODO: if available, handle the OpenSSL version
-        let body_apache_regex = Regex::new(r"<address>(?P<wholematch>Apache\/(?P<version>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\)) Server at [a-zA-Z0-9-.]+ Port \d+)</address>").unwrap();
+        let body_apache_regex = Regex::new(r"<address>(?P<wholematch>Apache\/(?P<version1>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\)) Server at [a-zA-Z0-9-.]+ Port \d+)</address>").unwrap();
 
         // Example: <hr><center>nginx/1.22.3</center>
-        let body_nginx_regex = Regex::new(r"<hr><center>(?P<wholematch>nginx(\/(?P<version>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\))))</center>").unwrap();
+        let body_nginx_regex = Regex::new(r"<hr><center>(?P<wholematch>nginx(\/(?P<version1>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\))))</center>").unwrap();
 
         regexes.insert("openssh-banner", openssh_regex);
         regexes.insert("openssh-windows-banner", openssh_windows_regex);
@@ -88,7 +88,7 @@ impl<'a> OSChecker<'a> {
                 let caps = caps_result.unwrap();
                 let os_name = caps["os"].to_string();
                 let software = caps["software"].to_string();
-                let software_version = caps["version"].to_string();
+                let software_version = caps["version1"].to_string();
                 let os_version = self.get_os_version(&os_name, &software, &software_version);
                 let mut version_text = "".to_string();
                 if os_version.is_some() {
@@ -133,7 +133,7 @@ impl<'a> OSChecker<'a> {
             let caps = caps_result.unwrap();
             let evidence = caps["wholematch"].to_string();
             let os_name = caps["os"].to_string();
-            let software_version = caps["version"].to_string();
+            let software_version = caps["version1"].to_string();
             let os_version = self.get_os_version(&os_name, "apache", &software_version);
             let mut version_text = "".to_string();
             if os_version.is_some() {
@@ -169,7 +169,7 @@ impl<'a> OSChecker<'a> {
             let caps = caps_result.unwrap();
             let evidence = caps["wholematch"].to_string();
             let os_name = caps["os"].to_string();
-            let software_version = caps["version"].to_string();
+            let software_version = caps["version1"].to_string();
             let os_version = self.get_os_version(&os_name, "nginx", &software_version);
             let mut version_text = "".to_string();
             if os_version.is_some() {
@@ -304,7 +304,7 @@ impl<'a> TcpChecker for OSChecker<'a> {
                 info!("Regex OS/openssh-banner matches");
                 let caps = caps_result.unwrap();
                 let os_name = caps["os"].to_string();
-                let software_version = caps["version"].to_string();
+                let software_version = caps["version1"].to_string();
                 let os_version_result = caps.name("osversion");
                 let os_version: Option<&str>;
                 // Check at the end of the banner first, if the debX is present
@@ -346,7 +346,7 @@ impl<'a> TcpChecker for OSChecker<'a> {
                 let caps = caps_result.unwrap();
                 // Only Debian is supported currently
                 let os_name = "Debian".to_string();
-                let software_version = caps["version"].to_string();
+                let software_version = caps["version1"].to_string();
                 let os_version_result = caps.name("osversion");
                 let os_version: Option<&str>;
                 // Check at the end of the banner first, if the debX is present

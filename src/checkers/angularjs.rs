@@ -32,14 +32,14 @@ impl<'a> AngularJSChecker<'a> {
         // Note: (?m) enables multi line mode. So, ^ marks the beginning of the line, not
         // the beginning of the whole input
         let comment_regex = Regex::new(
-            r"(?m)^\s+(\*\s+)?(?P<wholematch>(@license\s+)?AngularJS\s+v(?P<version>\d+\.\d+\.\d+))"
+            r"(?m)^\s+(\*\s+)?(?P<wholematch>(@license\s+)?AngularJS\s+v(?P<version1>\d+\.\d+\.\d+))"
         )
         .unwrap();
 
         // Example: ] http://errors.angularjs.org/1.8.2/
         // 'https://errors.angularjs.org/1.8.2/'
         let body_minified_regex =
-            Regex::new(r#"(\] |'|\\n)(?P<wholematch>https?:\/\/errors.angularjs.org\/(?P<version>\d+\.\d+\.\d+)\/)"#)
+            Regex::new(r#"(\] |'|\\n)(?P<wholematch>https?:\/\/errors.angularjs.org\/(?P<version1>\d+\.\d+\.\d+)\/)"#)
                 .unwrap();
 
         regexes.insert("http-body-comment", comment_regex);

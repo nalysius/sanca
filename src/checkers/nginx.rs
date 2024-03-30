@@ -24,10 +24,10 @@ impl<'a> NginxChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: nginx/1.22.3 (Debian)
         let header_regex =
-            Regex::new(r"^(?P<wholematch>nginx(\/(?P<version>\d+(\.\d+(\.\d+(\.\d+)?)?)?))?)")
+            Regex::new(r"^(?P<wholematch>nginx(\/(?P<version1>\d+(\.\d+(\.\d+(\.\d+)?)?)?))?)")
                 .unwrap();
         // Example: <hr><center>nginx/1.22.3</center>
-        let body_regex = Regex::new(r"<hr><center>(?P<wholematch>nginx(\/(?P<version>\d+\.\d+\.\d+)( \([^\)]+\)))?)</center>").unwrap();
+        let body_regex = Regex::new(r"<hr><center>(?P<wholematch>nginx(\/(?P<version1>\d+\.\d+\.\d+)( \([^\)]+\)))?)</center>").unwrap();
 
         regexes.insert("http-header", header_regex);
         regexes.insert("http-body", body_regex);

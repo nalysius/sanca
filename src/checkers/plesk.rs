@@ -24,7 +24,7 @@ impl<'a> PleskChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: <title>Plesk Obsidian 17.1.36</title>
         let login_regex = Regex::new(
-            r"<title>(?P<wholematch>Plesk\s+[a-zA-Z0-9]+\s+(?P<version>\d+\.\d+\.\d+))</title>",
+            r"<title>(?P<wholematch>Plesk\s+[a-zA-Z0-9]+\s+(?P<version1>\d+\.\d+\.\d+))</title>",
         )
         .unwrap();
         regexes.insert("http-body-login", login_regex);

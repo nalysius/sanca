@@ -25,17 +25,17 @@ impl<'a> AllInOneSEOChecker<'a> {
 
         // Example: <!-- All in One SEO Pro 4.5.1.1 - aioseo.com -->
         let source_code_regex = Regex::new(
-            r#"(?P<wholematch><!-- All in One SEO (Pro )?(?P<version>\d+\.\d+(\.\d+(\.\d)?)?) - aioseo.com -->)"#,
+            r#"(?P<wholematch><!-- All in One SEO (Pro )?(?P<version1>\d+\.\d+(\.\d+(\.\d)?)?) - aioseo.com -->)"#,
         )
         .unwrap();
 
         // Example: Stable tag: 4.4.2.1
         let readme_regex =
-            Regex::new(r#"(?P<wholematch>Stable tag: (?P<version>\d+\.\d+(\.\d+(\.\d)?)?))"#)
+            Regex::new(r#"(?P<wholematch>Stable tag: (?P<version1>\d+\.\d+(\.\d+(\.\d)?)?))"#)
                 .unwrap();
 
         // Example: <meta name="generator" content="All in One SEO Pro (AIOSEO) 4.5.1.1" />
-        let body_meta_regex = Regex::new(r#"(?P<wholematch><meta\s+name\s*=\s*['"][Gg]enerator['"]\s+content\s*=\s*['"]All in One SEO (Pro )?\(AIOSEO\) (?P<version>\d+\.\d+(\.\d+(\.\d)?)?)['"]\s*\/>)"#).unwrap();
+        let body_meta_regex = Regex::new(r#"(?P<wholematch><meta\s+name\s*=\s*['"][Gg]enerator['"]\s+content\s*=\s*['"]All in One SEO (Pro )?\(AIOSEO\) (?P<version1>\d+\.\d+(\.\d+(\.\d)?)?)['"]\s*\/>)"#).unwrap();
 
         regexes.insert("http-body-source", source_code_regex);
         regexes.insert("http-body-meta", body_meta_regex);

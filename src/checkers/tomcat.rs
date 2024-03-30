@@ -24,7 +24,7 @@ impl<'a> TomcatChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: <h3>Apache Tomcat/9.1.17</h3>
         let body_regex =
-            Regex::new(r"<h3>(?P<wholematch>Apache Tomcat\/(?P<version>\d+\.\d+\.\d+))<\/h3>")
+            Regex::new(r"<h3>(?P<wholematch>Apache Tomcat\/(?P<version1>\d+\.\d+\.\d+))<\/h3>")
                 .unwrap();
 
         regexes.insert("http-body", body_regex);

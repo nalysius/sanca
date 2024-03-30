@@ -24,7 +24,7 @@ impl<'a> JiraChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: <meta name="application-name" content="JIRA" data-name="jira" data-version="9.11.6">
         let source_code_regex =
-            Regex::new(r#".*(?P<wholematch><meta\s+name\s*=\s*['"]application-name['"]\s+content\s*=\s*['"]JIRA['"]\s+data-name\s*=\s*['"]jira['"]\s+data-version\s*=\s*['"](?P<version>\d+\.\d+\.\d+(\.\d+)?)['"])"#).unwrap();
+            Regex::new(r#".*(?P<wholematch><meta\s+name\s*=\s*['"]application-name['"]\s+content\s*=\s*['"]JIRA['"]\s+data-name\s*=\s*['"]jira['"]\s+data-version\s*=\s*['"](?P<version1>\d+\.\d+\.\d+(\.\d+)?)['"])"#).unwrap();
         regexes.insert("http-body-source", source_code_regex);
         Self { regexes: regexes }
     }

@@ -24,7 +24,7 @@ impl<'a> TwistedChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: Twisted/16.5.0 TwistedWeb/8.3.0
         let header_regex =
-            Regex::new(r"(?P<wholematch>.*Twisted\/(?P<version>\d+\.\d+\.\d+).*)").unwrap();
+            Regex::new(r"(?P<wholematch>.*Twisted\/(?P<version1>\d+\.\d+\.\d+).*)").unwrap();
 
         regexes.insert("http-header", header_regex);
         Self { regexes: regexes }

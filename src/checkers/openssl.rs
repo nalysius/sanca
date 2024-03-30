@@ -24,11 +24,11 @@ impl<'a> OpenSSLChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: OpenSSL/1.0.2k-fips
         let header_regex = Regex::new(
-            r"(?P<wholematch>.*OpenSSL\/(?P<version>\d+\.\d+\.\d+([a-z])?(-[a-z]+)?).*)",
+            r"(?P<wholematch>.*OpenSSL\/(?P<version1>\d+\.\d+\.\d+([a-z])?(-[a-z]+)?).*)",
         )
         .unwrap();
         // Example: <address>Apache/2.4.52 (Debian) OpenSSL/1.1.1 Server at localhost Port 80</address>
-        let body_regex_httpd = Regex::new(r"<address>(?P<wholematch>Apache(\/\d+\.\d+\.\d+( \([^\)]+\)))? OpenSSL/(?P<version>\d+\.\d+\.\d+) Server at (<a href=.[a-zA-Z0-9.@:+_-]*.>)?[a-zA-Z0-9-.]+(</a>)? Port \d+?)</address>").unwrap();
+        let body_regex_httpd = Regex::new(r"<address>(?P<wholematch>Apache(\/\d+\.\d+\.\d+( \([^\)]+\)))? OpenSSL/(?P<version1>\d+\.\d+\.\d+) Server at (<a href=.[a-zA-Z0-9.@:+_-]*.>)?[a-zA-Z0-9-.]+(</a>)? Port \d+?)</address>").unwrap();
         regexes.insert("http-header", header_regex);
         regexes.insert("http-body-httpd", body_regex_httpd);
         Self { regexes: regexes }

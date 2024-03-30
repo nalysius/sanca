@@ -31,7 +31,7 @@ impl<'a> SymfonyChecker<'a> {
         //    </div>
         // (?s) means the . character matches also newlines
         let source_code_regex =
-            Regex::new(r#"(?s).*<h2>Symfony Configuration</h2>.+(?P<wholematch><span\s+class\s*=\s*['"]value['"]\s*>(?P<version>\d+\.\d+\.\d+)</span>).+<span class="label">Symfony version</span>"#).unwrap();
+            Regex::new(r#"(?s).*<h2>Symfony Configuration</h2>.+(?P<wholematch><span\s+class\s*=\s*['"]value['"]\s*>(?P<version1>\d+\.\d+\.\d+)</span>).+<span class="label">Symfony version</span>"#).unwrap();
         regexes.insert("http-body-source", source_code_regex);
         Self { regexes: regexes }
     }

@@ -25,7 +25,7 @@ impl<'a> GsapChecker<'a> {
         //           * PixiPlugin 3.11.1
         let gsap_plugins = "CSSRulePlugin|CustomEase|Draggable|EaselPlugin|EasePack|Flip|GSAP|MotionPathPlugin|Observer|PixiPlugin|ScrollToPlugin|ScrollTrigger|TextPlugin";
         let comment_regex = Regex::new(&format!(
-            r"^\s*\*\s+(?P<wholematch>({})\s+(?P<version>\d+\.\d+\.\d+))",
+            r"^\s*\*\s+(?P<wholematch>({})\s+(?P<version1>\d+\.\d+\.\d+))",
             gsap_plugins
         ))
         .unwrap();
@@ -33,7 +33,7 @@ impl<'a> GsapChecker<'a> {
         // Example: gsap)&&f.r[...],i,c,y,v,h,r={version:"3.11.1"
         // Note: GSAP is actually in version 3.x. Filter on this to reduce false-positive results
         let body_minified_regex = Regex::new(
-            r#"(?P<wholematch>(gsap|_gsScope).+version[=:]\s*['"](?P<version>[1-3]\.\d+\.\d+)['"])"#,
+            r#"(?P<wholematch>(gsap|_gsScope).+version[=:]\s*['"](?P<version1>[1-3]\.\d+\.\d+)['"])"#,
         )
         .unwrap();
 

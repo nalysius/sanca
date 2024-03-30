@@ -24,17 +24,17 @@ impl<'a> HighchartsChecker<'a> {
 
         // Example: Highcharts JS v11.1.0 (2023-06-05)
         // TODO: add unit tests for this
-        let body_comment_regex = Regex::new(r#"\s*(?P<wholematch>Highcharts JS v(?P<version>\d+\.\d+\.\d+)\s*\(\d\d\d\d-\d\d-\d\d\))"#)
+        let body_comment_regex = Regex::new(r#"\s*(?P<wholematch>Highcharts JS v(?P<version1>\d+\.\d+\.\d+)\s*\(\d\d\d\d-\d\d-\d\d\))"#)
         .unwrap();
 
         // Example: {product:"Highstock",version:"6.0.3",
         let body_regex = Regex::new(
-            r#"(?P<wholematch>Highcharts.+\{\s*product\s*:\s*"High[a-zA-Z0-9]+"\s*,\s*version\s*:\s*"(?P<version>\d+\.\d+\.\d+)")"#,
+            r#"(?P<wholematch>Highcharts.+\{\s*product\s*:\s*"High[a-zA-Z0-9]+"\s*,\s*version\s*:\s*"(?P<version1>\d+\.\d+\.\d+)")"#,
         )
         .unwrap();
 
         let body_regex_alternative = Regex::new(
-            r#"(?P<wholematch>Highcharts.+version\s*=\s*['"](?P<version>\d+\.\d+\.\d+)['"])"#,
+            r#"(?P<wholematch>Highcharts.+version\s*=\s*['"](?P<version1>\d+\.\d+\.\d+)['"])"#,
         )
         .unwrap();
 

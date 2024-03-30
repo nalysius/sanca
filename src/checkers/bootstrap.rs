@@ -24,7 +24,7 @@ impl<'a> BootstrapChecker<'a> {
         // Example: /*!
         //           * Bootstrap v5.2.3 (https://getbootstrap.com/)
         let comment_regex = Regex::new(
-            r".*\*\s*(?P<wholematch>Bootstrap v(?P<version>\d+\.\d+\.\d+(-[a-z0-9]+)?))\s+\(https?:\/\/getbootstrap.com\/?\)",
+            r".*\*\s*(?P<wholematch>Bootstrap v(?P<version1>\d+\.\d+\.\d+(-[a-z0-9]+)?))\s+\(https?:\/\/getbootstrap.com\/?\)",
         )
         .unwrap();
 
@@ -34,7 +34,7 @@ impl<'a> BootstrapChecker<'a> {
         //
         // Bootstrap[...]d.VERSION="3.3.7"
         let source_code_regex = Regex::new(
-            r#"(?P<wholematch>Bootstrap.+[^A-Za-z0-9_]VERSION(\(\)\s*\{\s*return\s*"|=")(?P<version>\d+\.\d+\.\d+)")"#,
+            r#"(?P<wholematch>Bootstrap.+[^A-Za-z0-9_]VERSION(\(\)\s*\{\s*return\s*"|=")(?P<version1>\d+\.\d+\.\d+)")"#,
         )
         .unwrap();
 

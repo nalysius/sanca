@@ -24,7 +24,7 @@ impl<'a> AngularChecker<'a> {
 
         // Example: CORE="@angular/core"[...]var VERSION2 = new Version("15.2.4")
         let source_code_regex = Regex::new(
-            r#"(?P<wholematch>CORE=['"]@angular\/.+['"].+new\s+Version\(['"](?P<version>\d+\.\d+\.\d+)['"]\))"#,
+            r#"(?P<wholematch>CORE=['"]@angular\/.+['"].+new\s+Version\(['"](?P<version1>\d+\.\d+\.\d+)['"]\))"#,
         )
         .unwrap();
 

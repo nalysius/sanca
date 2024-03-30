@@ -24,10 +24,10 @@ impl<'a> ApacheHttpdChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: Apache/2.4.52 (Debian)
         let header_regex =
-            Regex::new(r"^(?P<wholematch>.*Apache(\/(?P<version>\d+(\.\d+(\.\d+)?)?))?.*)")
+            Regex::new(r"^(?P<wholematch>.*Apache(\/(?P<version1>\d+(\.\d+(\.\d+)?)?))?.*)")
                 .unwrap();
         // Example: <address>Apache/2.4.52 (Debian) OpenSSL/1.1.1 Server at localhost Port 80</address>
-        let body_regex = Regex::new(r"<address>(?P<wholematch>Apache((\/(?P<version>\d+\.\d+\.\d+)( \([^\)]+\)))?( [a-zA-Z0-9/\.]+)? Server at (<a href=.[a-zA-Z0-9.@:+_-]*.>)?[a-zA-Z0-9-.]+(</a>)? Port \d+)?)</address>").unwrap();
+        let body_regex = Regex::new(r"<address>(?P<wholematch>Apache((\/(?P<version1>\d+\.\d+\.\d+)( \([^\)]+\)))?( [a-zA-Z0-9/\.]+)? Server at (<a href=.[a-zA-Z0-9.@:+_-]*.>)?[a-zA-Z0-9-.]+(</a>)? Port \d+)?)</address>").unwrap();
 
         regexes.insert("http-header", header_regex);
         regexes.insert("http-body", body_regex);

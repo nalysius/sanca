@@ -25,13 +25,13 @@ impl<'a> YoastSEOChecker<'a> {
 
         // Example: <!-- This site is optimized with the Yoast SEO plugin v20.11 - https://yoast.com/wordpress/plugins/seo/ -->
         let source_code_regex = Regex::new(
-            r#"(?P<wholematch><!-- This site is optimized with the Yoast SEO plugin v(?P<version>\d+\.\d+(\.\d+)?) - https://yoast.com/wordpress/plugins/seo/ -->)"#,
+            r#"(?P<wholematch><!-- This site is optimized with the Yoast SEO plugin v(?P<version1>\d+\.\d+(\.\d+)?) - https://yoast.com/wordpress/plugins/seo/ -->)"#,
         )
         .unwrap();
 
         // Example: Stable tag: 20.11
         let readme_regex =
-            Regex::new(r#"(?P<wholematch>Stable tag: (?P<version>\d+\.\d+(\.\d+)?))"#).unwrap();
+            Regex::new(r#"(?P<wholematch>Stable tag: (?P<version1>\d+\.\d+(\.\d+)?))"#).unwrap();
 
         regexes.insert("http-body-source", source_code_regex);
         regexes.insert("http-body-readme", readme_regex);

@@ -24,9 +24,9 @@ impl<'a> PHPChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: PHP/7.1.33.12
         let header_regex =
-            Regex::new(r"(?P<wholematch>.*PHP\/(?P<version>\d+\.\d+(\.\d+(\.\d+)?)?).*)").unwrap();
+            Regex::new(r"(?P<wholematch>.*PHP\/(?P<version1>\d+\.\d+(\.\d+(\.\d+)?)?).*)").unwrap();
         // Example: <h1 class="p">PHP Version 8.2.2</h1>
-        let body_regex = Regex::new(r#"(?P<wholematch><h1 class="p">PHP Version (?P<version>\d+\.\d+\.\d+(-[a-z0-9._-]+)?)</h1>)"#).unwrap();
+        let body_regex = Regex::new(r#"(?P<wholematch><h1 class="p">PHP Version (?P<version1>\d+\.\d+\.\d+(-[a-z0-9._-]+)?)</h1>)"#).unwrap();
 
         regexes.insert("http-header", header_regex);
         regexes.insert("http-body", body_regex);

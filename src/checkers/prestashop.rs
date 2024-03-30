@@ -38,7 +38,7 @@ impl<'a> PrestashopChecker<'a> {
         //
         // The first version encountered in the ChangeLog is the latest
         let changelog_regex = Regex::new(
-            r"(?s).*(Release\s+Notes\s+for\s+PrestaShop\s+\d\.\d|Changelog\s+for\s+PrestaShop\s+\d)..\s*#+.\s*#\s+(?P<wholematch>v(?P<version>\d+\.\d+\.\d+(\.\d+)?)\s+-\s+\(\d\d\d\d-\d\d-\d\d\))",
+            r"(?s).*(Release\s+Notes\s+for\s+PrestaShop\s+\d\.\d|Changelog\s+for\s+PrestaShop\s+\d)..\s*#+.\s*#\s+(?P<wholematch>v(?P<version1>\d+\.\d+\.\d+(\.\d+)?)\s+-\s+\(\d\d\d\d-\d\d-\d\d\))",
         )
         .unwrap();
         regexes.insert("http-body-changelog", changelog_regex);

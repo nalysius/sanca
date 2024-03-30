@@ -31,7 +31,7 @@ impl<'a> DiviChecker<'a> {
         //
         // (?s) means . matches also newline
         let source_code_regex =
-            Regex::new(r#"(?s)/*!.+Theme\s+Name:\s+Divi\n.+(?P<wholematch>Version:\s+(?P<version>\d+\.\d+(\.\d+)?))"#).unwrap();
+            Regex::new(r#"(?s)/*!.+Theme\s+Name:\s+Divi\n.+(?P<wholematch>Version:\s+(?P<version1>\d+\.\d+(\.\d+)?))"#).unwrap();
 
         regexes.insert("http-body-source", source_code_regex);
         Self { regexes: regexes }

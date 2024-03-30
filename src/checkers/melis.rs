@@ -24,7 +24,7 @@ impl<'a> MelisChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: - Version: v5.0.3
         let source_code_regex =
-            Regex::new(r"\s*(?P<wholematch>-\s+Version:\s+v(?P<version>\d+\.\d+\.\d+))").unwrap();
+            Regex::new(r"\s*(?P<wholematch>-\s+Version:\s+v(?P<version1>\d+\.\d+\.\d+))").unwrap();
         regexes.insert("http-body-source", source_code_regex);
         Self { regexes: regexes }
     }

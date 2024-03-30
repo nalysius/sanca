@@ -24,13 +24,13 @@ impl<'a> Typo3Checker<'a> {
         let mut regexes = HashMap::new();
         // Example: "typo3/cms-core": "x.y.z"
         let composer_regex = Regex::new(
-            r#"(?P<wholematch>"typo3\/cms-core" *: *"(?P<version>\d+\.\d+\.\d+(\.\d+)?)")"#,
+            r#"(?P<wholematch>"typo3\/cms-core" *: *"(?P<version1>\d+\.\d+\.\d+(\.\d+)?)")"#,
         )
         .unwrap();
 
         // Example: <meta name="generator" content="TYPO3 4.7 CMS">
         let source_code_regex = Regex::new(
-            r#"(?P<wholematch><meta\s+name\s*=\s*['"][Gg]enerator['"]\s+content\s*=\s*['"]TYPO3 (?P<version>\d+\.\d+(\.\d+)?)\s+CMS['"]\s*/?>)"#,
+            r#"(?P<wholematch><meta\s+name\s*=\s*['"][Gg]enerator['"]\s+content\s*=\s*['"]TYPO3 (?P<version1>\d+\.\d+(\.\d+)?)\s+CMS['"]\s*/?>)"#,
         )
         .unwrap();
 

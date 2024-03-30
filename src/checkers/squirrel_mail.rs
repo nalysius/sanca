@@ -26,7 +26,7 @@ impl<'a> SquirrelMailChecker<'a> {
         // Example: <small>SquirrelMail wersja 1.4.15<br />
         // Note: the word "version" between SquirrelMail and the version is translated
         // on each instance, so it's better to allow any word chars.
-        let source_code_regex = Regex::new(r"<small>(?P<wholematch>SquirrelMail\s+\w+\s+(?P<version>\d+\.\d+\.\d+(\.\d+)?))\s*<br\s*/?>").unwrap();
+        let source_code_regex = Regex::new(r"<small>(?P<wholematch>SquirrelMail\s+\w+\s+(?P<version1>\d+\.\d+\.\d+(\.\d+)?))\s*<br\s*/?>").unwrap();
 
         regexes.insert("http-body-source", source_code_regex);
         Self { regexes: regexes }

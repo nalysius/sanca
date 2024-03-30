@@ -30,18 +30,18 @@ impl<'a> HandlebarsChecker<'a> {
         // /*!
         //  handlebars v2.0.0
         let comment_regex = Regex::new(
-            r"\/\*\*?![\s\*]+(@license)?\s+(?P<wholematch>handlebars (v(?P<version>\d\.\d\.\d)))",
+            r"\/\*\*?![\s\*]+(@license)?\s+(?P<wholematch>handlebars (v(?P<version1>\d\.\d\.\d)))",
         )
         .unwrap();
 
         // Example: HandlebarsEnvironment;[...]b="4.7.7";An.VERSION=b;
-        let source_code_regex = Regex::new(r#"(?P<wholematch>HandlebarsEnvironment;.*[a-zA-Z0-9]+\s*=\s*"(?P<version>\d+\.\d+\.\d+)";[a-zA-Z0-9]+\.VERSION=[a-zA-Z0-9]+;)"#).unwrap();
+        let source_code_regex = Regex::new(r#"(?P<wholematch>HandlebarsEnvironment;.*[a-zA-Z0-9]+\s*=\s*"(?P<version1>\d+\.\d+\.\d+)";[a-zA-Z0-9]+\.VERSION=[a-zA-Z0-9]+;)"#).unwrap();
 
         // Example: VERSION="2.0.0";__exports__.VERSION=VERSION[...]HandlebarsEnvironment
-        let source_code_regex_alternative = Regex::new(r#"(?P<wholematch>VERSION\s*=\s*['"](?P<version>\d+\.\d+\.\d+)['"]+[,;]__exports__\.VERSION\s*=\s*VERSION.+HandlebarsEnvironment)"#).unwrap();
+        let source_code_regex_alternative = Regex::new(r#"(?P<wholematch>VERSION\s*=\s*['"](?P<version1>\d+\.\d+\.\d+)['"]+[,;]__exports__\.VERSION\s*=\s*VERSION.+HandlebarsEnvironment)"#).unwrap();
 
         // Example: HandlebarsEnvironment;[...]b="4.7.7";An.VERSION=b;
-        let source_code_regex_alternative_2 = Regex::new(r#"(?P<wholematch>VERSION\s*=\s*['"](?P<version>\d+\.\d+\.\d+)['"];.+HandlebarsEnvironment)"#).unwrap();
+        let source_code_regex_alternative_2 = Regex::new(r#"(?P<wholematch>VERSION\s*=\s*['"](?P<version1>\d+\.\d+\.\d+)['"];.+HandlebarsEnvironment)"#).unwrap();
 
         regexes.insert("http-body-comment", comment_regex);
         regexes.insert("http-body-source", source_code_regex);

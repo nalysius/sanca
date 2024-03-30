@@ -24,13 +24,13 @@ impl<'a> CKEditorChecker<'a> {
 
         // Example: x.CKEDITOR_VERSION="39.0.1"
         let body_regex = Regex::new(
-            r#"(?P<wholematch>[a-zA-Z0-9_]+\.CKEDITOR_VERSION\s*=\s*['"](?P<version>\d+\.\d+\.\d+)['"])"#,
+            r#"(?P<wholematch>[a-zA-Z0-9_]+\.CKEDITOR_VERSION\s*=\s*['"](?P<version1>\d+\.\d+\.\d+)['"])"#,
         )
         .unwrap();
 
         // Example: const x="39.0.1"[...]CKEDITOR_VERSION=x
         let body_alternative_regex = Regex::new(
-            r#"(?P<wholematch>const [a-zA-Z0-9_]+\s*=\s*['"](?P<version>\d+\.\d+\.\d+)['"].+CKEDITOR_VERSION\s*=\s*[a-zA-z0-9_]+)"#,
+            r#"(?P<wholematch>const [a-zA-Z0-9_]+\s*=\s*['"](?P<version1>\d+\.\d+\.\d+)['"].+CKEDITOR_VERSION\s*=\s*[a-zA-z0-9_]+)"#,
         )
         .unwrap();
 

@@ -24,7 +24,7 @@ impl<'a> ReactJSChecker<'a> {
 
         // Example: var ReactVersion = '18.2.0';
         let source_code_regex = Regex::new(
-            r#"\s*(?P<wholematch>var\s+ReactVersion\s*=\s*['"](?P<version>\d+\.\d+(\.\d+)?)['"])"#,
+            r#"\s*(?P<wholematch>var\s+ReactVersion\s*=\s*['"](?P<version1>\d+\.\d+(\.\d+)?)['"])"#,
         )
         .unwrap();
 

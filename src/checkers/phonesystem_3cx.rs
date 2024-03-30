@@ -22,7 +22,7 @@ impl<'a> PhoneSystem3CXChecker<'a> {
     pub fn new() -> Self {
         let mut regexes = HashMap::new();
         // Example: name: "Webclient",version: "18.0.9.20"
-        let comment_regex = Regex::new(r#".+(?P<wholematch>name\s*:\s*['"]Webclient['"]\s*,.*version\s*:\s*['"](?P<version>\d+\.\d+\.\d+\.\d+)['"])"#).unwrap();
+        let comment_regex = Regex::new(r#".+(?P<wholematch>name\s*:\s*['"]Webclient['"]\s*,.*version\s*:\s*['"](?P<version1>\d+\.\d+\.\d+\.\d+)['"])"#).unwrap();
         regexes.insert("http-body-comment", comment_regex);
         Self { regexes: regexes }
     }

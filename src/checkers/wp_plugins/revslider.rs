@@ -25,7 +25,7 @@ impl<'a> RevSliderChecker<'a> {
 
         // Example: <meta name="generator" content="Powered by Slider Revolution 6.5.11 - responsive, Mobile-Friendly Slider Plugin for WordPress with comfortable drag and drop interface." />
         let source_code_regex = Regex::new(
-            r#"(?P<wholematch><meta\s+name="generator"\s+content="Powered by Slider Revolution (?P<version>\d+\.\d+\.\d+) - )[^"]+""#,
+            r#"(?P<wholematch><meta\s+name="generator"\s+content="Powered by Slider Revolution (?P<version1>\d+\.\d+\.\d+) - )[^"]+""#,
         )
         .unwrap();
 

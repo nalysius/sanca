@@ -109,12 +109,27 @@ pub trait HttpChecker {
 
         let mut version = None;
         let mut version_text = String::new();
-        let version_match = captures.name("version");
-        if version_match.is_some() {
-            version = Some(version_match.unwrap().as_str());
-            // Add a space in the version, so in the evidence text we
-            // avoid a double space if the version is not found
-            version_text = format!(" {}", version.unwrap());
+        // Some technologies (e.g. TinyMCE) split their version
+        // in several parts. In most cases, only the matching group "version1"
+        // will be used, but in some occasions it will be needed to use also
+        // "version2", "version3", etc.
+        for version_part in 1..5 {
+            let version_part_match = captures.name(&format!("version{}", version_part));
+            if version_part_match.is_some() {
+                let version_part_text = version_part_match.unwrap().as_str();
+                // Version parts are separated by a dot
+                if !version_text.is_empty() {
+                    version_text.push('.');
+                }
+                version_text.push_str(version_part_text);
+            }
+        }
+
+        // Add a space in the version, so in the evidence text we
+        // avoid a double space if the version is not found
+        if !version_text.is_empty() {
+            version = Some(version_text.clone());
+            version_text = format!(" {}", version_text);
             trace!("Version: {}", version_text);
         }
 
@@ -128,7 +143,7 @@ pub trait HttpChecker {
 
         return Finding::new(
             technology_name,
-            version,
+            version.as_deref(),
             &evidence,
             &evidence_text,
             Some(&url_response.url),

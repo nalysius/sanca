@@ -25,7 +25,7 @@ impl<'a> JSComposerChecker<'a> {
 
         // Example: <body class="this that js-comp-ver-6.1 other-class">
         let source_code_regex = Regex::new(
-            r#"(?P<wholematch><body\s+[^>]*class\s*=\s*["'][^'"]*js-comp-ver-(?P<version>\d+\.\d+))[^'"]*["']"#,
+            r#"(?P<wholematch><body\s+[^>]*class\s*=\s*["'][^'"]*js-comp-ver-(?P<version1>\d+\.\d+))[^'"]*["']"#,
         )
         .unwrap();
 

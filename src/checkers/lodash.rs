@@ -27,7 +27,7 @@ impl<'a> LodashChecker<'a> {
         // lodash[...],An.VERSION="4.17.15"
         //
         let body_regex = Regex::new(
-            r#"lodash.+(?P<wholematch>(var )?VERSION ?= ?['"](?P<version>\d+\.\d+\.\d+)['"])[;,]?"#,
+            r#"lodash.+(?P<wholematch>(var )?VERSION ?= ?['"](?P<version1>\d+\.\d+\.\d+)['"])[;,]?"#,
         )
         .unwrap();
 
@@ -45,21 +45,21 @@ impl<'a> LodashChecker<'a> {
         //   */
         //
         // Note: (?s) means . matches also newlines
-        let body_not_minified = Regex::new(r#"(?s)\*\s+@license.\s+\*\s+(?P<wholematch>Lodash.+var\s+VERSION\s*=\s*['"](?P<version>\d+\.\d+\.\d+)['"]);"#)
+        let body_not_minified = Regex::new(r#"(?s)\*\s+@license.\s+\*\s+(?P<wholematch>Lodash.+var\s+VERSION\s*=\s*['"](?P<version1>\d+\.\d+\.\d+)['"]);"#)
         .unwrap();
 
         let body_minified_regex = Regex::new(
-            r#"(?P<wholematch>VERSION\s*=\s*[a-zA-Z0-9]+[,;].+[a-zA-Z0-9]+=['"](?P<version>\d+\.\d+\.\d+)['"]).+lodash_placeholder"#,
+            r#"(?P<wholematch>VERSION\s*=\s*[a-zA-Z0-9]+[,;].+[a-zA-Z0-9]+=['"](?P<version1>\d+\.\d+\.\d+)['"]).+lodash_placeholder"#,
         )
         .unwrap();
 
         let body_minified_regex_alternative = Regex::new(
-            r#"(?s)(?P<wholematch>[a-zA-z0-9]+\s*=\s*['"](?P<version>\d+\.\d+\.\d+)['"][,;].+lodash_placeholder.+VERSION\s*=\s*[a-zA-Z0-9]+)"#,
+            r#"(?s)(?P<wholematch>[a-zA-z0-9]+\s*=\s*['"](?P<version1>\d+\.\d+\.\d+)['"][,;].+lodash_placeholder.+VERSION\s*=\s*[a-zA-Z0-9]+)"#,
         )
         .unwrap();
 
         let body_comment_compat =
-            Regex::new(r#"\s*\*\s*(?P<wholematch>Lo-Dash (?P<version>\d+\.\d+\.\d+))"#).unwrap();
+            Regex::new(r#"\s*\*\s*(?P<wholematch>Lo-Dash (?P<version1>\d+\.\d+\.\d+))"#).unwrap();
 
         regexes.insert("http-body", body_regex);
         regexes.insert("http-body-minified", body_minified_regex);

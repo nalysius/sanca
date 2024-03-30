@@ -25,7 +25,7 @@ impl<'a> AllInOneWpMigrationChecker<'a> {
 
         // Example: Stable tag: 5.2
         let source_code_regex =
-            Regex::new(r#"(?P<wholematch>Stable tag: (?P<version>\d+\.\d+(\.\d+)?))"#).unwrap();
+            Regex::new(r#"(?P<wholematch>Stable tag: (?P<version1>\d+\.\d+(\.\d+)?))"#).unwrap();
 
         regexes.insert("http-body-source", source_code_regex);
         Self { regexes: regexes }
