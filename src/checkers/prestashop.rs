@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::HttpChecker;
+use super::{Checker, HttpChecker};
 use crate::models::reqres::{UrlRequestType, UrlResponse};
 use crate::models::{technology::Technology, Finding};
 use log::{info, trace};
@@ -65,13 +65,15 @@ impl<'a> PrestashopChecker<'a> {
             if caps_result.is_some() {
                 info!("Regex Prestashop/http-body-changelog matches");
                 let caps = caps_result.unwrap();
-                return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "Prestashop", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+                return Some(self.extract_finding_from_captures(caps, Some(url_response), 30, 30, "Prestashop", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
             }
         }
 
         None
     }
 }
+
+impl<'a> Checker for PrestashopChecker<'a> {}
 
 impl<'a> HttpChecker for PrestashopChecker<'a> {
     /// Check for a HTTP scan.

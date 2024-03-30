@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::HttpChecker;
+use super::{Checker, HttpChecker};
 use crate::models::reqres::{UrlRequestType, UrlResponse};
 use crate::models::{technology::Technology, Finding};
 use log::{info, trace};
@@ -55,7 +55,7 @@ impl<'a> TwistedWebChecker<'a> {
                 return Some(
                     self.extract_finding_from_captures(
                         caps,
-                        url_response,
+                        Some(url_response),
                         45,
                         45,
                         "TwistedWeb",
@@ -67,6 +67,8 @@ impl<'a> TwistedWebChecker<'a> {
         None
     }
 }
+
+impl<'a> Checker for TwistedWebChecker<'a> {}
 
 impl<'a> HttpChecker for TwistedWebChecker<'a> {
     /// Check if the asset is running TwistedWeb.

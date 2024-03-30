@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::TcpChecker;
+use super::{Checker, TcpChecker};
 use crate::models::{technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
@@ -15,6 +15,8 @@ pub struct EximChecker<'a> {
     regexes: HashMap<&'a str, Regex>,
 }
 
+impl<'a> Checker for EximChecker<'a> {}
+
 impl<'a> EximChecker<'a> {
     /// Creates a new EximChecker.
     /// By doing so, the regex will is compiled once and the checker can be
@@ -23,7 +25,7 @@ impl<'a> EximChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: 220 test.example.com ESMTP Exim 4.96 Mon, 10 Jul 2023 19:39:15 +0300
         // Date / time are ignored
-        let regex = Regex::new(r"^\d\d\d ([a-zA-Z0-9-]+\.)?([a-zA-Z0-9-]+\.)?[a-zA-Z0-9-]+ (?P<smtpprotocol>E?SMTP) Exim (?P<eximversion>\d+\.\d+) ").unwrap();
+        let regex = Regex::new(r"^(?P<wholematch>\d\d\d ([a-zA-Z0-9-]+\.)?([a-zA-Z0-9-]+\.)?[a-zA-Z0-9-]+ (?P<smtpprotocol>E?SMTP) Exim (?P<version>\d+\.\d+)) ").unwrap();
         regexes.insert("exim-banner", regex);
         Self { regexes: regexes }
     }
@@ -46,22 +48,15 @@ impl<'a> TcpChecker for EximChecker<'a> {
             if caps_result.is_some() {
                 info!("Regex Exim/exim-banner matches");
                 let caps = caps_result.unwrap();
-                let exim_smtp_protocol: String = caps["smtpprotocol"].to_string();
-                let exim_version: String = caps["eximversion"].to_string();
-                let exim_evidence_text = format!(
-                    "Exim {} has been identified running the {} protocol using the banner it presents after initiating a TCP connection: {}",
-                    exim_version,
-                    exim_smtp_protocol,
-                    item
-                );
-
-                return Some(Finding::new(
-                    "Exim",
-                    Some(&exim_version),
-                    item,
-                    &exim_evidence_text,
-                    None,
-                ));
+                let _exim_smtp_protocol = caps.name("smtpprotocol");
+                return Some(self.extract_finding_from_captures(
+		    caps,
+		    None,
+		    20,
+		    20,
+		    "Exim",
+		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" in its banner",
+		));
             }
         }
         return None;

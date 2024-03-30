@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::HttpChecker;
+use super::{Checker, HttpChecker};
 use crate::models::{reqres::UrlResponse, technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
@@ -55,7 +55,7 @@ impl<'a> TinyMCEChecker<'a> {
         if caps_result.is_some() {
             info!("Regex TinyMCE/http-body matches");
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "TinyMCE", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+            return Some(self.extract_finding_from_captures(caps, Some(url_response), 30, 30, "TinyMCE", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
 
         let caps_result = self
@@ -68,12 +68,14 @@ impl<'a> TinyMCEChecker<'a> {
         if caps_result.is_some() {
             info!("Regex TinyMCE/http-body-alternative matches");
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "TinyMCE", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+            return Some(self.extract_finding_from_captures(caps, Some(url_response), 30, 30, "TinyMCE", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
 
         None
     }
 }
+
+impl<'a> Checker for TinyMCEChecker<'a> {}
 
 impl<'a> HttpChecker for TinyMCEChecker<'a> {
     /// Check for a HTTP scan.

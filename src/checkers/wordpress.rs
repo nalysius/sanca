@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::HttpChecker;
+use super::{Checker, HttpChecker};
 use crate::models::reqres::{UrlRequestType, UrlResponse};
 use crate::models::{technology::Technology, Finding};
 use log::{info, trace};
@@ -48,7 +48,7 @@ impl<'a> WordPressChecker<'a> {
         if caps_result.is_some() {
             info!("Regex WordPress/http-body-meta matches");
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "WordPress", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+            return Some(self.extract_finding_from_captures(caps, Some(url_response), 30, 30, "WordPress", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
 
         // Checking only on the wp-login.php page to avoid false positive
@@ -63,12 +63,14 @@ impl<'a> WordPressChecker<'a> {
             if caps_result.is_some() {
                 info!("Regex WordPress/http-body-login matches");
                 let caps = caps_result.unwrap();
-                return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "WordPress", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+                return Some(self.extract_finding_from_captures(caps, Some(url_response), 30, 30, "WordPress", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
             }
         }
         None
     }
 }
+
+impl<'a> Checker for WordPressChecker<'a> {}
 
 impl<'a> HttpChecker for WordPressChecker<'a> {
     /// Check for a HTTP scan.

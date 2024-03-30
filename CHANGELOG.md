@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - OpenSSL can be detected from the Apache httpd's 404 page.
 - Technology version can be splitted in several parts and reassembled, to
   improve detection.
+- Handle findings in a uniform way between HttpChecker & TcpChecker.
 
 ## [1.2.0]
 

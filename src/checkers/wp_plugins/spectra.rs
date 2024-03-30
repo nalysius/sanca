@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use crate::checkers::HttpChecker;
+use crate::checkers::{Checker, HttpChecker};
 use crate::models::reqres::UrlRequestType;
 use crate::models::{reqres::UrlResponse, technology::Technology, Finding};
 use log::{info, trace};
@@ -54,7 +54,7 @@ impl<'a> SpectraChecker<'a> {
                 let caps = caps_result.unwrap();
                 return Some(self.extract_finding_from_captures(
                 caps,
-                url_response,
+                Some(url_response),
                 30,
                 30,
                 "Spectra",
@@ -65,6 +65,8 @@ impl<'a> SpectraChecker<'a> {
         None
     }
 }
+
+impl<'a> Checker for SpectraChecker<'a> {}
 
 impl<'a> HttpChecker for SpectraChecker<'a> {
     /// Check for a HTTP scan.

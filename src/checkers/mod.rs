@@ -57,7 +57,7 @@ use log::trace;
 use regex::Captures;
 
 /// A common interface between all TCP checkers
-pub trait TcpChecker {
+pub trait TcpChecker: Checker {
     /// Checks data to determine if a given technology matches.
     /// data will usually contain only one string (the banner), but
     /// some technologies could provide more information.
@@ -68,14 +68,17 @@ pub trait TcpChecker {
 }
 
 /// A common interface between all HTTP checkers
-pub trait HttpChecker {
+pub trait HttpChecker: Checker {
     /// Checks data to determine if a given technology matches.
     /// data will contain information about HTTP request & response.
     fn check_http(&self, data: &[UrlResponse]) -> Vec<Finding>;
 
     /// Get the technology supported by the checker.
     fn get_technology(&self) -> Technology;
+}
 
+// A common interface between all checkers
+pub trait Checker {
     /// Extract a finding from captures
     /// It is a common method used by most JavaScript checkers, so
     /// it's easier to defined it here.
@@ -90,7 +93,7 @@ pub trait HttpChecker {
     fn extract_finding_from_captures(
         &self,
         captures: Captures,
-        url_response: &UrlResponse,
+        url_response: Option<&UrlResponse>,
         evidence_first_chars: usize,
         evidence_last_chars: usize,
         technology_name: &str,
@@ -134,11 +137,18 @@ pub trait HttpChecker {
             trace!("Version: {}", version_text);
         }
 
+        let mut url = "";
+        let mut url_option = None;
+        if url_response.is_some() {
+            url = url_response.unwrap().url.as_str();
+            url_option = Some(url);
+        }
+
         let evidence_text = evidence_text_templace
             .replace("$techno_name$", technology_name)
             .replace("$techno_version$", &version_text)
             .replace("$evidence$", &evidence)
-            .replace("$url_of_finding$", &url_response.url);
+            .replace("$url_of_finding$", &url);
 
         trace!("Evidence text: {}", evidence_text);
 
@@ -147,7 +157,7 @@ pub trait HttpChecker {
             version.as_deref(),
             &evidence,
             &evidence_text,
-            Some(&url_response.url),
+            url_option,
         );
     }
 }

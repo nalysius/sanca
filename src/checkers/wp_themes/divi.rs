@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use crate::checkers::HttpChecker;
+use crate::checkers::{Checker, HttpChecker};
 use crate::models::reqres::UrlRequestType;
 use crate::models::{reqres::UrlResponse, technology::Technology, Finding};
 use log::{info, trace};
@@ -60,7 +60,7 @@ impl<'a> DiviChecker<'a> {
                 let caps = caps_result.unwrap();
                 return Some(self.extract_finding_from_captures(
                 caps,
-                url_response,
+                Some(url_response),
                 30,
                 30,
                 "Divi",
@@ -71,6 +71,8 @@ impl<'a> DiviChecker<'a> {
         None
     }
 }
+
+impl<'a> Checker for DiviChecker<'a> {}
 
 impl<'a> HttpChecker for DiviChecker<'a> {
     /// Check for a HTTP scan.

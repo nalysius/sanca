@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::TcpChecker;
+use super::{Checker, TcpChecker};
 use crate::models::{technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
@@ -15,6 +15,8 @@ pub struct MySQLChecker<'a> {
     regexes: HashMap<&'a str, Regex>,
 }
 
+impl<'a> Checker for MySQLChecker<'a> {}
+
 impl<'a> MySQLChecker<'a> {
     /// Creates a new MySQLChecker.
     /// By doing so, the regex will is compiled once and the checker can be
@@ -23,8 +25,7 @@ impl<'a> MySQLChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: S
         // 5.7.37-nmm1-logm{pX^4gw9JD]Sg4mysql_native_password
-        let regex =
-            Regex::new(r"(?P<mysqlversion>\d+\.\d+(\.\d+)?).+mysql_native_password").unwrap();
+        let regex = Regex::new(r"(?P<version1>\d+\.\d+(\.\d+)?).+mysql_native_password").unwrap();
         regexes.insert("mysql-banner", regex);
         Self { regexes: regexes }
     }
@@ -53,20 +54,14 @@ impl<'a> TcpChecker for MySQLChecker<'a> {
             if caps_result.is_some() {
                 info!("Regex MySQL/mysql-banner matches");
                 let caps = caps_result.unwrap();
-                let version: String = caps["mysqlversion"].to_string();
-                let evidence_text = format!(
-                    "MySQL {} has been identified using the banner it presents after initiating a TCP connection: {}",
-                    version,
-                    item
-                );
-
-                return Some(Finding::new(
-                    "MySQL",
-                    Some(&version),
-                    item,
-                    &evidence_text,
-                    None,
-                ));
+		return Some(self.extract_finding_from_captures(
+		    caps,
+		    None,
+		    30,
+		    30,
+		    "MySQL",
+		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" in its banner",
+		));
             }
         }
         return None;

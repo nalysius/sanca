@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use crate::checkers::HttpChecker;
+use crate::checkers::{Checker, HttpChecker};
 use crate::models::reqres::UrlRequestType;
 use crate::models::{reqres::UrlResponse, technology::Technology, Finding};
 use log::{info, trace};
@@ -55,7 +55,7 @@ impl<'a> LiteSpeedCacheChecker<'a> {
                 let caps = caps_result.unwrap();
                 return Some(self.extract_finding_from_captures(
                 caps,
-                url_response,
+                Some(url_response),
                 30,
                 30,
                 "LiteSpeedCache",
@@ -66,6 +66,8 @@ impl<'a> LiteSpeedCacheChecker<'a> {
         None
     }
 }
+
+impl<'a> Checker for LiteSpeedCacheChecker<'a> {}
 
 impl<'a> HttpChecker for LiteSpeedCacheChecker<'a> {
     /// Check for a HTTP scan.

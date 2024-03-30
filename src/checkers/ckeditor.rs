@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::HttpChecker;
+use super::{Checker, HttpChecker};
 use crate::models::{reqres::UrlResponse, technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
@@ -55,7 +55,7 @@ impl<'a> CKEditorChecker<'a> {
         if caps_result.is_some() {
             info!("Regex CKEditor/http-body matches");
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response, 20, 20, "CKEditor", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+            return Some(self.extract_finding_from_captures(caps, Some(url_response), 20, 20, "CKEditor", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
 
         let caps_result = self
@@ -68,12 +68,14 @@ impl<'a> CKEditorChecker<'a> {
         if caps_result.is_some() {
             info!("Regex CKEditor/http-body-alternative matches");
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response, 20, 20, "CKEditor", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+            return Some(self.extract_finding_from_captures(caps, Some(url_response), 20, 20, "CKEditor", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
 
         None
     }
 }
+
+impl<'a> Checker for CKEditorChecker<'a> {}
 
 impl<'a> HttpChecker for CKEditorChecker<'a> {
     /// Check for a HTTP scan.

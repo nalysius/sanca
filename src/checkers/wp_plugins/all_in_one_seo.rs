@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use crate::checkers::HttpChecker;
+use crate::checkers::{Checker, HttpChecker};
 use crate::models::reqres::UrlRequestType;
 use crate::models::{reqres::UrlResponse, technology::Technology, Finding};
 use log::{info, trace};
@@ -63,7 +63,7 @@ impl<'a> AllInOneSEOChecker<'a> {
             let caps = caps_result.unwrap();
             return Some(self.extract_finding_from_captures(
                 caps,
-                url_response,
+                Some(url_response),
                 65,
                 10,
                 "AllInOneSEO",
@@ -84,7 +84,7 @@ impl<'a> AllInOneSEOChecker<'a> {
             let caps = caps_result.unwrap();
             return Some(self.extract_finding_from_captures(
                 caps,
-                url_response,
+                Some(url_response),
                 65,
                 30,
                 "AllInOneSEO",
@@ -109,7 +109,7 @@ impl<'a> AllInOneSEOChecker<'a> {
                 let caps = caps_result.unwrap();
                 return Some(self.extract_finding_from_captures(
                 caps,
-                url_response,
+                Some(url_response),
                 30,
                 30,
                 "AllInOneSEO",
@@ -121,6 +121,8 @@ impl<'a> AllInOneSEOChecker<'a> {
         None
     }
 }
+
+impl<'a> Checker for AllInOneSEOChecker<'a> {}
 
 impl<'a> HttpChecker for AllInOneSEOChecker<'a> {
     /// Check for a HTTP scan.

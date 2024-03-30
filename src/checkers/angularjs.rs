@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::HttpChecker;
+use super::{Checker, HttpChecker};
 use crate::models::{reqres::UrlResponse, technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
@@ -63,7 +63,7 @@ impl<'a> AngularJSChecker<'a> {
         if caps_result.is_some() {
             info!("Regex AngularJS/http-body matches");
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "AngularJS", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+            return Some(self.extract_finding_from_captures(caps, Some(url_response), 30, 30, "AngularJS", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
 
         let caps_result = self
@@ -76,11 +76,13 @@ impl<'a> AngularJSChecker<'a> {
         if caps_result.is_some() {
             info!("Regex AngularJS/http-body-minified matches");
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response, 10, 30, "AngularJS", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+            return Some(self.extract_finding_from_captures(caps, Some(url_response), 10, 30, "AngularJS", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
         None
     }
 }
+
+impl<'a> Checker for AngularJSChecker<'a> {}
 
 impl<'a> HttpChecker for AngularJSChecker<'a> {
     /// Check for a HTTP scan.

@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::TcpChecker;
+use super::{Checker, TcpChecker};
 use crate::models::{technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
@@ -14,6 +14,8 @@ pub struct OpenSSHChecker<'a> {
     /// The regexes used to recognize OpenSSH
     regexes: HashMap<&'a str, Regex>,
 }
+
+impl<'a> Checker for OpenSSHChecker<'a> {}
 
 impl<'a> OpenSSHChecker<'a> {
     /// Creates a new OpenSSHChecker.
@@ -25,7 +27,7 @@ impl<'a> OpenSSHChecker<'a> {
         // SSH-2.0-OpenSSH_6.7p1 Debian-5+deb8u2
         // Note: the -5 is actually ignored. Could be handled later.
         // TODO: get the package name & version when possible
-        let regex = Regex::new(r"^SSH-(?P<sshversion>\d+\.\d+)-OpenSSH_(for_Windows_)?(?P<opensshversion>\d+\.\d+([a-z]\d+)?)( [a-zA-Z0-0]+)?").unwrap();
+        let regex = Regex::new(r"^(?P<wholematch>SSH-(?P<sshversion>\d+\.\d+)-OpenSSH_(for_Windows_)?(?P<version1>\d+\.\d+([a-z]\d+)?)( [a-zA-Z0-0]+)?)").unwrap();
         regexes.insert("openssh-banner", regex);
         OpenSSHChecker { regexes: regexes }
     }
@@ -48,22 +50,15 @@ impl<'a> TcpChecker for OpenSSHChecker<'a> {
             if caps_result.is_some() {
                 info!("Regex OpenSSH/openssh-banner matches");
                 let caps = caps_result.unwrap();
-                //let ssh_version: String = caps["sshversion"].to_string();
-                let openssh_version: String = caps["opensshversion"].to_string();
-                let openssh_evidence_text = format!(
-                    "OpenSSH {} has been identified using the banner it presents after initiating a TCP connection: {}"
-                    ,
-                    openssh_version,
-                    item
-                );
-
-                return Some(Finding::new(
-                    "OpenSSH",
-                    Some(&openssh_version),
-                    item,
-                    &openssh_evidence_text,
-                    None,
-                ));
+                let _ssh_version = caps.name("sshversion");
+                return Some(self.extract_finding_from_captures(
+		    caps,
+		    None,
+		    20,
+		    20,
+		    "OpenSSH",
+		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" in its banner",
+		));
             }
         }
         return None;

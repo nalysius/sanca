@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::{HttpChecker, TcpChecker};
+use super::{Checker, HttpChecker, TcpChecker};
 use crate::models::reqres::{UrlRequestType, UrlResponse};
 use crate::models::{technology::Technology, Finding};
 use log::{debug, info, trace};
@@ -266,6 +266,8 @@ impl<'a> OSChecker<'a> {
         versions.get(&(&os, &software, &version)).copied()
     }
 }
+
+impl<'a> Checker for OSChecker<'a> {}
 
 impl<'a> TcpChecker for OSChecker<'a> {
     /// Check what OS is running on the asset.

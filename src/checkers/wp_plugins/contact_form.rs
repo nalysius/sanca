@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use crate::checkers::HttpChecker;
+use crate::checkers::{Checker, HttpChecker};
 use crate::models::reqres::UrlRequestType;
 use crate::models::{reqres::UrlResponse, technology::Technology, Finding};
 use log::{info, trace};
@@ -54,7 +54,7 @@ impl<'a> ContactFormChecker<'a> {
                 let caps = caps_result.unwrap();
                 return Some(self.extract_finding_from_captures(
                 caps,
-                url_response,
+                Some(url_response),
                 30,
                 30,
                 "ContactForm",
@@ -65,6 +65,8 @@ impl<'a> ContactFormChecker<'a> {
         None
     }
 }
+
+impl<'a> Checker for ContactFormChecker<'a> {}
 
 impl<'a> HttpChecker for ContactFormChecker<'a> {
     /// Check for a HTTP scan.

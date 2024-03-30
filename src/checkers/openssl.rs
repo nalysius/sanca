@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::HttpChecker;
+use super::{Checker, HttpChecker};
 use crate::models::reqres::{UrlRequestType, UrlResponse};
 use crate::models::{technology::Technology, Finding};
 use log::{info, trace};
@@ -57,7 +57,7 @@ impl<'a> OpenSSLChecker<'a> {
             if caps_result.is_some() {
                 info!("Regex OpenSSH/http-header matches");
                 let caps = caps_result.unwrap();
-                return Some(self.extract_finding_from_captures(caps, url_response, 45, 45, "OpenSSL", &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)));
+                return Some(self.extract_finding_from_captures(caps, Some(url_response), 45, 45, "OpenSSL", &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)));
             }
         }
         None
@@ -79,11 +79,13 @@ impl<'a> OpenSSLChecker<'a> {
         if caps_result.is_some() {
             info!("Regex OpenSSLChecker/http-body-httpd matches");
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response, 45, 45, "OpenSSL", "$techno_name$$techno_version$ has been identified by looking at its signature \"$evidence$\" at this page: $url_of_finding$"));
+            return Some(self.extract_finding_from_captures(caps, Some(url_response), 45, 45, "OpenSSL", "$techno_name$$techno_version$ has been identified by looking at its signature \"$evidence$\" at this page: $url_of_finding$"));
         }
         None
     }
 }
+
+impl<'a> Checker for OpenSSLChecker<'a> {}
 
 impl<'a> HttpChecker for OpenSSLChecker<'a> {
     /// Check if the asset is running OpenSSL.

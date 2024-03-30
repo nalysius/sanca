@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::HttpChecker;
+use super::{Checker, HttpChecker};
 use crate::models::reqres::{UrlRequestType, UrlResponse};
 use crate::models::{technology::Technology, Finding};
 use log::{info, trace};
@@ -54,7 +54,7 @@ impl<'a> SquirrelMailChecker<'a> {
                 let caps = caps_result.unwrap();
                 return Some(self.extract_finding_from_captures(
                     caps,
-                    url_response,
+                    Some(url_response),
                     30,
                     30,
                     "SquirrelMail",
@@ -66,6 +66,8 @@ impl<'a> SquirrelMailChecker<'a> {
         None
     }
 }
+
+impl<'a> Checker for SquirrelMailChecker<'a> {}
 
 impl<'a> HttpChecker for SquirrelMailChecker<'a> {
     /// Check for a HTTP scan.

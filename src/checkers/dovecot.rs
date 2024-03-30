@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::TcpChecker;
+use super::{Checker, TcpChecker};
 use crate::models::{technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
@@ -23,11 +23,13 @@ impl<'a> DovecotChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: * OK [CAPABILITY IMAP4rev1 SASL-IR LOGIN-REFERRALS ID ENABLE IDLE LITERAL+ STARTTLS AUTH=PLAIN AUTH=LOGIN] Dovecot (Ubuntu) ready.
         // Example: +OK Dovecot (Ubuntu) ready.
-        let regex = Regex::new(r"OK \[.+\] Dovecot .* ready\.").unwrap();
+        let regex = Regex::new(r"(?P<wholematch>OK \[.+\] Dovecot .* ready\.)").unwrap();
         regexes.insert("dovecot-banner", regex);
         Self { regexes: regexes }
     }
 }
+
+impl<'a> Checker for DovecotChecker<'a> {}
 
 impl<'a> TcpChecker for DovecotChecker<'a> {
     /// Check if the asset is running Dovecot.
@@ -38,19 +40,22 @@ impl<'a> TcpChecker for DovecotChecker<'a> {
         for item in data {
             trace!("Checking item: {}", item);
             // The regex matches
-            if self
+            let caps_result = self
                 .regexes
                 .get("dovecot-banner")
                 .expect("Regex \"dovecot-banner\" not found.")
-                .is_match(item)
-            {
+                .captures(item);
+            if caps_result.is_some() {
                 info!("Regex Dovecot/dovecot-banner matches");
-                let evidence_text = format!(
-                    "Dovecot has been identified using the banner it presents after initiating a TCP connection: {}",
-                    item
-                );
-
-                return Some(Finding::new("Dovecot", None, item, &evidence_text, None));
+                let caps = caps_result.unwrap();
+                return Some(self.extract_finding_from_captures(
+		    caps,
+		    None,
+		    20,
+		    20,
+		    "Dovecot",
+		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" in its banner",
+		));
             }
         }
         return None;

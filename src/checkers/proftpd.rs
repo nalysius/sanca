@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::TcpChecker;
+use super::{Checker, TcpChecker};
 use crate::models::{technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
@@ -15,6 +15,8 @@ pub struct ProFTPDChecker<'a> {
     regexes: HashMap<&'a str, Regex>,
 }
 
+impl<'a> Checker for ProFTPDChecker<'a> {}
+
 impl<'a> ProFTPDChecker<'a> {
     /// Creates a new ProFTPDChecker.
     /// By doing so, the regex will is compiled once and the checker can be
@@ -23,7 +25,7 @@ impl<'a> ProFTPDChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: 220 ProFTPD 1.3.5b Server (ProFTPD) [11.22.33.44]
         // The IP address is ignored by the regex
-        let regex = Regex::new(r"^\d\d\d ProFTPD (?P<proftpdversion>\d+\.\d+\.\d+[a-z]?) Server \((?P<proftpdname>.+)\)").unwrap();
+        let regex = Regex::new(r"^(?P<wholematch>\d\d\d ProFTPD (?P<version1>\d+\.\d+\.\d+[a-z]?) Server \((?P<proftpdname>.+)\))").unwrap();
         regexes.insert("proftpd-banner", regex);
         Self { regexes: regexes }
     }
@@ -46,22 +48,15 @@ impl<'a> TcpChecker for ProFTPDChecker<'a> {
             if caps_result.is_some() {
                 info!("Regex ProFTPD/proftpd-banner matches");
                 let caps = caps_result.unwrap();
-                let proftpd_version: String = caps["proftpdversion"].to_string();
-                let proftpd_name: String = caps["proftpdname"].to_string();
-                let proftpd_evidence_text = format!(
-                    "ProFTPD {} has been found under the name \"{}\" using the banner it presents after initiating a TCP connection: {}",
-                    proftpd_version,
-                    proftpd_name,
-                    item
-                );
-
-                return Some(Finding::new(
-                    "ProFTPD",
-                    Some(&proftpd_version),
-                    item,
-                    &proftpd_evidence_text,
-                    None,
-                ));
+                let _proftpd_name = caps.name("proftpdname");
+                return Some(self.extract_finding_from_captures(
+		    caps,
+		    None,
+		    30,
+		    30,
+		    "ProFTPD",
+		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" in its banner",
+		));
             }
         }
         return None;

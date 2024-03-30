@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::HttpChecker;
+use super::{Checker, HttpChecker};
 use crate::models::{reqres::UrlResponse, technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
@@ -48,11 +48,13 @@ impl<'a> JQueryChecker<'a> {
         if caps_result.is_some() {
             info!("Regex JQuery/http-body-comment matches");
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response, 30, 30, "jQuery", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+            return Some(self.extract_finding_from_captures(caps, Some(url_response), 30, 30, "jQuery", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
         None
     }
 }
+
+impl<'a> Checker for JQueryChecker<'a> {}
 
 impl<'a> HttpChecker for JQueryChecker<'a> {
     /// Check for a HTTP scan.

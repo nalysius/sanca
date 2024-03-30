@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::TcpChecker;
+use super::{Checker, TcpChecker};
 use crate::models::{technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
@@ -15,6 +15,8 @@ pub struct MariaDBChecker<'a> {
     regexes: HashMap<&'a str, Regex>,
 }
 
+impl<'a> Checker for MariaDBChecker<'a> {}
+
 impl<'a> MariaDBChecker<'a> {
     /// Creates a new MariaDBChecker.
     /// By doing so, the regex will is compiled once and the checker can be
@@ -24,7 +26,8 @@ impl<'a> MariaDBChecker<'a> {
         // Example: q
         // 5.5.5-10.10.2-MariaDB-1:10.10.2+maria~ubu1804CZA"$-TB,R-=xdmx1+%s:bamysql_native_password
         let regex =
-            Regex::new(r"\d+\.\d+\.\d+\-(?P<mariadbversion>\d+\.\d+\.\d+)-MariaDB").unwrap();
+            Regex::new(r"(?P<wholematch>\d+\.\d+\.\d+\-(?P<version1>\d+\.\d+\.\d+)-MariaDB)")
+                .unwrap();
         regexes.insert("mariadb-banner", regex);
         Self { regexes: regexes }
     }
@@ -47,20 +50,14 @@ impl<'a> TcpChecker for MariaDBChecker<'a> {
             if caps_result.is_some() {
                 info!("Regex MariaDB/mariadb-banner matches");
                 let caps = caps_result.unwrap();
-                let version: String = caps["mariadbversion"].to_string();
-                let evidence_text = format!(
-                    "MariaDB {} has been identified using the banner it presents after initiating a TCP connection: {}",
-                    version,
-                    item
-                );
-
-                return Some(Finding::new(
-                    "MariaDB",
-                    Some(&version),
-                    item,
-                    &evidence_text,
-                    None,
-                ));
+                return Some(self.extract_finding_from_captures(
+		    caps,
+		    None,
+		    30,
+		    30,
+		    "MariaDB",
+		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" in its banner",
+		));
             }
         }
         return None;

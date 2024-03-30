@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use crate::checkers::HttpChecker;
+use crate::checkers::{Checker, HttpChecker};
 use crate::models::reqres::UrlRequestType;
 use crate::models::{reqres::UrlResponse, technology::Technology, Finding};
 use log::{info, trace};
@@ -52,7 +52,7 @@ impl<'a> JSComposerChecker<'a> {
             let caps = caps_result.unwrap();
             return Some(self.extract_finding_from_captures(
                 caps,
-                url_response,
+                Some(url_response),
                 20,
                 20,
                 "JSComposer",
@@ -62,6 +62,8 @@ impl<'a> JSComposerChecker<'a> {
         None
     }
 }
+
+impl<'a> Checker for JSComposerChecker<'a> {}
 
 impl<'a> HttpChecker for JSComposerChecker<'a> {
     /// Check for a HTTP scan.

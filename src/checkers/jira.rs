@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::HttpChecker;
+use super::{Checker, HttpChecker};
 use crate::models::reqres::{UrlRequestType, UrlResponse};
 use crate::models::{technology::Technology, Finding};
 use log::{info, trace};
@@ -46,12 +46,14 @@ impl<'a> JiraChecker<'a> {
         if caps_result.is_some() {
             info!("Regex Jira/http-body-source matches");
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, url_response, 50, 50, "Jira", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+            return Some(self.extract_finding_from_captures(caps, Some(url_response), 50, 50, "Jira", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
 
         None
     }
 }
+
+impl<'a> Checker for JiraChecker<'a> {}
 
 impl<'a> HttpChecker for JiraChecker<'a> {
     /// Check for a HTTP scan.

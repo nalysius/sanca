@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use super::HttpChecker;
+use super::{Checker, HttpChecker};
 use crate::models::{reqres::UrlResponse, technology::Technology, Finding};
 use log::{info, trace};
 use regex::Regex;
@@ -61,7 +61,7 @@ impl<'a> BootstrapChecker<'a> {
             let caps = caps_result.unwrap();
             return Some(self.extract_finding_from_captures(
                 caps,
-                url_response,
+                Some(url_response),
                 40,
                 40,
                 "Bootstrap",
@@ -81,7 +81,7 @@ impl<'a> BootstrapChecker<'a> {
             let caps = caps_result.unwrap();
             return Some(self.extract_finding_from_captures(
                 caps,
-                url_response,
+                Some(url_response),
                 10,
                 20,
                 "Bootstrap",
@@ -91,6 +91,8 @@ impl<'a> BootstrapChecker<'a> {
         None
     }
 }
+
+impl<'a> Checker for BootstrapChecker<'a> {}
 
 impl<'a> HttpChecker for BootstrapChecker<'a> {
     /// Check for a HTTP scan.
