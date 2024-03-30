@@ -80,6 +80,7 @@ pub enum Technology {
     TwistedWeb,
     Symfony,
     TinyMCE,
+    JQueryUI,
 }
 
 impl Technology {
@@ -504,6 +505,7 @@ impl ValueEnum for Technology {
             Technology::TwistedWeb,
             Technology::Symfony,
             Technology::TinyMCE,
+            Technology::JQueryUI,
         ]
     }
 
@@ -568,6 +570,7 @@ impl ValueEnum for Technology {
             Technology::TwistedWeb => Some(PossibleValue::new("twistedweb")),
             Technology::Symfony => Some(PossibleValue::new("symfony")),
             Technology::TinyMCE => Some(PossibleValue::new("tinymce")),
+            Technology::JQueryUI => Some(PossibleValue::new("jqueryui")),
         }
     }
 }

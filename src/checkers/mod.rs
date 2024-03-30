@@ -25,6 +25,7 @@ pub mod highcharts;
 pub mod httpd;
 pub mod jira;
 pub mod jquery;
+pub mod jqueryui;
 pub mod lodash;
 pub mod mariadb;
 pub mod melis;

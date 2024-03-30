@@ -30,6 +30,7 @@ use crate::checkers::highcharts::HighchartsChecker;
 use crate::checkers::httpd::ApacheHttpdChecker;
 use crate::checkers::jira::JiraChecker;
 use crate::checkers::jquery::JQueryChecker;
+use crate::checkers::jqueryui::JQueryUIChecker;
 use crate::checkers::lodash::LodashChecker;
 use crate::checkers::mariadb::MariaDBChecker;
 use crate::checkers::melis::MelisChecker;
@@ -168,6 +169,7 @@ impl Application {
             Box::new(TwistedWebChecker::new()),
             Box::new(SymfonyChecker::new()),
             Box::new(TinyMCEChecker::new()),
+            Box::new(JQueryUIChecker::new()),
         ];
 
         trace!("Returning the Application");
