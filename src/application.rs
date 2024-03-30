@@ -48,6 +48,7 @@ use crate::checkers::pureftpd::PureFTPdChecker;
 use crate::checkers::reactjs::ReactJSChecker;
 use crate::checkers::squirrel_mail::SquirrelMailChecker;
 use crate::checkers::symfony::SymfonyChecker;
+use crate::checkers::tinymce::TinyMCEChecker;
 use crate::checkers::tomcat::TomcatChecker;
 use crate::checkers::twisted::TwistedChecker;
 use crate::checkers::twistedweb::TwistedWebChecker;
@@ -166,6 +167,7 @@ impl Application {
             Box::new(TwistedChecker::new()),
             Box::new(TwistedWebChecker::new()),
             Box::new(SymfonyChecker::new()),
+            Box::new(TinyMCEChecker::new()),
         ];
 
         trace!("Returning the Application");
