@@ -54,7 +54,7 @@ impl<'a> TcpChecker for MySQLChecker<'a> {
             if caps_result.is_some() {
                 info!("Regex MySQL/mysql-banner matches");
                 let caps = caps_result.unwrap();
-		return Some(self.extract_finding_from_captures(
+                return Some(self.extract_finding_from_captures(
 		    caps,
 		    None,
 		    30,
