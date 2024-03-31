@@ -11,8 +11,11 @@ use regex::Regex;
 
 /// The Pure-FTPd checker
 pub struct PureFTPdChecker<'a> {
-    /// The regexes used to recognize Pure-FTPd
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> Checker for PureFTPdChecker<'a> {}
@@ -27,7 +30,7 @@ impl<'a> PureFTPdChecker<'a> {
         let regex =
             Regex::new(r"(?P<wholematch>Welcome to Pure-FTPd \[(?P<srvname>[a-zA-z0-9-_.]+)\])")
                 .unwrap();
-        regexes.insert("pureftpd-banner", regex);
+        regexes.insert("pureftpd-banner", (regex, 30, 30));
         Self { regexes: regexes }
     }
 }
@@ -40,11 +43,13 @@ impl<'a> TcpChecker for PureFTPdChecker<'a> {
         // For each item, check if it's an Pure-FTPd banner
         for item in data {
             trace!("Checker item: {}", item);
-            let caps_result = self
+            let banner_regex_params = self
                 .regexes
                 .get("pureftpd-banner")
-                .expect("Regex \"pureftpd-banner\" not found.")
-                .captures(item);
+                .expect("Regex PureFTPd/pureftpd-banner not found");
+            let (regex, keep_left, keep_right) = banner_regex_params;
+            let caps_result = regex.captures(&item);
+
             // The regex matches
             if caps_result.is_some() {
                 info!("Regex PureFTPd/pureftpd-banner matches");
@@ -53,8 +58,8 @@ impl<'a> TcpChecker for PureFTPdChecker<'a> {
                 return Some(self.extract_finding_from_captures(
 		    caps,
 		    None,
-		    20,
-		    20,
+		    keep_left.to_owned(),
+		    keep_right.to_owned(),
 		    "Pure-FTPd",
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" in its banner",
 		));

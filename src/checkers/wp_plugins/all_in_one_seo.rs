@@ -12,8 +12,11 @@ use regex::Regex;
 
 /// The checker
 pub struct AllInOneSEOChecker<'a> {
-    /// The regexes used to recognize the technology
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> AllInOneSEOChecker<'a> {
@@ -37,9 +40,9 @@ impl<'a> AllInOneSEOChecker<'a> {
         // Example: <meta name="generator" content="All in One SEO Pro (AIOSEO) 4.5.1.1" />
         let body_meta_regex = Regex::new(r#"(?P<wholematch><meta\s+name\s*=\s*['"][Gg]enerator['"]\s+content\s*=\s*['"]All in One SEO (Pro )?\(AIOSEO\) (?P<version1>\d+\.\d+(\.\d+(\.\d)?)?)['"]\s*\/>)"#).unwrap();
 
-        regexes.insert("http-body-source", source_code_regex);
-        regexes.insert("http-body-meta", body_meta_regex);
-        regexes.insert("http-body-readme", readme_regex);
+        regexes.insert("http-body-source", (source_code_regex, 65, 10));
+        regexes.insert("http-body-meta", (body_meta_regex, 65, 30));
+        regexes.insert("http-body-readme", (readme_regex, 30, 30));
         Self { regexes: regexes }
     }
 
@@ -50,12 +53,13 @@ impl<'a> AllInOneSEOChecker<'a> {
             url_response.url
         );
 
-        // Search in HTML comment
-        let caps_result = self
+        let body_regex_params = self
             .regexes
             .get("http-body-source")
-            .expect("Regex \"http-body-source\" not found.")
-            .captures(&url_response.body);
+            .expect("Regex AllInOneSEO/http-body-source not found");
+        let (regex, keep_left, keep_right) = body_regex_params;
+        // Search in HTML comment
+        let caps_result = regex.captures(&url_response.body);
 
         // The regex matches
         if caps_result.is_some() {
@@ -64,19 +68,20 @@ impl<'a> AllInOneSEOChecker<'a> {
             return Some(self.extract_finding_from_captures(
                 caps,
                 Some(url_response),
-                65,
-                10,
+                keep_left.to_owned(),
+                keep_right.to_owned(),
                 "AllInOneSEO",
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
         }
 
-        // Search in <meta> tag
-        let caps_result = self
+        let body_meta_regex_params = self
             .regexes
             .get("http-body-meta")
-            .expect("Regex \"http-body-meta\" not found.")
-            .captures(&url_response.body);
+            .expect("Regex AllInOneSEO/http-body-meta not found");
+        let (regex_meta, keep_left_meta, keep_right_meta) = body_meta_regex_params;
+        // Search in <meta> tag
+        let caps_result = regex_meta.captures(&url_response.body);
 
         // The regex matches
         if caps_result.is_some() {
@@ -85,8 +90,8 @@ impl<'a> AllInOneSEOChecker<'a> {
             return Some(self.extract_finding_from_captures(
                 caps,
                 Some(url_response),
-                65,
-                30,
+                keep_left_meta.to_owned(),
+                keep_right_meta.to_owned(),
                 "AllInOneSEO",
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
@@ -97,11 +102,12 @@ impl<'a> AllInOneSEOChecker<'a> {
             .url
             .contains("/wp-content/plugins/all-in-one-seo-pack/readme.txt")
         {
-            let caps_result = self
+            let body_readme_regex_params = self
                 .regexes
                 .get("http-body-readme")
-                .expect("Regex \"http-body-readme\" not found.")
-                .captures(&url_response.body);
+                .expect("Regex AllInOneSEO/http-body-readme not found");
+            let (regex_readme, keep_left_readme, keep_right_readme) = body_readme_regex_params;
+            let caps_result = regex_readme.captures(&url_response.body);
 
             // The regex matches
             if caps_result.is_some() {
@@ -110,8 +116,8 @@ impl<'a> AllInOneSEOChecker<'a> {
                 return Some(self.extract_finding_from_captures(
                 caps,
                 Some(url_response),
-                30,
-                30,
+                keep_left_readme.to_owned(),
+                keep_right_readme.to_owned(),
                 "AllInOneSEO",
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));

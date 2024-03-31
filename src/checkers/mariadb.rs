@@ -11,8 +11,11 @@ use regex::Regex;
 
 /// The MariaDB checker
 pub struct MariaDBChecker<'a> {
-    /// The regexes used to recognize MariaDB
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> Checker for MariaDBChecker<'a> {}
@@ -28,7 +31,7 @@ impl<'a> MariaDBChecker<'a> {
         let regex =
             Regex::new(r"(?P<wholematch>\d+\.\d+\.\d+\-(?P<version1>\d+\.\d+\.\d+)-MariaDB)")
                 .unwrap();
-        regexes.insert("mariadb-banner", regex);
+        regexes.insert("mariadb-banner", (regex, 30, 30));
         Self { regexes: regexes }
     }
 }
@@ -41,11 +44,13 @@ impl<'a> TcpChecker for MariaDBChecker<'a> {
         // For each item, check if it's an MariaDB banner
         for item in data {
             trace!("Checking item: {}", item);
-            let caps_result = self
+            let banner_regex_params = self
                 .regexes
                 .get("mariadb-banner")
-                .expect("Regex \"mariadb-banner\" not found.")
-                .captures(item);
+                .expect("Regex MariaDB/mariadb-banner not found");
+            let (regex, keep_left, keep_right) = banner_regex_params;
+            let caps_result = regex.captures(&item);
+
             // The regex matches
             if caps_result.is_some() {
                 info!("Regex MariaDB/mariadb-banner matches");
@@ -53,8 +58,8 @@ impl<'a> TcpChecker for MariaDBChecker<'a> {
                 return Some(self.extract_finding_from_captures(
 		    caps,
 		    None,
-		    30,
-		    30,
+		    keep_left.to_owned(),
+		    keep_right.to_owned(),
 		    "MariaDB",
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" in its banner",
 		));

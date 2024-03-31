@@ -11,8 +11,11 @@ use regex::Regex;
 
 /// The OpenSSH checker
 pub struct OpenSSHChecker<'a> {
-    /// The regexes used to recognize OpenSSH
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> Checker for OpenSSHChecker<'a> {}
@@ -28,7 +31,7 @@ impl<'a> OpenSSHChecker<'a> {
         // Note: the -5 is actually ignored. Could be handled later.
         // TODO: get the package name & version when possible
         let regex = Regex::new(r"^(?P<wholematch>SSH-(?P<sshversion>\d+\.\d+)-OpenSSH_(for_Windows_)?(?P<version1>\d+\.\d+([a-z]\d+)?)( [a-zA-Z0-0]+)?)").unwrap();
-        regexes.insert("openssh-banner", regex);
+        regexes.insert("openssh-banner", (regex, 20, 20));
         OpenSSHChecker { regexes: regexes }
     }
 }
@@ -41,11 +44,13 @@ impl<'a> TcpChecker for OpenSSHChecker<'a> {
         // For each item, check if it's an OpenSSH banner
         for item in data {
             trace!("Checking item: {}", item);
-            let caps_result = self
+            let banner_regex_params = self
                 .regexes
                 .get("openssh-banner")
-                .expect("Regex \"openssh-banner\" not found.")
-                .captures(item);
+                .expect("Regex OpenSSH/openssh-banner not found");
+            let (regex, keep_left, keep_right) = banner_regex_params;
+            let caps_result = regex.captures(&item);
+
             // The regex matches
             if caps_result.is_some() {
                 info!("Regex OpenSSH/openssh-banner matches");
@@ -54,8 +59,8 @@ impl<'a> TcpChecker for OpenSSHChecker<'a> {
                 return Some(self.extract_finding_from_captures(
 		    caps,
 		    None,
-		    20,
-		    20,
+		    keep_left.to_owned(),
+		    keep_right.to_owned(),
 		    "OpenSSH",
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" in its banner",
 		));

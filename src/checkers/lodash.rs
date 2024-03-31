@@ -11,8 +11,11 @@ use regex::Regex;
 
 /// The checker
 pub struct LodashChecker<'a> {
-    /// The regexes used to recognize the technology
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> LodashChecker<'a> {
@@ -61,14 +64,14 @@ impl<'a> LodashChecker<'a> {
         let body_comment_compat =
             Regex::new(r#"\s*\*\s*(?P<wholematch>Lo-Dash (?P<version1>\d+\.\d+\.\d+))"#).unwrap();
 
-        regexes.insert("http-body", body_regex);
-        regexes.insert("http-body-minified", body_minified_regex);
+        regexes.insert("http-body", (body_regex, 30, 30));
+        regexes.insert("http-body-minified", (body_minified_regex, 30, 30));
         regexes.insert(
             "http-body-minified-alternative",
-            body_minified_regex_alternative,
+            (body_minified_regex_alternative, 10, 30),
         );
-        regexes.insert("http-body-not-minified", body_not_minified);
-        regexes.insert("http-body-comment-compat", body_comment_compat);
+        regexes.insert("http-body-not-minified", (body_not_minified, 6, 15));
+        regexes.insert("http-body-comment-compat", (body_comment_compat, 30, 30));
         Self { regexes: regexes }
     }
 
@@ -79,82 +82,23 @@ impl<'a> LodashChecker<'a> {
             url_response.url
         );
 
-        let caps_result = self
-            .regexes
-            .get("http-body-comment-compat")
-            .expect("Regex \"http-body-comment-compat\"")
-            .captures(&url_response.body);
+        // Loop over each regex to try to detect the technology
+        for (regex_name, (regex, keep_left, keep_right)) in &self.regexes {
+            let caps_result = regex.captures(&url_response.body);
 
-        if caps_result.is_some() {
-            info!("Regex Lodash/http-body-comment-compat matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, Some(url_response), 30, 30, "Lodash", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+            if caps_result.is_some() {
+                info!("Regex Lodash/{} matches", regex_name);
+                let caps = caps_result.unwrap();
+                return Some(self.extract_finding_from_captures(
+		    caps,
+		    Some(url_response),
+		    keep_left.to_owned(),
+		    keep_right.to_owned(),
+		    "Lodash",
+		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
+		));
+            }
         }
-
-        let caps_result = self
-            .regexes
-            .get("http-body")
-            .expect("Regex \"http-body\" not found.")
-            .captures(&url_response.body);
-
-        // The regex matches
-        if caps_result.is_some() {
-            info!("Regex Lodash/http-body matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, Some(url_response), 30, 30, "Lodash", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
-        }
-
-        let caps_result = self
-            .regexes
-            .get("http-body-minified")
-            .expect("Regex \"http-body-minified\" not found.")
-            .captures(&url_response.body);
-
-        // The regex matches
-        if caps_result.is_some() {
-            info!("Regex Lodash/http-body-minified matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, Some(url_response), 10, 30, "Lodash", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
-        }
-
-        let caps_result = self
-            .regexes
-            .get("http-body-minified-alternative")
-            .expect("Regex \"http-body-minified-alternative\" not found.")
-            .captures(&url_response.body);
-
-        // The regex matches
-        if caps_result.is_some() {
-            info!("Regex Lodash/http-body-minified-alternative matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, Some(url_response), 10, 30, "Lodash", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
-        }
-
-        let caps_result = self
-            .regexes
-            .get("http-body-comment-compat")
-            .expect("Regex \"http-body-comment-compat\"")
-            .captures(&url_response.body);
-
-        if caps_result.is_some() {
-            info!("Regex Lodash/http-body-comment-compat matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, Some(url_response), 30, 30, "Lodash", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
-        }
-
-        let caps_result = self
-            .regexes
-            .get("http-body-not-minified")
-            .expect("Regex \"http-body-not-minified\" not found.")
-            .captures(&url_response.body);
-
-        // The regex matches
-        if caps_result.is_some() {
-            info!("Regex Lodash/http-body-not-minified matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, Some(url_response), 6, 15, "Lodash", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
-        }
-
         None
     }
 }

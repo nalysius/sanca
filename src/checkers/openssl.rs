@@ -12,8 +12,11 @@ use regex::Regex;
 
 /// The OpenSSL checker
 pub struct OpenSSLChecker<'a> {
-    /// The regexes used to recognize the technology
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> OpenSSLChecker<'a> {
@@ -29,8 +32,8 @@ impl<'a> OpenSSLChecker<'a> {
         .unwrap();
         // Example: <address>Apache/2.4.52 (Debian) OpenSSL/1.1.1 Server at localhost Port 80</address>
         let body_regex_httpd = Regex::new(r"<address>(?P<wholematch>Apache(\/\d+\.\d+\.\d+( \([^\)]+\)))? OpenSSL/(?P<version1>\d+\.\d+\.\d+) Server at (<a href=.[a-zA-Z0-9.@:+_-]*.>)?[a-zA-Z0-9-.]+(</a>)? Port \d+?)</address>").unwrap();
-        regexes.insert("http-header", header_regex);
-        regexes.insert("http-body-httpd", body_regex_httpd);
+        regexes.insert("http-header", (header_regex, 45, 45));
+        regexes.insert("http-body-httpd", (body_regex_httpd, 45, 45));
         Self { regexes: regexes }
     }
 
@@ -43,21 +46,29 @@ impl<'a> OpenSSLChecker<'a> {
         // Check the HTTP headers of each UrlResponse
         let headers_to_check =
             url_response.get_headers(&vec!["Server".to_string(), "X-powered-by".to_string()]);
+        let header_regex_params = self
+            .regexes
+            .get("http-header")
+            .expect("Regex OpenSSL/http-header not found");
+        let (regex_header, keep_left_header, keep_right_header) = header_regex_params;
 
         // Check in the headers to check that were present in this UrlResponse
         for (header_name, header_value) in headers_to_check {
             trace!("Checking header: {} / {}", header_name, header_value);
-            let caps_result = self
-                .regexes
-                .get("http-header")
-                .expect("Regex \"http-header\" not found.")
-                .captures(&header_value);
+            let caps_result = regex_header.captures(&header_value);
 
             // The regex matches
             if caps_result.is_some() {
-                info!("Regex OpenSSH/http-header matches");
+                info!("Regex OpenSSL/http-header matches");
                 let caps = caps_result.unwrap();
-                return Some(self.extract_finding_from_captures(caps, Some(url_response), 45, 45, "OpenSSL", &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)));
+                return Some(self.extract_finding_from_captures(
+		    caps,
+		    Some(url_response),
+		    keep_left_header.to_owned(),
+		    keep_right_header.to_owned(),
+		    "OpenSSL",
+		    &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)
+		));
             }
         }
         None
@@ -69,17 +80,24 @@ impl<'a> OpenSSLChecker<'a> {
             "Running OpenSSLChecker::check_http_body() on {}",
             url_response.url
         );
-        let caps_result = self
+        let body_regex_params = self
             .regexes
             .get("http-body-httpd")
-            .expect("Regex \"http-body-httpd\" not found.")
-            .captures(&url_response.body);
+            .expect("Regex OpenSSH/http-body not found");
+        let (regex_body, keep_left_body, keep_right_body) = body_regex_params;
+        let caps_result = regex_body.captures(&url_response.body);
 
         // The regex matches
         if caps_result.is_some() {
-            info!("Regex OpenSSLChecker/http-body-httpd matches");
+            info!("Regex OpenSSL/http-body-httpd matches");
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, Some(url_response), 45, 45, "OpenSSL", "$techno_name$$techno_version$ has been identified by looking at its signature \"$evidence$\" at this page: $url_of_finding$"));
+            return Some(self.extract_finding_from_captures(
+		caps,
+		Some(url_response),
+		keep_left_body.to_owned(),
+		keep_right_body.to_owned(),
+		"OpenSSL",
+		"$techno_name$$techno_version$ has been identified by looking at its signature \"$evidence$\" at this page: $url_of_finding$"));
         }
         None
     }

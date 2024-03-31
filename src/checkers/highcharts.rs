@@ -11,8 +11,11 @@ use regex::Regex;
 
 /// The checker
 pub struct HighchartsChecker<'a> {
-    /// The regexes used to recognize the technology
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> HighchartsChecker<'a> {
@@ -38,9 +41,9 @@ impl<'a> HighchartsChecker<'a> {
         )
         .unwrap();
 
-        regexes.insert("http-body", body_regex);
-        regexes.insert("http-body-alternative", body_regex_alternative);
-        regexes.insert("http-body-comment", body_comment_regex);
+        regexes.insert("http-body", (body_regex, 20, 20));
+        regexes.insert("http-body-alternative", (body_regex_alternative, 10, 20));
+        regexes.insert("http-body-comment", (body_comment_regex, 10, 20));
         Self { regexes: regexes }
     }
 
@@ -51,43 +54,22 @@ impl<'a> HighchartsChecker<'a> {
             url_response.url
         );
 
-        let caps_result = self
-            .regexes
-            .get("http-body-comment")
-            .expect("Regex \"http-body-comment\" not found.")
-            .captures(&url_response.body);
-
-        // The regex matches
-        if caps_result.is_some() {
-            info!("Regex Highcharts/http-body-comment matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, Some(url_response), 20, 20, "Highcharts", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
-        }
-
-        let caps_result = self
-            .regexes
-            .get("http-body")
-            .expect("Regex \"http-body\" not found.")
-            .captures(&url_response.body);
-
-        // The regex matches
-        if caps_result.is_some() {
-            info!("Regex Highcharts/http-body matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, Some(url_response), 10, 20, "Highcharts", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
-        }
-
-        let caps_result = self
-            .regexes
-            .get("http-body-alternative")
-            .expect("Regex \"http-body-alternative\" not found.")
-            .captures(&url_response.body);
-
-        // The regex matches
-        if caps_result.is_some() {
-            info!("Regex Highcharts/http-body-alternative matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, Some(url_response), 10, 20, "Highcharts", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+        // Loop over each regex to try to detect the technology
+        for (regex_name, (regex, keep_left, keep_right)) in &self.regexes {
+            let caps_result = regex.captures(&url_response.body);
+            // The regex matches
+            if caps_result.is_some() {
+                info!("Regex Highcharts/{} matches", regex_name);
+                let caps = caps_result.unwrap();
+                return Some(self.extract_finding_from_captures(
+		    caps,
+		    Some(url_response),
+		    keep_left.to_owned(),
+		    keep_right.to_owned(),
+		    "Highcharts",
+		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
+		));
+            }
         }
         None
     }

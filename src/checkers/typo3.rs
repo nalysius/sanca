@@ -12,8 +12,11 @@ use regex::Regex;
 
 /// The checker
 pub struct Typo3Checker<'a> {
-    /// The regexes used to recognize the technology
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> Typo3Checker<'a> {
@@ -34,8 +37,8 @@ impl<'a> Typo3Checker<'a> {
         )
         .unwrap();
 
-        regexes.insert("http-body-composer", composer_regex);
-        regexes.insert("http-body-source", source_code_regex);
+        regexes.insert("http-body-composer", (composer_regex, 30, 30));
+        regexes.insert("http-body-source", (source_code_regex, 30, 30));
         Self { regexes: regexes }
     }
 
@@ -46,11 +49,12 @@ impl<'a> Typo3Checker<'a> {
             url_response.url
         );
 
-        let caps_result = self
+        let body_source_regex_params = self
             .regexes
             .get("http-body-source")
-            .expect("Regex \"http-body-source\" not found.")
-            .captures(&url_response.body);
+            .expect("Regex TYPO3/http-body-source not found");
+        let (regex_source, keep_left_source, keep_right_source) = body_source_regex_params;
+        let caps_result = regex_source.captures(&url_response.body);
 
         // The regex matches
         if caps_result.is_some() {
@@ -59,27 +63,36 @@ impl<'a> Typo3Checker<'a> {
             return Some(self.extract_finding_from_captures(
                 caps,
                 Some(url_response),
-                30,
-                30,
+                keep_left_source.to_owned(),
+                keep_right_source.to_owned(),
                 "TYPO3",
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$")
-        );
+            );
         }
 
         // This regex is not restrictive and could generate false positive
         // results, so restrict its usage on URLs containing composer.json
         if url_response.url.contains("/composer.json") {
-            let caps_result = self
+            let body_composer_regex_params = self
                 .regexes
                 .get("http-body-composer")
-                .expect("Regex \"http-body-composer\" not found.")
-                .captures(&url_response.body);
+                .expect("Regex TYPO3/http-body-composer not found");
+            let (regex_composer, keep_left_composer, keep_right_composer) =
+                body_composer_regex_params;
+            let caps_result = regex_composer.captures(&url_response.body);
 
             // The regex matches
             if caps_result.is_some() {
                 info!("Regex TYPO3/http-body-composer matches");
                 let caps = caps_result.unwrap();
-                return Some(self.extract_finding_from_captures(caps, Some(url_response), 30, 30, "TYPO3", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+                return Some(self.extract_finding_from_captures(
+		    caps,
+		    Some(url_response),
+		    keep_left_composer.to_owned(),
+		    keep_right_composer.to_owned(),
+		    "TYPO3",
+		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
+		));
             }
         }
 

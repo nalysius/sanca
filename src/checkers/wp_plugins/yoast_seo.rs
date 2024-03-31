@@ -12,8 +12,11 @@ use regex::Regex;
 
 /// The checker
 pub struct YoastSEOChecker<'a> {
-    /// The regexes used to recognize the technology
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> YoastSEOChecker<'a> {
@@ -33,8 +36,8 @@ impl<'a> YoastSEOChecker<'a> {
         let readme_regex =
             Regex::new(r#"(?P<wholematch>Stable tag: (?P<version1>\d+\.\d+(\.\d+)?))"#).unwrap();
 
-        regexes.insert("http-body-source", source_code_regex);
-        regexes.insert("http-body-readme", readme_regex);
+        regexes.insert("http-body-source", (source_code_regex, 65, 10));
+        regexes.insert("http-body-readme", (readme_regex, 30, 30));
         Self { regexes: regexes }
     }
 
@@ -45,11 +48,12 @@ impl<'a> YoastSEOChecker<'a> {
             url_response.url
         );
 
-        let caps_result = self
+        let body_source_regex_params = self
             .regexes
             .get("http-body-source")
-            .expect("Regex \"http-body-source\" not found.")
-            .captures(&url_response.body);
+            .expect("Regex YoastSEO/http-body-source not found");
+        let (regex_source, keep_left_source, keep_right_source) = body_source_regex_params;
+        let caps_result = regex_source.captures(&url_response.body);
 
         // The regex matches
         if caps_result.is_some() {
@@ -58,8 +62,8 @@ impl<'a> YoastSEOChecker<'a> {
             return Some(self.extract_finding_from_captures(
                 caps,
                 Some(url_response),
-                65,
-                10,
+                keep_left_source.to_owned(),
+                keep_right_source.to_owned(),
                 "YoastSEO",
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
@@ -69,11 +73,12 @@ impl<'a> YoastSEOChecker<'a> {
             .url
             .contains("/wp-content/plugins/wordpress-seo/readme.txt")
         {
-            let caps_result = self
+            let body_readme_regex_params = self
                 .regexes
                 .get("http-body-readme")
-                .expect("Regex \"http-body-readme\" not found.")
-                .captures(&url_response.body);
+                .expect("Regex YoastSEO/http-body-readme not found");
+            let (regex_readme, keep_left_readme, keep_right_readme) = body_readme_regex_params;
+            let caps_result = regex_readme.captures(&url_response.body);
 
             // The regex matches
             if caps_result.is_some() {
@@ -82,8 +87,8 @@ impl<'a> YoastSEOChecker<'a> {
                 return Some(self.extract_finding_from_captures(
                 caps,
                 Some(url_response),
-                30,
-                30,
+                keep_left_readme.to_owned(),
+                keep_right_readme.to_owned(),
                 "YoastSEO",
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));

@@ -12,8 +12,11 @@ use regex::Regex;
 
 /// The PHP checker
 pub struct PHPChecker<'a> {
-    /// The regexes used to recognize the technology
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> PHPChecker<'a> {
@@ -28,8 +31,8 @@ impl<'a> PHPChecker<'a> {
         // Example: <h1 class="p">PHP Version 8.2.2</h1>
         let body_regex = Regex::new(r#"(?P<wholematch><h1 class="p">PHP Version (?P<version1>\d+\.\d+\.\d+(-[a-z0-9._-]+)?)</h1>)"#).unwrap();
 
-        regexes.insert("http-header", header_regex);
-        regexes.insert("http-body", body_regex);
+        regexes.insert("http-header", (header_regex, 45, 45));
+        regexes.insert("http-body", (body_regex, 30, 30));
         Self { regexes: regexes }
     }
 
@@ -42,15 +45,16 @@ impl<'a> PHPChecker<'a> {
         // Check the HTTP headers of each UrlResponse
         let headers_to_check =
             url_response.get_headers(&vec!["Server".to_string(), "X-powered-by".to_string()]);
+        let header_regex_params = self
+            .regexes
+            .get("http-header")
+            .expect("Regex PHP/http-header not found");
+        let (regex_header, keep_left_header, keep_right_header) = header_regex_params;
 
         // Check in the headers to check that were present in this UrlResponse
         for (header_name, header_value) in headers_to_check {
             trace!("Checking header: {} / {}", header_name, header_value);
-            let caps_result = self
-                .regexes
-                .get("http-header")
-                .expect("Regex \"http-header\" not found.")
-                .captures(&header_value);
+            let caps_result = regex_header.captures(&header_value);
 
             // The regex matches
             if caps_result.is_some() {
@@ -60,8 +64,8 @@ impl<'a> PHPChecker<'a> {
                     self.extract_finding_from_captures(
                         caps,
                         Some(url_response),
-                        45,
-                        45,
+                        keep_left_header.to_owned(),
+                        keep_right_header.to_owned(),
                         "PHP",
                         &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)
                     )
@@ -77,17 +81,25 @@ impl<'a> PHPChecker<'a> {
             "Running PHPChecker::check_http_body() on {}",
             url_response.url
         );
-        let caps_result = self
+        let body_regex_params = self
             .regexes
             .get("http-body")
-            .expect("Regex \"http-body\" not found.")
-            .captures(&url_response.body);
+            .expect("Regex PHP/http-body not found");
+        let (regex_body, keep_left_body, keep_right_body) = body_regex_params;
+        let caps_result = regex_body.captures(&url_response.body);
 
         // The regex matches
         if caps_result.is_some() {
             info!("Regex PHP/http-body matches");
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, Some(url_response), 30, 30, "PHP", "$techno_name$$techno_version$ has been identified by looking at the phpinfo()'s output \"$evidence$\" at this page: $url_of_finding$"));
+            return Some(self.extract_finding_from_captures(
+		caps,
+		Some(url_response),
+		keep_left_body.to_owned(),
+		keep_right_body.to_owned(),
+		"PHP",
+		"$techno_name$$techno_version$ has been identified by looking at the phpinfo()'s output \"$evidence$\" at this page: $url_of_finding$"
+	    ));
         }
         None
     }

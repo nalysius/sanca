@@ -12,8 +12,11 @@ use regex::Regex;
 
 /// The checker
 pub struct SymfonyChecker<'a> {
-    /// The regexes used to recognize the technology
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> SymfonyChecker<'a> {
@@ -32,7 +35,7 @@ impl<'a> SymfonyChecker<'a> {
         // (?s) means the . character matches also newlines
         let source_code_regex =
             Regex::new(r#"(?s).*<h2>Symfony Configuration</h2>.+(?P<wholematch><span\s+class\s*=\s*['"]value['"]\s*>(?P<version1>\d+\.\d+\.\d+)</span>).+<span class="label">Symfony version</span>"#).unwrap();
-        regexes.insert("http-body-source", source_code_regex);
+        regexes.insert("http-body-source", (source_code_regex, 50, 50));
         Self { regexes: regexes }
     }
 
@@ -44,17 +47,25 @@ impl<'a> SymfonyChecker<'a> {
         );
 
         if url_response.url.contains("/_profiler/") {
-            let caps_result = self
+            let body_regex_params = self
                 .regexes
                 .get("http-body-source")
-                .expect("Regex \"http-body-source\" not found.")
-                .captures(&url_response.body);
+                .expect("Regex Symfony/http-body-source not found");
+            let (regex, keep_left, keep_right) = body_regex_params;
+            let caps_result = regex.captures(&url_response.body);
 
             // The regex matches
             if caps_result.is_some() {
                 info!("Regex Symfony/http-body-source matches");
                 let caps = caps_result.unwrap();
-                return Some(self.extract_finding_from_captures(caps, Some(url_response), 50, 50, "Symfony", "$techno_name$$techno_version$ has been identified because the debug mode was enabled and we found \"$evidence$\" at this url: $url_of_finding$"));
+                return Some(self.extract_finding_from_captures(
+		    caps,
+		    Some(url_response),
+		    keep_left.to_owned(),
+		    keep_right.to_owned(),
+		    "Symfony",
+		    "$techno_name$$techno_version$ has been identified because the debug mode was enabled and we found \"$evidence$\" at this url: $url_of_finding$"
+		));
             }
         }
         None

@@ -11,8 +11,11 @@ use regex::Regex;
 
 /// The checker
 pub struct AngularJSChecker<'a> {
-    /// The regexes used to recognize the technology
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> AngularJSChecker<'a> {
@@ -42,8 +45,8 @@ impl<'a> AngularJSChecker<'a> {
             Regex::new(r#"(\] |'|\\n)(?P<wholematch>https?:\/\/errors.angularjs.org\/(?P<version1>\d+\.\d+\.\d+)\/)"#)
                 .unwrap();
 
-        regexes.insert("http-body-comment", comment_regex);
-        regexes.insert("http-body-minified", body_minified_regex);
+        regexes.insert("http-body-comment", (comment_regex, 30, 30));
+        regexes.insert("http-body-minified", (body_minified_regex, 10, 30));
         Self { regexes: regexes }
     }
 
@@ -53,30 +56,23 @@ impl<'a> AngularJSChecker<'a> {
             "Running AngularJSChecker::check_http_body() on {}",
             url_response.url
         );
-        let caps_result = self
-            .regexes
-            .get("http-body-comment")
-            .expect("Regex \"http-body-comment\" not found.")
-            .captures(&url_response.body);
 
-        // The regex matches
-        if caps_result.is_some() {
-            info!("Regex AngularJS/http-body matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, Some(url_response), 30, 30, "AngularJS", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
-        }
-
-        let caps_result = self
-            .regexes
-            .get("http-body-minified")
-            .expect("Regex \"http-body-minified\" not found.")
-            .captures(&url_response.body);
-
-        // The regex matches
-        if caps_result.is_some() {
-            info!("Regex AngularJS/http-body-minified matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, Some(url_response), 10, 30, "AngularJS", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+        // Loop over each regex to try to detect the technology
+        for (regex_name, (regex, keep_left, keep_right)) in &self.regexes {
+            let caps_result = regex.captures(&url_response.body);
+            // The regex matches
+            if caps_result.is_some() {
+                info!("Regex AngularJS/{} matches", regex_name);
+                let caps = caps_result.unwrap();
+                return Some(self.extract_finding_from_captures(
+		    caps,
+		    Some(url_response),
+		    keep_left.to_owned(),
+		    keep_right.to_owned(),
+		    "AngularJS",
+		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
+		));
+            }
         }
         None
     }

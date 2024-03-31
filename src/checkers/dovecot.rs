@@ -11,8 +11,11 @@ use regex::Regex;
 
 /// The Dovecot checker
 pub struct DovecotChecker<'a> {
-    /// The regexes used to recognize the software
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> DovecotChecker<'a> {
@@ -24,7 +27,7 @@ impl<'a> DovecotChecker<'a> {
         // Example: * OK [CAPABILITY IMAP4rev1 SASL-IR LOGIN-REFERRALS ID ENABLE IDLE LITERAL+ STARTTLS AUTH=PLAIN AUTH=LOGIN] Dovecot (Ubuntu) ready.
         // Example: +OK Dovecot (Ubuntu) ready.
         let regex = Regex::new(r"(?P<wholematch>OK \[.+\] Dovecot .* ready\.)").unwrap();
-        regexes.insert("dovecot-banner", regex);
+        regexes.insert("dovecot-banner", (regex, 20, 20));
         Self { regexes: regexes }
     }
 }
@@ -39,20 +42,22 @@ impl<'a> TcpChecker for DovecotChecker<'a> {
         // For each item, check if it's a Dovecot banner
         for item in data {
             trace!("Checking item: {}", item);
-            // The regex matches
-            let caps_result = self
+            let banner_regex_params = self
                 .regexes
                 .get("dovecot-banner")
-                .expect("Regex \"dovecot-banner\" not found.")
-                .captures(item);
+                .expect("Regex Dovecot/dovecot-banner not found");
+            let (regex, keep_left, keep_right) = banner_regex_params;
+            let caps_result = regex.captures(&item);
+
+            // The regex matches
             if caps_result.is_some() {
                 info!("Regex Dovecot/dovecot-banner matches");
                 let caps = caps_result.unwrap();
                 return Some(self.extract_finding_from_captures(
 		    caps,
 		    None,
-		    20,
-		    20,
+		    keep_left.to_owned(),
+		    keep_right.to_owned(),
 		    "Dovecot",
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" in its banner",
 		));

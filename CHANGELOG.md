@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Changed
+
+- Regexes handling has been improved in checkers, making code cleaner especially
+  in JavaScript libraries checkers.
+
 ## [1.3.0]
 
 ### Added

@@ -12,8 +12,11 @@ use regex::Regex;
 
 /// The checker
 pub struct MelisChecker<'a> {
-    /// The regexes used to recognize the technology
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> MelisChecker<'a> {
@@ -25,7 +28,7 @@ impl<'a> MelisChecker<'a> {
         // Example: - Version: v5.0.3
         let source_code_regex =
             Regex::new(r"\s*(?P<wholematch>-\s+Version:\s+v(?P<version1>\d+\.\d+\.\d+))").unwrap();
-        regexes.insert("http-body-source", source_code_regex);
+        regexes.insert("http-body-source", (source_code_regex, 30, 30));
         Self { regexes: regexes }
     }
 
@@ -36,18 +39,23 @@ impl<'a> MelisChecker<'a> {
             url_response.url
         );
 
-        if url_response.url.contains("/melis/login") {
-            let caps_result = self
-                .regexes
-                .get("http-body-source")
-                .expect("Regex \"http-body-source\" not found.")
-                .captures(&url_response.body);
-
-            // The regex matches
-            if caps_result.is_some() {
-                info!("Regex Melis/http-body-source matches");
-                let caps = caps_result.unwrap();
-                return Some(self.extract_finding_from_captures(caps, Some(url_response), 30, 30, "Melis", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+        // Loop over each regex to try to detect the technology
+        for (regex_name, (regex, keep_left, keep_right)) in &self.regexes {
+            if url_response.url.contains("/melis/login") {
+                let caps_result = regex.captures(&url_response.body);
+                // The regex matches
+                if caps_result.is_some() {
+                    info!("Regex Melis/{} matches", regex_name);
+                    let caps = caps_result.unwrap();
+                    return Some(self.extract_finding_from_captures(
+			caps,
+			Some(url_response),
+			keep_left.to_owned(),
+			keep_right.to_owned(),
+			"Melis",
+			"$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
+		    ));
+                }
             }
         }
 

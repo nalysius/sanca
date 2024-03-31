@@ -12,8 +12,11 @@ use regex::Regex;
 
 /// The Nginx checker
 pub struct NginxChecker<'a> {
-    /// The regexes used to recognize the technology
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> NginxChecker<'a> {
@@ -29,8 +32,8 @@ impl<'a> NginxChecker<'a> {
         // Example: <hr><center>nginx/1.22.3</center>
         let body_regex = Regex::new(r"<hr><center>(?P<wholematch>nginx(\/(?P<version1>\d+\.\d+\.\d+)( \([^\)]+\)))?)</center>").unwrap();
 
-        regexes.insert("http-header", header_regex);
-        regexes.insert("http-body", body_regex);
+        regexes.insert("http-header", (header_regex, 45, 45));
+        regexes.insert("http-body", (body_regex, 10, 15));
         Self { regexes: regexes }
     }
 
@@ -43,21 +46,28 @@ impl<'a> NginxChecker<'a> {
         // Check the HTTP headers of each UrlResponse
         let headers_to_check =
             url_response.get_headers(&vec!["Server".to_string(), "X-powered-by".to_string()]);
+        let header_regex_params = self
+            .regexes
+            .get("http-header")
+            .expect("Regex Nginx/http-header not found");
+        let (regex_header, keep_left_header, keep_right_header) = header_regex_params;
 
         // Check in the headers to check present in this UrlResponse
         for (header_name, header_value) in headers_to_check {
             trace!("Checking header: {} / {}", header_name, header_value);
-            let caps_result = self
-                .regexes
-                .get("http-header")
-                .expect("Regex \"http-header\" not found.")
-                .captures(&header_value);
-
+            let caps_result = regex_header.captures(&header_value);
             // The regex matches
             if caps_result.is_some() {
                 info!("Regex Nginx/http-header matches");
                 let caps = caps_result.unwrap();
-                return Some(self.extract_finding_from_captures(caps, Some(url_response), 45, 45, "Nginx", &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)));
+                return Some(self.extract_finding_from_captures(
+		    caps,
+		    Some(url_response),
+		    keep_left_header.to_owned(),
+		    keep_right_header.to_owned(),
+		    "Nginx",
+		    &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)
+		));
             }
         }
         None
@@ -66,17 +76,25 @@ impl<'a> NginxChecker<'a> {
     /// Check for the technology in the body.
     fn check_http_body(&self, url_response: &UrlResponse) -> Option<Finding> {
         trace!("Running check_http_body() on {}", url_response.url);
-        let caps_result = self
+        let body_regex_params = self
             .regexes
             .get("http-body")
-            .expect("Regex \"http-body\" not found.")
-            .captures(&url_response.body);
+            .expect("Regex Nginx/http-body not found");
+        let (regex, keep_left, keep_right) = body_regex_params;
+        let caps_result = regex.captures(&url_response.body);
 
         // The regex matches
         if caps_result.is_some() {
             info!("Regex Nginx/http-body matches");
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, Some(url_response), 10, 15, "Nginx", "$techno_name$$techno_version$ has been identified by looking at its signature \"$evidence$\" at this page: $url_of_finding$"));
+            return Some(self.extract_finding_from_captures(
+		caps,
+		Some(url_response),
+		keep_left.to_owned(),
+		keep_right.to_owned(),
+		"Nginx",
+		"$techno_name$$techno_version$ has been identified by looking at its signature \"$evidence$\" at this page: $url_of_finding$"
+	    ));
         }
         None
     }

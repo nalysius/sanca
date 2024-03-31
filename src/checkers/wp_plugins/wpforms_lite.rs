@@ -12,8 +12,11 @@ use regex::Regex;
 
 /// The checker
 pub struct WpformsLiteChecker<'a> {
-    /// The regexes used to recognize the technology
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> WpformsLiteChecker<'a> {
@@ -28,7 +31,7 @@ impl<'a> WpformsLiteChecker<'a> {
             Regex::new(r#"(?P<wholematch>Stable tag: (?P<version1>\d+\.\d+(\.\d+(\.\d+)?)?))"#)
                 .unwrap();
 
-        regexes.insert("http-body-source", source_code_regex);
+        regexes.insert("http-body-source", (source_code_regex, 30, 30));
         Self { regexes: regexes }
     }
 
@@ -43,11 +46,12 @@ impl<'a> WpformsLiteChecker<'a> {
             .url
             .contains("/wp-content/plugins/wpforms-lite/readme.txt")
         {
-            let caps_result = self
+            let body_regex_params = self
                 .regexes
                 .get("http-body-source")
-                .expect("Regex \"http-body-source\" not found.")
-                .captures(&url_response.body);
+                .expect("Regex WpformsLite/http-body-source not found");
+            let (regex, keep_left, keep_right) = body_regex_params;
+            let caps_result = regex.captures(&url_response.body);
 
             // The regex matches
             if caps_result.is_some() {
@@ -56,8 +60,8 @@ impl<'a> WpformsLiteChecker<'a> {
                 return Some(self.extract_finding_from_captures(
                 caps,
                 Some(url_response),
-                30,
-                30,
+                keep_left.to_owned(),
+                keep_right.to_owned(),
                 "WpformsLite",
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));

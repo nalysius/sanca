@@ -12,8 +12,11 @@ use regex::Regex;
 
 /// The checker
 pub struct WordPressChecker<'a> {
-    /// The regexes used to recognize the technology
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> WordPressChecker<'a> {
@@ -27,8 +30,8 @@ impl<'a> WordPressChecker<'a> {
         // Example: [...]/style.min.css?ver=6.2.2'
         let body_login_regex =
             Regex::new(r#"(?P<wholematch>\?ver=(?P<version1>\d+\.\d+\.\d+))"#).unwrap();
-        regexes.insert("http-body-meta", body_meta_regex);
-        regexes.insert("http-body-login", body_login_regex);
+        regexes.insert("http-body-meta", (body_meta_regex, 30, 30));
+        regexes.insert("http-body-login", (body_login_regex, 30, 30));
         Self { regexes: regexes }
     }
 
@@ -38,32 +41,48 @@ impl<'a> WordPressChecker<'a> {
             "Running WordPressChecker::check_http_body() on {}",
             url_response.url
         );
-        let caps_result = self
+        let body_meta_regex_params = self
             .regexes
             .get("http-body-meta")
-            .expect("Regex \"http-body-meta\" not found.")
-            .captures(&url_response.body);
+            .expect("Regex WordPress/http-body-meta not found");
+        let (regex_meta, keep_left_meta, keep_right_meta) = body_meta_regex_params;
+        let caps_result = regex_meta.captures(&url_response.body);
 
         // The regex matches
         if caps_result.is_some() {
             info!("Regex WordPress/http-body-meta matches");
             let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(caps, Some(url_response), 30, 30, "WordPress", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+            return Some(self.extract_finding_from_captures(
+		caps,
+		Some(url_response),
+		keep_left_meta.to_owned(),
+		keep_right_meta.to_owned(),
+		"WordPress",
+		"$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
+	    ));
         }
 
         // Checking only on the wp-login.php page to avoid false positive
         if url_response.url.contains("/wp-login.php") {
-            let caps_result = self
+            let body_login_regex_params = self
                 .regexes
                 .get("http-body-login")
-                .expect("Regex \"http-body-login\" not found.")
-                .captures(&url_response.body);
+                .expect("Regex WordPress/http-body-login not found");
+            let (regex_login, keep_left_login, keep_right_login) = body_login_regex_params;
+            let caps_result = regex_login.captures(&url_response.body);
 
             // The regex matches
             if caps_result.is_some() {
                 info!("Regex WordPress/http-body-login matches");
                 let caps = caps_result.unwrap();
-                return Some(self.extract_finding_from_captures(caps, Some(url_response), 30, 30, "WordPress", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+                return Some(self.extract_finding_from_captures(
+		    caps,
+		    Some(url_response),
+		    keep_left_login.to_owned(),
+		    keep_right_login.to_owned(),
+		    "WordPress",
+		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
+		));
             }
         }
         None

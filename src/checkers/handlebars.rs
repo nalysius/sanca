@@ -11,8 +11,11 @@ use regex::Regex;
 
 /// The checker
 pub struct HandlebarsChecker<'a> {
-    /// The regexes used to recognize the technology
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> HandlebarsChecker<'a> {
@@ -43,15 +46,15 @@ impl<'a> HandlebarsChecker<'a> {
         // Example: HandlebarsEnvironment;[...]b="4.7.7";An.VERSION=b;
         let source_code_regex_alternative_2 = Regex::new(r#"(?P<wholematch>VERSION\s*=\s*['"](?P<version1>\d+\.\d+\.\d+)['"];.+HandlebarsEnvironment)"#).unwrap();
 
-        regexes.insert("http-body-comment", comment_regex);
-        regexes.insert("http-body-source", source_code_regex);
+        regexes.insert("http-body-comment", (comment_regex, 40, 40));
+        regexes.insert("http-body-source", (source_code_regex, 40, 40));
         regexes.insert(
             "http-body-source-alternative",
-            source_code_regex_alternative,
+            (source_code_regex_alternative, 30, 30),
         );
         regexes.insert(
             "http-body-source-alternative-2",
-            source_code_regex_alternative_2,
+            (source_code_regex_alternative_2, 30, 30),
         );
         Self { regexes: regexes }
     }
@@ -62,86 +65,23 @@ impl<'a> HandlebarsChecker<'a> {
             "Running HandlebarsChecker::check_http_body() on {}",
             url_response.url
         );
-        let caps_result = self
-            .regexes
-            .get("http-body-comment")
-            .expect("Regex \"http-body-comment\" not found.")
-            .captures(&url_response.body);
-
-        // The regex matches
-        if caps_result.is_some() {
-            info!("Regex Handlebars/http-body-comment matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(
-                caps,
-                Some(url_response),
-                40,
-                40,
-                "Handlebars",
-                "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
-            ));
+        // Loop over each regex to try to detect the technology
+        for (regex_name, (regex, keep_left, keep_right)) in &self.regexes {
+            let caps_result = regex.captures(&url_response.body);
+            // The regex matches
+            if caps_result.is_some() {
+                info!("Regex Handlebars/{} matches", regex_name);
+                let caps = caps_result.unwrap();
+                return Some(self.extract_finding_from_captures(
+                    caps,
+                    Some(url_response),
+                    keep_left.to_owned(),
+                    keep_right.to_owned(),
+                    "Handlebars",
+                    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
+		));
+            }
         }
-
-        let caps_result = self
-            .regexes
-            .get("http-body-source")
-            .expect("Regex \"http-body-source\" not found.")
-            .captures(&url_response.body);
-
-        // The regex matches
-        if caps_result.is_some() {
-            info!("Regex Handlebars/http-body-source matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(
-                caps,
-                Some(url_response),
-                30,
-                30,
-                "Handlebars",
-                "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
-            ));
-        }
-
-        let caps_result = self
-            .regexes
-            .get("http-body-source-alternative")
-            .expect("Regex \"http-body-source-alternative\" not found.")
-            .captures(&url_response.body);
-
-        // The regex matches
-        if caps_result.is_some() {
-            info!("Regex Handlebars/http-body-source-alternative matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(
-                caps,
-                Some(url_response),
-                30,
-                30,
-                "Handlebars",
-                "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
-            ));
-        }
-
-        let caps_result = self
-            .regexes
-            .get("http-body-source-alternative-2")
-            .expect("Regex \"http-body-source-alternative-2\" not found.")
-            .captures(&url_response.body);
-
-        // The regex matches
-        if caps_result.is_some() {
-            info!("Regex Handlebars/http-body-source-alternative-2 matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(
-                caps,
-                Some(url_response),
-                30,
-                30,
-                "Handlebars",
-                "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
-            ));
-        }
-
         None
     }
 }

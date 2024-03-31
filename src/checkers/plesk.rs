@@ -12,8 +12,11 @@ use regex::Regex;
 
 /// The checker
 pub struct PleskChecker<'a> {
-    /// The regexes used to recognize the technology
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> PleskChecker<'a> {
@@ -27,7 +30,7 @@ impl<'a> PleskChecker<'a> {
             r"<title>(?P<wholematch>Plesk\s+[a-zA-Z0-9]+\s+(?P<version1>\d+\.\d+\.\d+))</title>",
         )
         .unwrap();
-        regexes.insert("http-body-login", login_regex);
+        regexes.insert("http-body-login", (login_regex, 30, 30));
         Self { regexes: regexes }
     }
 
@@ -38,18 +41,27 @@ impl<'a> PleskChecker<'a> {
             url_response.url
         );
 
+        let body_regex_params = self
+            .regexes
+            .get("http-body-login")
+            .expect("Regex Plesk/http-body-login not found");
+        let (regex, keep_left, keep_right) = body_regex_params;
+
         // Restrict the verification on the login page
         if url_response.url.contains("/login_up.php") {
-            let caps_result = self
-                .regexes
-                .get("http-body-login")
-                .expect("Regex \"http-body-login\" not found.")
-                .captures(&url_response.body);
+            let caps_result = regex.captures(&url_response.body);
             // The regex matches
             if caps_result.is_some() {
-                info!("Regex Plesk/http-body-documentation matches");
+                info!("Regex Plesk/http-body-login matches");
                 let caps = caps_result.unwrap();
-                return Some(self.extract_finding_from_captures(caps, Some(url_response), 30, 30, "Plesk", "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
+                return Some(self.extract_finding_from_captures(
+		    caps,
+		    Some(url_response),
+		    keep_left.to_owned(),
+		    keep_right.to_owned(),
+		    "Plesk",
+		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
+		));
             }
         }
 

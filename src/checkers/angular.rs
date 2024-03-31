@@ -11,8 +11,11 @@ use regex::Regex;
 
 /// The checker
 pub struct AngularChecker<'a> {
-    /// The regexes used to recognize the technology
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> AngularChecker<'a> {
@@ -28,7 +31,7 @@ impl<'a> AngularChecker<'a> {
         )
         .unwrap();
 
-        regexes.insert("http-body-source", source_code_regex);
+        regexes.insert("http-body-source", (source_code_regex, 15, 21));
         Self { regexes: regexes }
     }
 
@@ -39,24 +42,22 @@ impl<'a> AngularChecker<'a> {
             url_response.url
         );
 
-        let caps_result = self
-            .regexes
-            .get("http-body-source")
-            .expect("Regex \"http-body-source\" not found.")
-            .captures(&url_response.body);
-
-        // The regex matches
-        if caps_result.is_some() {
-            info!("Regex Angular/http-body-source matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(
+        // Loop over each regex to try to detect the technology
+        for (regex_name, (regex, keep_left, keep_right)) in &self.regexes {
+            let caps_result = regex.captures(&url_response.body);
+            // The regex matches
+            if caps_result.is_some() {
+                info!("Regex Angular/{} matches", regex_name);
+                let caps = caps_result.unwrap();
+                return Some(self.extract_finding_from_captures(
                 caps,
-                Some(url_response),
-                15,
-                21,
-                "Angular",
-                "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
-            ));
+                    Some(url_response),
+                    keep_left.to_owned(),
+                    keep_right.to_owned(),
+                    "Angular",
+                    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
+		));
+            }
         }
         None
     }

@@ -12,8 +12,11 @@ use regex::Regex;
 
 /// The OS checker
 pub struct OSChecker<'a> {
-    /// The regexes used to recognize the OS
-    regexes: HashMap<&'a str, Regex>,
+    /// The regexes and their parameters used to recognize the technology
+    /// The left-side usize represent the number of chars to keep in the
+    /// evidence, from the left, if the regex matches. The right-side is
+    /// similar but it's about the number of chars to keep from the right.
+    regexes: HashMap<&'a str, (Regex, usize, usize)>,
 }
 
 impl<'a> OSChecker<'a> {
@@ -56,12 +59,12 @@ impl<'a> OSChecker<'a> {
         // Example: <hr><center>nginx/1.22.3</center>
         let body_nginx_regex = Regex::new(r"<hr><center>(?P<wholematch>nginx(\/(?P<version1>\d+\.\d+\.\d+)( \((?P<os>[^\)]+)\))))</center>").unwrap();
 
-        regexes.insert("openssh-banner", openssh_regex);
-        regexes.insert("openssh-windows-banner", openssh_windows_regex);
-        regexes.insert("mariadb-banner", mariadb_regex);
-        regexes.insert("http-header", header_regex);
-        regexes.insert("http-body-apache", body_apache_regex);
-        regexes.insert("http-body-nginx", body_nginx_regex);
+        regexes.insert("openssh-banner", (openssh_regex, 50, 50));
+        regexes.insert("openssh-windows-banner", (openssh_windows_regex, 50, 50));
+        regexes.insert("mariadb-banner", (mariadb_regex, 50, 50));
+        regexes.insert("http-header", (header_regex, 50, 50));
+        regexes.insert("http-body-apache", (body_apache_regex, 50, 50));
+        regexes.insert("http-body-nginx", (body_nginx_regex, 50, 50));
         OSChecker { regexes: regexes }
     }
 
@@ -73,15 +76,16 @@ impl<'a> OSChecker<'a> {
         );
         let headers_to_check =
             url_response.get_headers(&vec!["Server".to_string(), "X-powered-by".to_string()]);
+        let header_regex_params = self
+            .regexes
+            .get("http-header")
+            .expect("Regex OS/http-header not found");
+        let (regex_header, _keep_left_header, _keep_right_header) = header_regex_params;
 
         // Check in the headers to check that were present in this UrlResponse
         for (header_name, header_value) in headers_to_check {
             trace!("Checking header: {} / {}", header_name, header_value);
-            let caps_result = self
-                .regexes
-                .get("http-header")
-                .expect("Regex \"http-header\" not found.")
-                .captures(&header_value);
+            let caps_result = regex_header.captures(&header_value);
             // The regex matches
             if caps_result.is_some() {
                 info!("Regex OS/http-header matches");
@@ -121,11 +125,12 @@ impl<'a> OSChecker<'a> {
             "Running OSChecker::check_http_body() on {}",
             url_response.url
         );
-        let caps_result = self
+        let body_apache_regex_params = self
             .regexes
             .get("http-body-apache")
-            .expect("Regex \"http-body-apache\" not found.")
-            .captures(&url_response.body);
+            .expect("Regex OS/http-body-apache not found");
+        let (regex_body, _keep_left_body, _keep_right_body) = body_apache_regex_params;
+        let caps_result = regex_body.captures(&url_response.body);
 
         // The regex matches
         if caps_result.is_some() {
@@ -157,11 +162,13 @@ impl<'a> OSChecker<'a> {
             ));
         }
 
-        let caps_result = self
+        let body_nginx_regex_params = self
             .regexes
             .get("http-body-nginx")
-            .expect("Regex \"http-body-nginx\" not found.")
-            .captures(&url_response.body);
+            .expect("Regex OS/http-body-nginx not found");
+        let (regex_body_nginx, _keep_left_body_nginx, _keep_right_body_nginx) =
+            body_nginx_regex_params;
+        let caps_result = regex_body_nginx.captures(&url_response.body);
 
         // The regex matches
         if caps_result.is_some() {
@@ -274,6 +281,18 @@ impl<'a> TcpChecker for OSChecker<'a> {
     /// It looks for the OpenSSH banner.
     fn check_tcp(&self, data: &[String]) -> Option<Finding> {
         trace!("Running OSChecker::check_tcp()");
+        let body_openssh_regex_params = self
+            .regexes
+            .get("openssh-banner")
+            .expect("Regex OS/openssh-banner not found");
+        let (openssh_regex, _keep_left, _keep_right) = body_openssh_regex_params;
+        let body_openssh_windows_regex_params = self
+            .regexes
+            .get("openssh-windows-banner")
+            .expect("Regex OS/openssh-windows-banner not found");
+        let (openssh_windows_regex, _keep_left_windows, _keep_right_windows) =
+            body_openssh_windows_regex_params;
+
         // For each item, check if it's an OpenSSH banner
         for item in data {
             trace!("Checking item: {}", item);
@@ -281,18 +300,8 @@ impl<'a> TcpChecker for OSChecker<'a> {
             // Avoid duplicating the whole handling of OpenSSH
             // It's similar between Windows and the rest, only the regex
             // is different to keep them clean.
-            let caps_result_default = self
-                .regexes
-                .get("openssh-banner")
-                .expect("Regex \"openssh-banner\" not found.")
-                .captures(item);
-
-            let caps_result_windows = self
-                .regexes
-                .get("openssh-windows-banner")
-                .expect("Regex \"openssh-windows-banner\" not found.")
-                .captures(item);
-
+            let caps_result_default = openssh_regex.captures(item);
+            let caps_result_windows = openssh_windows_regex.captures(item);
             let caps_result = if caps_result_default.is_some() {
                 caps_result_default
             } else if caps_result_windows.is_some() {
@@ -336,12 +345,14 @@ impl<'a> TcpChecker for OSChecker<'a> {
                     None,
                 ));
             }
-
-            let caps_result = self
+            let body_mariadb_regex_params = self
                 .regexes
                 .get("mariadb-banner")
-                .expect("Regex \"mariadb-banner\" not found.")
-                .captures(item);
+                .expect("Regex OS/mariadb-banner not found");
+            let (mariadb_regex, _keep_left_mariadb, _keep_right_mariadb) =
+                body_mariadb_regex_params;
+
+            let caps_result = mariadb_regex.captures(item);
             // The regex matches
             if caps_result.is_some() {
                 info!("Regex OS/mariadb-banner matches");
