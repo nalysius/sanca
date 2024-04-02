@@ -30,7 +30,7 @@ impl<'a> OpenSSHChecker<'a> {
         // SSH-2.0-OpenSSH_6.7p1 Debian-5+deb8u2
         // Note: the -5 is actually ignored. Could be handled later.
         // TODO: get the package name & version when possible
-        let regex = Regex::new(r"^(?P<wholematch>SSH-(?P<sshversion>\d+\.\d+)-OpenSSH_(for_Windows_)?(?P<version1>\d+\.\d+([a-z]\d+)?)( [a-zA-Z0-0]+)?)").unwrap();
+        let regex = Regex::new(r"^(?P<wholematch>SSH-(?P<sshversion>\d+\.\d+)-OpenSSH_(for_Windows_)?(?P<version1>\d+\.\d+([a-z]\d+)?)( [a-zA-Z0-9+-]+)?)").unwrap();
         regexes.insert("openssh-banner", (regex, 20, 20));
         OpenSSHChecker { regexes: regexes }
     }
