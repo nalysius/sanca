@@ -27,7 +27,7 @@ impl<'a> TinyMCEChecker<'a> {
 
         // Example: return s={$:b,majorVersion:"4",minorVersion:"6.2",
         let body_regex = Regex::new(
-            r#"(?P<wholematch>[^a-z]majorVersion\s*:\s*['"](?P<version1>\d+)['"]\s*,\s*minorVersion\s*:\s*['"](?P<version2>\d+\.\d+)['"])"#
+            r#"[^a-z](?P<wholematch>majorVersion\s*:\s*['"](?P<version1>\d+)['"]\s*,\s*minorVersion\s*:\s*['"](?P<version2>\d+\.\d+)['"])"#
         )
             .unwrap();
 
