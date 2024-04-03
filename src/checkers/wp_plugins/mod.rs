@@ -21,5 +21,6 @@ pub mod spectra;
 pub mod woocommerce;
 pub mod wordfence;
 pub mod wp_mail_smtp;
+pub mod wp_members;
 pub mod wpforms_lite;
 pub mod yoast_seo;

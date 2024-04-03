@@ -82,6 +82,7 @@ pub enum Technology {
     TinyMCE,
     JQueryUI,
     WPPLayerSlider,
+    WPPWpMembers,
 }
 
 impl Technology {
@@ -463,6 +464,20 @@ impl Technology {
 		    ),
                 ]
             }
+            Self::WPPWpMembers => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/wp-members/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/wp-members/readme.txt",
+                        false,
+                    ),
+                ]
+            }
             _ => vec![UrlRequest::new(main_url, true)],
         }
     }
@@ -532,6 +547,7 @@ impl ValueEnum for Technology {
             Technology::TinyMCE,
             Technology::JQueryUI,
             Technology::WPPLayerSlider,
+            Technology::WPPWpMembers,
         ]
     }
 
@@ -598,6 +614,7 @@ impl ValueEnum for Technology {
             Technology::TinyMCE => Some(PossibleValue::new("tinymce")),
             Technology::JQueryUI => Some(PossibleValue::new("jqueryui")),
             Technology::WPPLayerSlider => Some(PossibleValue::new("layerslider")),
+            Technology::WPPWpMembers => Some(PossibleValue::new("wpmembers")),
         }
     }
 }

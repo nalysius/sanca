@@ -74,6 +74,7 @@ use crate::checkers::wp_plugins::spectra::SpectraChecker;
 use crate::checkers::wp_plugins::woocommerce::WooCommerceChecker;
 use crate::checkers::wp_plugins::wordfence::WordfenceChecker;
 use crate::checkers::wp_plugins::wp_mail_smtp::WpMailSmtpChecker;
+use crate::checkers::wp_plugins::wp_members::WpMembersChecker;
 use crate::checkers::wp_plugins::wpforms_lite::WpformsLiteChecker;
 use crate::checkers::wp_plugins::yoast_seo::YoastSEOChecker;
 use crate::checkers::wp_themes::divi::DiviChecker;
@@ -172,6 +173,7 @@ impl Application {
             Box::new(TinyMCEChecker::new()),
             Box::new(JQueryUIChecker::new()),
             Box::new(LayerSliderChecker::new()),
+            Box::new(WpMembersChecker::new()),
         ];
 
         trace!("Returning the Application");
