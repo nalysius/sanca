@@ -27,12 +27,18 @@ impl<'a> RevSliderChecker<'a> {
         let mut regexes = HashMap::new();
 
         // Example: <meta name="generator" content="Powered by Slider Revolution 6.5.11 - responsive, Mobile-Friendly Slider Plugin for WordPress with comfortable drag and drop interface." />
-        let source_code_regex = Regex::new(
-            r#"(?P<wholematch><meta\s+name="generator"\s+content="Powered by Slider Revolution (?P<version1>\d+\.\d+\.\d+) - )[^"]+""#,
+        let source_meta_regex = Regex::new(
+            r#"(?P<wholematch><meta\s+name="generator"\s+content="Powered by Slider Revolution (?P<version1>\d+\.\d+\.\d+(\.\d+)?) - )[^"]+""#,
         )
-        .unwrap();
+            .unwrap();
 
-        regexes.insert("http-body-source", (source_code_regex, 30, 30));
+        let source_comment_regex = Regex::new(
+            r#"(?P<wholematch><!--\s+START\s+REVOLUTION\s+SLIDER\s+(?P<version1>\d+\.\d+\.\d+(\.\d+)?)( fullwidth mode)?\s+-->)"#,
+        )
+            .unwrap();
+
+        regexes.insert("http-body-meta", (source_meta_regex, 30, 30));
+        regexes.insert("http-body-comment", (source_comment_regex, 30, 30));
         Self { regexes: regexes }
     }
 
@@ -43,25 +49,22 @@ impl<'a> RevSliderChecker<'a> {
             url_response.url
         );
 
-        let body_regex_params = self
-            .regexes
-            .get("http-body-source")
-            .expect("Regex RevSlider/http-body-source not found");
-        let (regex, keep_left, keep_right) = body_regex_params;
-        let caps_result = regex.captures(&url_response.body);
-
-        // The regex matches
-        if caps_result.is_some() {
-            info!("Regex RevSlider/http-body-source matches");
-            let caps = caps_result.unwrap();
-            return Some(self.extract_finding_from_captures(
-                caps,
-                Some(url_response),
-                keep_left.to_owned(),
-                keep_right.to_owned(),
-                "RevSlider",
-                "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
-            ));
+        // Loop over each regex to try to detect the technology
+        for (regex_name, (regex, keep_left, keep_right)) in &self.regexes {
+            let caps_result = regex.captures(&url_response.body);
+            // The regex matches
+            if caps_result.is_some() {
+                info!("Regex RevSlider/{} matches", regex_name);
+                let caps = caps_result.unwrap();
+                return Some(self.extract_finding_from_captures(
+                    caps,
+                    Some(url_response),
+                    keep_left.to_owned(),
+                    keep_right.to_owned(),
+                    "RevSlider",
+                    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
+		));
+            }
         }
         None
     }
@@ -115,6 +118,19 @@ mod tests {
             Some("6.5.11"),
             Some(url1),
         );
+
+        let body2 = r#"<div></div><!-- START REVOLUTION SLIDER 5.4.8.3 fullwidth mode --> <hr />"#;
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body2, UrlRequestType::Default, 200);
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "REVOLUTION SLIDER 5.4.8.3",
+            "RevSlider",
+            Some("5.4.8.3"),
+            Some(url1),
+        );
     }
 
     #[test]
@@ -125,6 +141,17 @@ mod tests {
             "https://www.example.com/that.jsp?abc=def",
             HashMap::new(),
             body,
+            UrlRequestType::Default,
+            200,
+        );
+        let finding = checker.check_http_body(&url_response_invalid);
+        assert!(finding.is_none());
+
+        let body2 = r#"&lt;!-- START REVOLUTION SLIDER 5.4.8.3 fullwidth mode --&gt;"#;
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/that.jsp?abc=def",
+            HashMap::new(),
+            body2,
             UrlRequestType::Default,
             200,
         );

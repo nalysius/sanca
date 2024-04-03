@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Regexes handling has been improved in checkers, making code cleaner especially
   in JavaScript libraries checkers.
+- WordPress plugin RevSlider can be detected using a second regex.
 
 ## [1.3.0]
 
