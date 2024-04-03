@@ -31,7 +31,7 @@ impl<'a> LayerSliderChecker<'a> {
         )
         .unwrap();
 
-        regexes.insert("http-body", (source_regex, 30, 30));
+        regexes.insert("http-body-source", (source_regex, 30, 30));
         Self { regexes: regexes }
     }
 
