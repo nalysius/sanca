@@ -451,6 +451,16 @@ impl Technology {
 			"wp-content/plugins/LayerSlider/static/layerslider/js/layerslider.kreaturamedia.jquery.js",
 			false,
 		    ),
+		    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/LayerSlider/static/js/layerslider.kreaturamedia.jquery.js",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+			main_url,
+			"wp-content/plugins/LayerSlider/static/js/layerslider.kreaturamedia.jquery.js",
+			false,
+		    ),
                 ]
             }
             _ => vec![UrlRequest::new(main_url, true)],

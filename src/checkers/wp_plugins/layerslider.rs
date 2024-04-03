@@ -43,9 +43,12 @@ impl<'a> LayerSliderChecker<'a> {
         );
 
         // Search only in this file
-        if !url_response.url.contains("/wp-content/plugins/LayerSlider/static/layerslider/js/layerslider.kreaturamedia.jquery.js") {
-	    return None;
-	}
+        if !url_response
+            .url
+            .contains("layerslider.kreaturamedia.jquery.js")
+        {
+            return None;
+        }
 
         // Loop over each regex to try to detect the technology
         for (regex_name, (regex, keep_left, keep_right)) in &self.regexes {
