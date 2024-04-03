@@ -12,6 +12,7 @@ pub mod elements_ready_lite;
 pub mod gtranslate;
 pub mod jetpack;
 pub mod js_composer;
+pub mod layerslider;
 pub mod litespeed_cache;
 pub mod mailchimp_for_wp;
 pub mod really_simple_ssl;

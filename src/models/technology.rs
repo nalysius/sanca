@@ -81,6 +81,7 @@ pub enum Technology {
     Symfony,
     TinyMCE,
     JQueryUI,
+    WPPLayerSlider,
 }
 
 impl Technology {
@@ -438,6 +439,20 @@ impl Technology {
             Self::Symfony => {
                 vec![UrlRequest::new(main_url, false)]
             }
+            Self::WPPLayerSlider => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/LayerSlider/static/layerslider/js/layerslider.kreaturamedia.jquery.js",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+			main_url,
+			"wp-content/plugins/LayerSlider/static/layerslider/js/layerslider.kreaturamedia.jquery.js",
+			false,
+		    ),
+                ]
+            }
             _ => vec![UrlRequest::new(main_url, true)],
         }
     }
@@ -506,6 +521,7 @@ impl ValueEnum for Technology {
             Technology::Symfony,
             Technology::TinyMCE,
             Technology::JQueryUI,
+            Technology::WPPLayerSlider,
         ]
     }
 
@@ -571,6 +587,7 @@ impl ValueEnum for Technology {
             Technology::Symfony => Some(PossibleValue::new("symfony")),
             Technology::TinyMCE => Some(PossibleValue::new("tinymce")),
             Technology::JQueryUI => Some(PossibleValue::new("jqueryui")),
+            Technology::WPPLayerSlider => Some(PossibleValue::new("layerslider")),
         }
     }
 }

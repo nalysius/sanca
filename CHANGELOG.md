@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Added
+
+- Detection of LayerSlider Wordpress plugin.
+
 ## Changed
 
 - Regexes handling has been improved in checkers, making code cleaner especially

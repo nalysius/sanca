@@ -65,6 +65,7 @@ use crate::checkers::wp_plugins::elements_ready_lite::ElementsReadyLiteChecker;
 use crate::checkers::wp_plugins::gtranslate::GTranslateChecker;
 use crate::checkers::wp_plugins::jetpack::JetpackChecker;
 use crate::checkers::wp_plugins::js_composer::JSComposerChecker;
+use crate::checkers::wp_plugins::layerslider::LayerSliderChecker;
 use crate::checkers::wp_plugins::litespeed_cache::LiteSpeedCacheChecker;
 use crate::checkers::wp_plugins::mailchimp_for_wp::Mc4wpChecker;
 use crate::checkers::wp_plugins::really_simple_ssl::ReallySimpleSSLChecker;
@@ -170,6 +171,7 @@ impl Application {
             Box::new(SymfonyChecker::new()),
             Box::new(TinyMCEChecker::new()),
             Box::new(JQueryUIChecker::new()),
+            Box::new(LayerSliderChecker::new()),
         ];
 
         trace!("Returning the Application");
