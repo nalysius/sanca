@@ -28,10 +28,19 @@ impl<'a> MySQLChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: S
         // 5.7.37-nmm1-logm{pX^4gw9JD]Sg4mysql_native_password
-	//
-	// (?s) means that . also matches a newline.
-        let regex = Regex::new(r"(?s)(?P<wholematch>(?P<version1>\d+\.\d+(\.\d+)?).+mysql_native_password)").unwrap();
-        regexes.insert("mysql-banner", (regex, 50, 50));
+        //
+        // OR
+        //
+        // 8.0.36-0ubuntu0.20.04.1$en#@�bXL<%m6k/Dcaching_sha2_password
+        //
+        // (?s) means that . also matches a newline.
+        let regex =
+            Regex::new(r"(?s)(?P<wholematch>(?P<version1>\d+\.\d+(\.\d+)?).+_password)").unwrap();
+        // MySQL banner contains characters which are replaced by the
+        // replacement character (U+FFFD). Splitting an evidence on this
+        // character makes the program panic because it's a multi-bytes
+        // character. Instead, take the whole banner.
+        regexes.insert("mysql-banner", (regex, 100, 100));
         Self { regexes: regexes }
     }
 }
