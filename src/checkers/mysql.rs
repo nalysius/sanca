@@ -28,8 +28,10 @@ impl<'a> MySQLChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: S
         // 5.7.37-nmm1-logm{pX^4gw9JD]Sg4mysql_native_password
-        let regex = Regex::new(r"(?P<version1>\d+\.\d+(\.\d+)?).+mysql_native_password").unwrap();
-        regexes.insert("mysql-banner", (regex, 30, 30));
+	//
+	// (?s) means that . also matches a newline.
+        let regex = Regex::new(r"(?s)(?P<wholematch>(?P<version1>\d+\.\d+(\.\d+)?).+mysql_native_password)").unwrap();
+        regexes.insert("mysql-banner", (regex, 50, 50));
         Self { regexes: regexes }
     }
 }

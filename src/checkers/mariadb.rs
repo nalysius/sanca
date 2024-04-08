@@ -28,10 +28,12 @@ impl<'a> MariaDBChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: q
         // 5.5.5-10.10.2-MariaDB-1:10.10.2+maria~ubu1804CZA"$-TB,R-=xdmx1+%s:bamysql_native_password
+	//
+	// (?s) means that . also matches a newline.
         let regex =
-            Regex::new(r"(?P<wholematch>\d+\.\d+\.\d+\-(?P<version1>\d+\.\d+\.\d+)-MariaDB)")
+            Regex::new(r"(?s)(?P<wholematch>\d+\.\d+\.\d+\-(?P<version1>\d+\.\d+\.\d+)-MariaDB.+)")
                 .unwrap();
-        regexes.insert("mariadb-banner", (regex, 30, 30));
+        regexes.insert("mariadb-banner", (regex, 50, 50));
         Self { regexes: regexes }
     }
 }

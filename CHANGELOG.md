@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   in JavaScript libraries checkers.
 - WordPress plugin RevSlider can be detected using a second regex.
 
+## Fixed
+
+- Some false negatives in MySQL & MariaDB when the banner was containing a newline.
+
 ## [1.3.0]
 
 ### Added
