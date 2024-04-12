@@ -31,7 +31,13 @@ impl<'a> JQueryChecker<'a> {
         //
         // /*! jQuery v3.7.0 |
         let comment_regex = Regex::new(r".*\/\*![\s\*]+(?P<wholematch>jQuery (JavaScript Library )?(v@?(?P<version1>\d+\.\d+\.\d+)))( |)?").unwrap();
+
+        // Example: {jquery:"3.3.1",
+        let body_minified_regex =
+            Regex::new(r#"\s*(?P<wholematch>jquery\s*:\s*['"](?P<version1>3.3.1)['"])"#).unwrap();
         regexes.insert("http-body-comment", (comment_regex, 30, 30));
+        regexes.insert("http-body-minified", (body_minified_regex, 30, 30));
+
         Self { regexes: regexes }
     }
 
@@ -91,6 +97,39 @@ mod tests {
     use super::*;
     use crate::checkers::check_finding_fields;
     use crate::models::reqres::UrlRequestType;
+
+    #[test]
+    fn source_code_matches() {
+        let checker = JQueryChecker::new();
+        let body1 = r#"w.prototype={jquery:"3.3.1",constructor:w,length:0"#;
+        let url1 = "https://www.example.com/js/file.js";
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript, 200);
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "jquery:\"3.3.1\"",
+            "jQuery",
+            Some("3.3.1"),
+            Some(url1),
+        );
+    }
+
+    #[test]
+    fn source_code_doesnt_match() {
+        let checker = JQueryChecker::new();
+        let body = r#"{lodash:"3.3.1","#;
+        let url_response_invalid = UrlResponse::new(
+            "https://www.example.com/that.jsp?abc=def",
+            HashMap::new(),
+            body,
+            UrlRequestType::Default,
+            200,
+        );
+        let finding = checker.check_http_body(&url_response_invalid);
+        assert!(finding.is_none());
+    }
 
     #[test]
     fn comment_matches() {

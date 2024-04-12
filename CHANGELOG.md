@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Detection of LayerSlider Wordpress plugin.
 - Detection of WPMembers WordPress plugin.
+- New regex for minified jQuery.
 
 ## Changed
 
