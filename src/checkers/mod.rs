@@ -18,6 +18,7 @@ pub mod angularjs;
 pub mod bootstrap;
 pub mod ckeditor;
 pub mod dovecot;
+pub mod drupal;
 pub mod exim;
 pub mod gsap;
 pub mod handlebars;

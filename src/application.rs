@@ -23,6 +23,7 @@ use crate::checkers::angularjs::AngularJSChecker;
 use crate::checkers::bootstrap::BootstrapChecker;
 use crate::checkers::ckeditor::CKEditorChecker;
 use crate::checkers::dovecot::DovecotChecker;
+use crate::checkers::drupal::DrupalChecker;
 use crate::checkers::exim::EximChecker;
 use crate::checkers::gsap::GsapChecker;
 use crate::checkers::handlebars::HandlebarsChecker;
@@ -129,6 +130,7 @@ impl Application {
             Box::new(PhpMyAdminChecker::new()),
             Box::new(Typo3Checker::new()),
             Box::new(WordPressChecker::new()),
+            Box::new(DrupalChecker::new()),
             Box::new(PleskChecker::new()),
             Box::new(AngularChecker::new()),
             Box::new(AngularJSChecker::new()),
@@ -163,6 +165,8 @@ impl Application {
             Box::new(WpMailSmtpChecker::new()),
             Box::new(Mc4wpChecker::new()),
             Box::new(SpectraChecker::new()),
+            Box::new(LayerSliderChecker::new()),
+            Box::new(WpMembersChecker::new()),
             Box::new(SquirrelMailChecker::new()),
             Box::new(PhoneSystem3CXChecker::new()),
             Box::new(PrestashopChecker::new()),
@@ -172,8 +176,6 @@ impl Application {
             Box::new(SymfonyChecker::new()),
             Box::new(TinyMCEChecker::new()),
             Box::new(JQueryUIChecker::new()),
-            Box::new(LayerSliderChecker::new()),
-            Box::new(WpMembersChecker::new()),
         ];
 
         trace!("Returning the Application");
