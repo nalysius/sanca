@@ -332,7 +332,7 @@ impl<'a> TcpChecker for OSChecker<'a> {
                 }
 
                 let os_evidence_text = format!(
-                        "The operating system {}{} has been identified using the banner presented by OpenSSH: {}.",
+                        "The operating system {}{} has been identified using the banner presented by OpenSSH: {}",
                         os_name,
                         version_text,
                         item
@@ -376,7 +376,7 @@ impl<'a> TcpChecker for OSChecker<'a> {
                 }
 
                 let os_evidence_text = format!(
-                        "The operating system {}{} has been identified using the banner presented by MariaDB: {}.",
+                        "The operating system {}{} has been identified using the banner presented by MariaDB: {}",
                         os_name,
                         version_text,
                         item
