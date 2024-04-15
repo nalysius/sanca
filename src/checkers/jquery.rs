@@ -34,9 +34,18 @@ impl<'a> JQueryChecker<'a> {
 
         // Example: {jquery:"3.3.1",
         let body_minified_regex =
-            Regex::new(r#"\s*(?P<wholematch>jquery\s*:\s*['"](?P<version1>3.3.1)['"])"#).unwrap();
+            Regex::new(r#"\s*(?P<wholematch>jquery\s*:\s*['"](?P<version1>\d+\.\d+\.\d+)['"])"#)
+                .unwrap();
+
+        // Example: var version = "3.1.1"; var jQuery = {jquery:version,
+        let body_minified_regex_alternative =
+            Regex::new(r#"(?P<wholematch>(var|let)\s+version\s*=\s*['"](?P<version1>\d+\.\d+\.\d+)['"].+jquery\s*:\s*version)"#).unwrap();
         regexes.insert("http-body-comment", (comment_regex, 30, 30));
         regexes.insert("http-body-minified", (body_minified_regex, 30, 30));
+        regexes.insert(
+            "http-body-minified-alternative",
+            (body_minified_regex_alternative, 30, 30),
+        );
 
         Self { regexes: regexes }
     }
@@ -112,6 +121,19 @@ mod tests {
             "jquery:\"3.3.1\"",
             "jQuery",
             Some("3.3.1"),
+            Some(url1),
+        );
+
+        let body1 = r#"var version="3.1.1";w.prototype={jquery:version,constructor:w,length:0"#;
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::JavaScript, 200);
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "version=\"3.1.1\"",
+            "jQuery",
+            Some("3.1.1"),
             Some(url1),
         );
     }
