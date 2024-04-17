@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detection of WPMembers WordPress plugin.
 - 2 new regexes for minified jQuery.
 - Detection for Drupal CMS.
+- New regex for minified jQuery UI.
 
 ## Changed
 
@@ -23,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Fixed
 
 - Some false negatives in MySQL & MariaDB when the banner was containing a newline.
+- Some false negatives in AngularJS.
 
 ## [1.3.0]
 
