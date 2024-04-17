@@ -42,11 +42,22 @@ impl<'a> AngularJSChecker<'a> {
         // Example: ] http://errors.angularjs.org/1.8.2/
         // 'https://errors.angularjs.org/1.8.2/'
         let body_minified_regex =
-            Regex::new(r#"(\] |'|\\n)(?P<wholematch>https?:\/\/errors.angularjs.org\/(?P<version1>\d+\.\d+\.\d+)\/)"#)
+            Regex::new(r#"(\] |'|\\n|")(?P<wholematch>https?:\/\/errors.angularjs.org\/(?P<version1>\d+\.\d+\.\d+)\/)"#)
                 .unwrap();
+
+        // Example: info({angularVersion:"1.8.3"})
+        let body_minified_regex_alternative = Regex::new(
+            r#"(?P<wholematch>angularVersion\s*:\s*['"](?P<version1>\d+\.\d+\.\d+)['"])"#,
+        )
+        .unwrap();
 
         regexes.insert("http-body-comment", (comment_regex, 30, 30));
         regexes.insert("http-body-minified", (body_minified_regex, 10, 30));
+        regexes.insert(
+            "http-body-minified-alternative",
+            (body_minified_regex_alternative, 15, 15),
+        );
+
         Self { regexes: regexes }
     }
 
@@ -119,6 +130,19 @@ mod tests {
             "https://errors.angularjs.org/1.8.2",
             "AngularJS",
             Some("1.8.2"),
+            Some(url1),
+        );
+
+        let body2 = r#"info({angularVersion: "1.8.3"})"#;
+        let url_response_valid =
+            UrlResponse::new(url1, HashMap::new(), body2, UrlRequestType::JavaScript, 200);
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "angularVersion: \"1.8.3\"",
+            "AngularJS",
+            Some("1.8.3"),
             Some(url1),
         );
     }
