@@ -33,11 +33,18 @@ impl<'a> JQueryUIChecker<'a> {
         // t.ui=t.ui||{},t.ui.version="1.11.0";
         let body_minified_regex_alternative = Regex::new(r#"ui-datepicker.+(?P<wholematch>[a-zA-Z0-9]+\.ui\s*=\s*[a-zA-Z0-9]+\.ui\s*\|\|\s*\{\}\s*,\s*[a-zA-Z0-9]+\.ui\.version\s*=\s*['"](?P<version1>\d+\.\d+\.\d+)['"])"#).unwrap();
 
+        // ["jquery"], factory), $.ui.version="1.13.0";
+        let body_minified_regex_alternative_1 = Regex::new(r#"j[Qq]uery.+(?P<wholematch>[a-zA-Z0-9\$]+\.ui\.version\s*=\s*['"](?P<version1>\d+\.\d+\.\d+)['"])"#).unwrap();
+
         regexes.insert("http-body-comment", (comment_regex, 30, 30));
         regexes.insert("http-body-minified", (body_minified_regex, 30, 30));
         regexes.insert(
             "http-body-minified-alternative",
             (body_minified_regex_alternative, 30, 30),
+        );
+        regexes.insert(
+            "http-body-minified-alternative-1",
+            (body_minified_regex_alternative_1, 30, 30),
         );
         Self { regexes: regexes }
     }
@@ -137,6 +144,18 @@ mod tests {
             "ui.version=\"1.12.0\"",
             "jQueryUI",
             Some("1.12.0"),
+            Some(url1),
+        );
+
+        let body4 = r#"["jquery"], $.ui.version="1.13.0";"#;
+        url_response_valid.body = body4.to_string();
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "$.ui.version=\"1.13.0\"",
+            "jQueryUI",
+            Some("1.13.0"),
             Some(url1),
         );
     }
