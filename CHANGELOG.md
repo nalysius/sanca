@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Detection for Horde webmail.
+
 ## [1.4.0]
 
-## Added
+### Added
 
 - Detection of LayerSlider Wordpress plugin.
 - Detection of WPMembers WordPress plugin.
@@ -18,13 +22,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New regex for minified jQuery UI.
 - Detection for WordPress plugin Forminator.
 
-## Changed
+### Changed
 
 - Regexes handling has been improved in checkers, making code cleaner especially
   in JavaScript libraries checkers.
 - WordPress plugin RevSlider can be detected using a second regex.
 
-## Fixed
+### Fixed
 
 - Some false negatives in MySQL & MariaDB when the banner was containing a newline.
 - Some false negatives in AngularJS.

@@ -84,6 +84,7 @@ pub enum Technology {
     WPPLayerSlider,
     WPPWpMembers,
     WPPForminator,
+    Horde,
 }
 
 impl Technology {
@@ -493,6 +494,20 @@ impl Technology {
                     ),
                 ]
             }
+            Self::Horde => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/horde/services/help/index.php?module=horde&show=menu",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "horde/services/help/index.php?module=horde&show=menu",
+                        false,
+                    ),
+                ]
+            }
             _ => vec![UrlRequest::new(main_url, true)],
         }
     }
@@ -564,6 +579,7 @@ impl ValueEnum for Technology {
             Technology::WPPLayerSlider,
             Technology::WPPWpMembers,
             Technology::WPPForminator,
+            Technology::Horde,
         ]
     }
 
@@ -632,6 +648,7 @@ impl ValueEnum for Technology {
             Technology::WPPLayerSlider => Some(PossibleValue::new("layerslider")),
             Technology::WPPWpMembers => Some(PossibleValue::new("wpmembers")),
             Technology::WPPForminator => Some(PossibleValue::new("forminator")),
+            Technology::Horde => Some(PossibleValue::new("horde")),
         }
     }
 }

@@ -23,6 +23,7 @@ pub mod exim;
 pub mod gsap;
 pub mod handlebars;
 pub mod highcharts;
+pub mod horde;
 pub mod httpd;
 pub mod jira;
 pub mod jquery;

@@ -28,6 +28,7 @@ use crate::checkers::exim::EximChecker;
 use crate::checkers::gsap::GsapChecker;
 use crate::checkers::handlebars::HandlebarsChecker;
 use crate::checkers::highcharts::HighchartsChecker;
+use crate::checkers::horde::HordeChecker;
 use crate::checkers::httpd::ApacheHttpdChecker;
 use crate::checkers::jira::JiraChecker;
 use crate::checkers::jquery::JQueryChecker;
@@ -124,6 +125,7 @@ impl Application {
         let http_checkers: Vec<Box<dyn HttpChecker>> = vec![
             Box::new(OSChecker::new()),
             Box::new(ApacheHttpdChecker::new()),
+            Box::new(HordeChecker::new()),
             Box::new(JiraChecker::new()),
             Box::new(MelisChecker::new()),
             Box::new(NginxChecker::new()),
