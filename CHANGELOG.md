@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 2 new regexes for minified jQuery.
 - Detection for Drupal CMS.
 - New regex for minified jQuery UI.
+- Detection for WordPress plugin Forminator.
 
 ## Changed
 

@@ -83,6 +83,7 @@ pub enum Technology {
     JQueryUI,
     WPPLayerSlider,
     WPPWpMembers,
+    WPPForminator,
 }
 
 impl Technology {
@@ -478,6 +479,20 @@ impl Technology {
                     ),
                 ]
             }
+            Self::WPPForminator => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/forminator/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/forminator/readme.txt",
+                        false,
+                    ),
+                ]
+            }
             _ => vec![UrlRequest::new(main_url, true)],
         }
     }
@@ -548,6 +563,7 @@ impl ValueEnum for Technology {
             Technology::JQueryUI,
             Technology::WPPLayerSlider,
             Technology::WPPWpMembers,
+            Technology::WPPForminator,
         ]
     }
 
@@ -615,6 +631,7 @@ impl ValueEnum for Technology {
             Technology::JQueryUI => Some(PossibleValue::new("jqueryui")),
             Technology::WPPLayerSlider => Some(PossibleValue::new("layerslider")),
             Technology::WPPWpMembers => Some(PossibleValue::new("wpmembers")),
+            Technology::WPPForminator => Some(PossibleValue::new("forminator")),
         }
     }
 }
