@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Detection for Horde webmail.
 
+### Fixed
+
+- The program panicked when scanning OpenSSH for Windows.
+
 ## [1.4.0]
 
 ### Added

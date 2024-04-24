@@ -34,7 +34,7 @@ impl<'a> OSChecker<'a> {
 
         // Example: SSH-2.0-OpenSSH_for_Windows_9.5
         let openssh_windows_regex = Regex::new(
-            r"^SSH-\d+\.\d+-OpenSSH_for_(?P<os>Windows)_(?P<version>\d+\.\d+)([a-z]\d+)?",
+            r"^SSH-\d+\.\d+-OpenSSH_for_(?P<os>Windows)_(?P<version1>\d+\.\d+)([a-z]\d+)?",
         )
         .unwrap();
 
