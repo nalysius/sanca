@@ -27,10 +27,16 @@ impl<'a> ElementorChecker<'a> {
         let mut regexes = HashMap::new();
 
         // Example: Stable tag: 3.7.8
-        let source_code_regex =
+        let readme_regex =
             Regex::new(r#"(?P<wholematch>Stable tag: (?P<version1>\d+\.\d+(\.\d+)?))"#).unwrap();
 
-        regexes.insert("http-body-source", (source_code_regex, 30, 30));
+	let source_code_regex = Regex::new(
+            r#"(?P<wholematch><meta\s+name\s*=\s*['"][Gg]enerator['"]\s+content\s*=\s*['"]Elementor\s+(?P<version1>\d+\.\d+(\.\d+)?))"#,
+        )
+        .unwrap();
+	
+        regexes.insert("http-body-readme", (readme_regex, 30, 30));
+	regexes.insert("http-body-source", (source_code_regex, 30, 30));
         Self { regexes: regexes }
     }
 
@@ -41,20 +47,41 @@ impl<'a> ElementorChecker<'a> {
             url_response.url
         );
 
+	let body_regex_params = self
+            .regexes
+            .get("http-body-source")
+            .expect("Regex Elementor/http-body-source not found");
+        let (regex, keep_left, keep_right) = body_regex_params;
+        let caps_result = regex.captures(&url_response.body);
+
+        // The regex matches
+        if caps_result.is_some() {
+            info!("Regex Elementor/http-body-source matches");
+            let caps = caps_result.unwrap();
+            return Some(self.extract_finding_from_captures(
+                caps,
+                Some(url_response),
+                keep_left.to_owned(),
+                keep_right.to_owned(),
+                "Elementor",
+                "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
+	    ));
+        }
+
         if url_response
             .url
             .contains("/wp-content/plugins/elementor/readme.txt")
         {
             let body_regex_params = self
                 .regexes
-                .get("http-body-source")
-                .expect("Regex Elementor/http-body-source not found");
+                .get("http-body-readme")
+                .expect("Regex Elementor/http-body-readme not found");
             let (regex, keep_left, keep_right) = body_regex_params;
             let caps_result = regex.captures(&url_response.body);
 
             // The regex matches
             if caps_result.is_some() {
-                info!("Regex Elementor/http-body-source matches");
+                info!("Regex Elementor/http-body-readme matches");
                 let caps = caps_result.unwrap();
                 return Some(self.extract_finding_from_captures(
                 caps,
@@ -123,6 +150,20 @@ mod tests {
             "Elementor",
             Some("3.7.8"),
             Some(url1),
+        );
+
+	let body2 = r#" <meta name="generator" content="Elementor 3.21.4; features: e_optimized_assets_loading"#;
+	let url2 = "https://www.example.com/blog/";
+	let url_response_valid =
+            UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::Default, 200);
+        let finding = checker.check_http_body(&url_response_valid);
+        assert!(finding.is_some());
+        check_finding_fields(
+            &finding.unwrap(),
+            "Elementor 3.21.4",
+            "Elementor",
+            Some("3.21.4"),
+            Some(url2),
         );
     }
 
