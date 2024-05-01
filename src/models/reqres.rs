@@ -227,7 +227,7 @@ impl UrlRequest {
 ///
 /// Contains all the data needed by a checker: the URL of the request,
 /// the HTTP headers, the response body, and the [`UrlRequestType`].
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct UrlResponse {
     /// The URL where the request was sent
     pub url: String,
@@ -277,7 +277,7 @@ impl UrlResponse {
 
 /// Represents the type of a UrlRequest.
 /// It is about a main URL, or a JavaScript one.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum UrlRequestType {
     /// The default UrlRequest type.
     /// Used for "main" requests, not for subsequent

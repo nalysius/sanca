@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Detection for Horde webmail.
+- WordPress is now searched on the install page.
 
 ### Fixed
 

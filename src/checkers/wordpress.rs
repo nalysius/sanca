@@ -63,7 +63,7 @@ impl<'a> WordPressChecker<'a> {
         }
 
         // Checking only on the wp-login.php page to avoid false positive
-        if url_response.url.contains("/wp-login.php") {
+        if url_response.url.contains("/wp-login.php") || url_response.url.contains("/wp-admin/install.php") {
             let body_login_regex_params = self
                 .regexes
                 .get("http-body-login")
@@ -96,7 +96,11 @@ impl<'a> HttpChecker for WordPressChecker<'a> {
     fn check_http(&self, data: &[UrlResponse]) -> Vec<Finding> {
         trace!("Running WordPressChecker::check_http()");
 
-        for url_response in data {
+	// Sort the UrlResponses by URL, so wp-admin/install.php is checked before wp-login.php
+	let mut datas = data.to_vec();
+	datas.sort_by(|a, b| a.url.partial_cmp(&b.url).unwrap());
+
+        for url_response in datas {
             // JavaScript files could be hosted on a different server
             // Don't check the JavaScript files to avoid false positive,
             // Check only the "main" requests.
@@ -199,7 +203,7 @@ mod tests {
         );
 
         let body2 = "<script src = \"/that.js?ver=5.8.4\"></script>";
-        let url2 = "https://www.example.com/blog/wp-login.php";
+        let url2 = "https://www.example.com/blog/wp-admin/install.php";
         let url_response_valid =
             UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::Default, 200);
         let url_response_invalid = UrlResponse::new(

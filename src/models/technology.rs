@@ -176,6 +176,7 @@ impl Technology {
             Self::WordPress => {
                 vec![
                     UrlRequest::new(main_url, false),
+		    UrlRequest::from_path(main_url, "wp-admin/install.php", false),
                     UrlRequest::from_path(main_url, "wp-login.php", false),
                 ]
             }
