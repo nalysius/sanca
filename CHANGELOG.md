@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - WordPress is now detected on the install page.
 - Elementor is now detected in the meta Generator tag.
 - New regex to detect minified jQuery UI.
+- Detection for Knockout.
 
 ### Fixed
 

@@ -33,6 +33,7 @@ use crate::checkers::httpd::ApacheHttpdChecker;
 use crate::checkers::jira::JiraChecker;
 use crate::checkers::jquery::JQueryChecker;
 use crate::checkers::jqueryui::JQueryUIChecker;
+use crate::checkers::knockout::KnockoutChecker;
 use crate::checkers::lodash::LodashChecker;
 use crate::checkers::mariadb::MariaDBChecker;
 use crate::checkers::melis::MelisChecker;
@@ -176,6 +177,7 @@ impl Application {
             Box::new(HighchartsChecker::new()),
             Box::new(JQueryChecker::new()),
             Box::new(JQueryUIChecker::new()),
+            Box::new(KnockoutChecker::new()),
             Box::new(LodashChecker::new()),
             Box::new(ReactJSChecker::new()),
             Box::new(TinyMCEChecker::new()),

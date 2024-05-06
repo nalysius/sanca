@@ -28,6 +28,7 @@ pub mod httpd;
 pub mod jira;
 pub mod jquery;
 pub mod jqueryui;
+pub mod knockout;
 pub mod lodash;
 pub mod mariadb;
 pub mod melis;

@@ -85,6 +85,7 @@ pub enum Technology {
     WPPWpMembers,
     WPPForminator,
     Horde,
+    Knockout,
 }
 
 impl Technology {
@@ -176,7 +177,7 @@ impl Technology {
             Self::WordPress => {
                 vec![
                     UrlRequest::new(main_url, false),
-		    UrlRequest::from_path(main_url, "wp-admin/install.php", false),
+                    UrlRequest::from_path(main_url, "wp-admin/install.php", false),
                     UrlRequest::from_path(main_url, "wp-login.php", false),
                 ]
             }
@@ -581,6 +582,7 @@ impl ValueEnum for Technology {
             Technology::WPPWpMembers,
             Technology::WPPForminator,
             Technology::Horde,
+            Technology::Knockout,
         ]
     }
 
@@ -650,6 +652,7 @@ impl ValueEnum for Technology {
             Technology::WPPWpMembers => Some(PossibleValue::new("wpmembers")),
             Technology::WPPForminator => Some(PossibleValue::new("forminator")),
             Technology::Horde => Some(PossibleValue::new("horde")),
+            Technology::Knockout => Some(PossibleValue::new("knockout")),
         }
     }
 }
