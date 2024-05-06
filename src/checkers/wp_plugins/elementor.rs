@@ -30,13 +30,13 @@ impl<'a> ElementorChecker<'a> {
         let readme_regex =
             Regex::new(r#"(?P<wholematch>Stable tag: (?P<version1>\d+\.\d+(\.\d+)?))"#).unwrap();
 
-	let source_code_regex = Regex::new(
+        let source_code_regex = Regex::new(
             r#"(?P<wholematch><meta\s+name\s*=\s*['"][Gg]enerator['"]\s+content\s*=\s*['"]Elementor\s+(?P<version1>\d+\.\d+(\.\d+)?))"#,
         )
         .unwrap();
-	
+
         regexes.insert("http-body-readme", (readme_regex, 30, 30));
-	regexes.insert("http-body-source", (source_code_regex, 30, 30));
+        regexes.insert("http-body-source", (source_code_regex, 30, 30));
         Self { regexes: regexes }
     }
 
@@ -47,7 +47,7 @@ impl<'a> ElementorChecker<'a> {
             url_response.url
         );
 
-	let body_regex_params = self
+        let body_regex_params = self
             .regexes
             .get("http-body-source")
             .expect("Regex Elementor/http-body-source not found");
@@ -152,9 +152,9 @@ mod tests {
             Some(url1),
         );
 
-	let body2 = r#" <meta name="generator" content="Elementor 3.21.4; features: e_optimized_assets_loading"#;
-	let url2 = "https://www.example.com/blog/";
-	let url_response_valid =
+        let body2 = r#" <meta name="generator" content="Elementor 3.21.4; features: e_optimized_assets_loading"#;
+        let url2 = "https://www.example.com/blog/";
+        let url_response_valid =
             UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::Default, 200);
         let finding = checker.check_http_body(&url_response_valid);
         assert!(finding.is_some());
