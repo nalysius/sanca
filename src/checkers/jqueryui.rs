@@ -36,6 +36,9 @@ impl<'a> JQueryUIChecker<'a> {
         // ["jquery"], factory), $.ui.version="1.13.0";
         let body_minified_regex_alternative_1 = Regex::new(r#"j[Qq]uery.+(?P<wholematch>[a-zA-Z0-9\$]+\.ui\.version\s*=\s*['"](?P<version1>\d+\.\d+\.\d+)['"])"#).unwrap();
 
+	// n.ui.version)||(n.extend(n.ui,{version:"1.10.0",
+	let body_minified_regex_alternative_2 = Regex::new(r#"(?P<wholematch>[a-zA-Z0-9]+\.ui\.version\)?\s*\|\|\s*\(?[a-zA-Z0-9]+\.extend\([a-zA-Z0-9]+\.ui\s*,\s*\{version\s*:\s*['"](?P<version1>\d+\.\d+\.\d+)['"]).+ui-datepicker"#).unwrap();
+
         regexes.insert("http-body-comment", (comment_regex, 30, 30));
         regexes.insert("http-body-minified", (body_minified_regex, 30, 30));
         regexes.insert(
@@ -45,6 +48,10 @@ impl<'a> JQueryUIChecker<'a> {
         regexes.insert(
             "http-body-minified-alternative-1",
             (body_minified_regex_alternative_1, 30, 30),
+        );
+	regexes.insert(
+            "http-body-minified-alternative-2",
+            (body_minified_regex_alternative_2, 30, 30),
         );
         Self { regexes: regexes }
     }
