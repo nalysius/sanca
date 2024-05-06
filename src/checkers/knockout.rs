@@ -25,7 +25,8 @@ impl<'a> KnockoutChecker<'a> {
     pub fn new() -> Self {
         let mut regexes = HashMap::new();
         // Example: // Knockout JavaScript library v2.1.0
-        let comment_regex = Regex::new(r"\/\/\s*(?P<wholematch>Knockout (JavaScript [Ll]ibrary )?(v@?(?P<version1>\d+\.\d+\.\d+)))").unwrap();
+	// Example: * Knockout JavaScript library v3.5.0-rc
+        let comment_regex = Regex::new(r"(\/\/|\*)\s*(?P<wholematch>Knockout (JavaScript [Ll]ibrary )?(v@?(?P<version1>\d+\.\d+\.\d+(-[a-zA-Z0-9]+)?)))").unwrap();
 
         // Example: function(a,c,d){a[c]=d};a.version="2.1.0"
         let body_minified_regex = Regex::new(r#"(?P<wholematch>function\s*\(\s*[a-zA-Z0-9]+\s*,\s*[a-zA-Z0-9]+\s*,\s*[a-zA-Z0-9]+\s*\)\s*\{\s*[a-zA-Z0-9]+\[\s*[a-zA-Z0-9]+\s*\]\s*=\s*[a-zA-Z0-9]+\s*\}\s*[,;]\s*[a-zA-Z0-9]+\.version\s*=\s*['"](?P<version1>\d+\.\d+\.\d+)['"]).+__RequestVerificationToken"#).unwrap();
