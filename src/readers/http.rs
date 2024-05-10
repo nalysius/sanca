@@ -38,9 +38,16 @@ impl HttpReader<'_> {
         )
         .unwrap();
 
+        // Old Symfony (e.g.: 3.x) use this form instead
+        //
+        // Example: Sfjs.load('sfwdte16009', '\/app_dev.php\/_wdt\/e16009',
+        let symfony_old_debug_toolbar_regex =
+            Regex::new(r#"Sfjs\.load\(\s*['"]sfwdt(?P<profilertoken>[a-f0-9]+)['"]"#).unwrap();
+
         let mut url_regexes = HashMap::new();
         url_regexes.insert("scripts", script_regex);
         url_regexes.insert("symfony_debug_toolbar", symfony_debug_toolbar_regex);
+        url_regexes.insert("symfony_old_debug_toolbar", symfony_old_debug_toolbar_regex);
         HttpReader {
             url_regexes: url_regexes,
         }
@@ -292,21 +299,34 @@ impl HttpReader<'_> {
     /// Search the Symfony toolbar and if found, return a UrlRequest to
     /// find the Symfony version.
     pub fn extract_symfony(&self, url: &str, data: &str) -> Option<UrlRequest> {
-        let caps = self
-            .url_regexes
-            .get("symfony_debug_toolbar")
-            .unwrap()
-            .captures_iter(data);
-        for rmatch in caps {
-            let token = rmatch.name("profilertoken");
-            if token.is_some() {
-                return Some(UrlRequest::from_path(
-                    url,
-                    &format!("_profiler/{}/?panel=config", token.unwrap().as_str()),
-                    false,
-                ));
+        let regex_names = ["symfony_debug_toolbar", "symfony_old_debug_toolbar"];
+        for regex_name in regex_names {
+            let caps = self
+                .url_regexes
+                .get(regex_name)
+                .unwrap()
+                .captures_iter(data);
+            for rmatch in caps {
+                let token = rmatch.name("profilertoken");
+                if token.is_some() {
+                    // Old Symfony used app_dev.php for debug mode, in paths like
+                    // /app_dev.php/_profiler/xxxxxx?panel=config
+                    // The UrlRequest::from_path method works on relative path as
+                    // on directories, so the generated URL would be /_profiler/[...]
+                    // To prevent this, app a slash to the end.
+                    let mut url_mut = url.to_string();
+                    if regex_name == "symfony_old_debug_toolbar" {
+                        url_mut = format!("{}/", url);
+                    }
+                    return Some(UrlRequest::from_path(
+                        &url_mut,
+                        &format!("_profiler/{}?panel=config", token.unwrap().as_str()),
+                        false,
+                    ));
+                }
             }
         }
+
         return None;
     }
 }

@@ -442,7 +442,10 @@ impl Technology {
                 )]
             }
             Self::Symfony => {
-                vec![UrlRequest::new(main_url, false)]
+                vec![
+                    UrlRequest::new(main_url, false),
+                    UrlRequest::from_path(main_url, "/app_dev.php", false),
+                ]
             }
             Self::WPPLayerSlider => {
                 vec![

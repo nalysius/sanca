@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - The program panicked when scanning OpenSSH for Windows.
+- Detection for old versions of Symfony.
 
 ## [1.4.0]
 
