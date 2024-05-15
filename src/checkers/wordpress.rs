@@ -29,7 +29,7 @@ impl<'a> WordPressChecker<'a> {
         let body_meta_regex = Regex::new(r#"(?P<wholematch><meta\s+name\s*=\s*['"][Gg]enerator['"]\s+content\s*=\s*['"]WordPress (?P<version1>\d+\.\d+(\.\d+)?)['"]\s*\/>)"#).unwrap();
         // Example: [...]/style.min.css?ver=6.2.2'
         let body_login_regex =
-            Regex::new(r#"(?P<wholematch>\?ver=(?P<version1>\d+\.\d+\.\d+))"#).unwrap();
+            Regex::new(r#"(?P<wholematch>\?ver=(?P<version1>\d+\.\d+(\.\d+)?))"#).unwrap();
         regexes.insert("http-body-meta", (body_meta_regex, 30, 30));
         regexes.insert("http-body-login", (body_login_regex, 30, 30));
         Self { regexes: regexes }
