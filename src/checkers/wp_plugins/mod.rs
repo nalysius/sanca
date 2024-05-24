@@ -23,5 +23,6 @@ pub mod woocommerce;
 pub mod wordfence;
 pub mod wp_mail_smtp;
 pub mod wp_members;
+pub mod wp_super_cache;
 pub mod wpforms_lite;
 pub mod yoast_seo;

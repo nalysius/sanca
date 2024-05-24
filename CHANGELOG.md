@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Elementor is now detected in the meta Generator tag.
 - New regex to detect minified jQuery UI.
 - Detection for Knockout.
+- Detection for WP Super Cache WordPress plugin.
 
 ### Fixed
 

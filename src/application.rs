@@ -79,6 +79,7 @@ use crate::checkers::wp_plugins::woocommerce::WooCommerceChecker;
 use crate::checkers::wp_plugins::wordfence::WordfenceChecker;
 use crate::checkers::wp_plugins::wp_mail_smtp::WpMailSmtpChecker;
 use crate::checkers::wp_plugins::wp_members::WpMembersChecker;
+use crate::checkers::wp_plugins::wp_super_cache::WpSuperCacheChecker;
 use crate::checkers::wp_plugins::wpforms_lite::WpformsLiteChecker;
 use crate::checkers::wp_plugins::yoast_seo::YoastSEOChecker;
 use crate::checkers::wp_themes::divi::DiviChecker;
@@ -167,6 +168,7 @@ impl Application {
             Box::new(WpformsLiteChecker::new()),
             Box::new(WpMailSmtpChecker::new()),
             Box::new(WpMembersChecker::new()),
+            Box::new(WpSuperCacheChecker::new()),
             Box::new(YoastSEOChecker::new()),
             Box::new(AngularChecker::new()),
             Box::new(AngularJSChecker::new()),
