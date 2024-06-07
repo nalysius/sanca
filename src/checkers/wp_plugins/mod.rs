@@ -9,6 +9,7 @@ pub mod classic_editor;
 pub mod contact_form;
 pub mod elementor;
 pub mod elements_ready_lite;
+pub mod email_subscribers;
 pub mod forminator;
 pub mod gtranslate;
 pub mod jetpack;

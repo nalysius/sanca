@@ -87,6 +87,7 @@ pub enum Technology {
     Horde,
     Knockout,
     WPPWpSuperCache,
+    WPPEmailSubscribers,
 }
 
 impl Technology {
@@ -527,7 +528,21 @@ impl Technology {
                         false,
                     ),
                 ]
-            }
+            },
+	    Self::WPPEmailSubscribers => {
+		vec![
+		    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/email-subscribers/readme.txt",
+                        false,
+                    ),
+		    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/email-subscribers/readme.txt",
+                        false,
+                    )
+		]
+	    }
             _ => vec![UrlRequest::new(main_url, true)],
         }
     }
@@ -602,6 +617,7 @@ impl ValueEnum for Technology {
             Technology::Horde,
             Technology::Knockout,
             Technology::WPPWpSuperCache,
+	    Technology::WPPEmailSubscribers,
         ]
     }
 
@@ -673,6 +689,7 @@ impl ValueEnum for Technology {
             Technology::Horde => Some(PossibleValue::new("horde")),
             Technology::Knockout => Some(PossibleValue::new("knockout")),
             Technology::WPPWpSuperCache => Some(PossibleValue::new("wpsupercache")),
+	    Technology::WPPEmailSubscribers => Some(PossibleValue::new("emailsubscribers")),
         }
     }
 }

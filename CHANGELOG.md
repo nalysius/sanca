@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New regex to detect minified jQuery UI.
 - Detection for Knockout.
 - Detection for WP Super Cache WordPress plugin.
+- Detection for Email Subscribers WordPress plugin.
 
 ### Fixed
 

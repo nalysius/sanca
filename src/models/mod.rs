@@ -1,5 +1,6 @@
 //! In this module are declared the entities manipulated by this program
 
+pub mod cve;
 pub mod reqres;
 pub mod technology;
 
@@ -63,6 +64,14 @@ impl Finding {
             evidence_text: evidence_text.to_string(),
             url_of_finding: url_of_finding.map(|f| f.to_string()),
         }
+    }
+
+    /// Read the CVEs in the directory and add the ones concerning the current finding.
+    ///
+    /// If cve_dir isn't a valid path or not readable, an Err is returned.
+    /// Otherwise, nothing is returned.
+    pub fn check_cves(&mut self, _cve_dir: String) {
+	// TODO
     }
 }
 

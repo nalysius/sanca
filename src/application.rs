@@ -65,6 +65,7 @@ use crate::checkers::wp_plugins::classic_editor::ClassicEditorChecker;
 use crate::checkers::wp_plugins::contact_form::ContactFormChecker;
 use crate::checkers::wp_plugins::elementor::ElementorChecker;
 use crate::checkers::wp_plugins::elements_ready_lite::ElementsReadyLiteChecker;
+use crate::checkers::wp_plugins::email_subscribers::EmailSubscribersChecker;
 use crate::checkers::wp_plugins::forminator::ForminatorChecker;
 use crate::checkers::wp_plugins::gtranslate::GTranslateChecker;
 use crate::checkers::wp_plugins::jetpack::JetpackChecker;
@@ -152,6 +153,7 @@ impl Application {
             Box::new(ContactFormChecker::new()),
             Box::new(ElementorChecker::new()),
             Box::new(ElementsReadyLiteChecker::new()),
+	    Box::new(EmailSubscribersChecker::new()),
             Box::new(ForminatorChecker::new()),
             Box::new(DiviChecker::new()),
             Box::new(GTranslateChecker::new()),
@@ -348,7 +350,7 @@ impl Application {
         }
 
         trace!("Checking args.scan_type");
-        let findings: Vec<Finding> = match args.scan_type {
+        let mut findings: Vec<Finding> = match args.scan_type {
             ScanType::Tcp | ScanType::Udp => {
                 info!("Scan type is TCP or UDP");
                 let ip_hostname = &args.ip_hostname.clone().unwrap();
@@ -381,6 +383,12 @@ impl Application {
                 )
             }
         };
+
+	if let Some(cve_dir) = &args.cve_dir {
+	    for finding in &mut findings {
+		finding.check_cves(cve_dir.clone())
+	    }
+	}
 
         info!("Scan finished, writing output");
         let writer: Box<dyn Writer> = match args.writer {
@@ -419,4 +427,8 @@ pub struct Args {
     /// Hide the header with the URL to the Sanca's website
     #[arg(short('e'), long)]
     pub hide_header: bool,
+    /// The directory containing the CVEs, in JSON format.
+    /// CVEs can be downloaded at https://github.com/CVEProject/cvelistV5/releases.
+    #[arg(short('c'), long)]
+    pub cve_dir: Option<String>,
 }
