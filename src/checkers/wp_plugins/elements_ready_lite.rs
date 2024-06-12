@@ -1,6 +1,7 @@
 //! The ElementsReady Lite checker.
 //! This module contains the checker used to determine if ElementsReady Elementor Addons is
 //! used by the asset.
+//! https://wordpress.org/plugins/element-ready-lite
 
 use std::collections::HashMap;
 

@@ -1,6 +1,7 @@
 //! The RevSlider checker.
 //! This module contains the checker used to determine if RevSlider is
 //! used by the asset.
+//! https://www.sliderrevolution.com/
 
 use std::collections::HashMap;
 

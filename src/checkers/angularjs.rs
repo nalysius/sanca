@@ -1,6 +1,7 @@
 //! The AngularJS (1.x) checker.
 //! This module contains the checker used to determine if AngularJS is
 //! used by the asset.
+//! https://angularjs.org/
 
 use std::collections::HashMap;
 

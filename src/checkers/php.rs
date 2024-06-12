@@ -1,6 +1,7 @@
 //! The PHP checker.
 //! This module contains the checker used to determine if PHP is
 //! used by the asset.
+//! https://www.php.net
 
 use std::collections::HashMap;
 

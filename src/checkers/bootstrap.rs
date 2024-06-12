@@ -1,6 +1,7 @@
 //! The Bootstrap checker.
 //! This module contains the checker used to determine if Bootstrap is
 //! used by the asset.
+//! https://getbootstrap.com
 
 use std::collections::HashMap;
 

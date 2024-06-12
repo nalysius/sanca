@@ -1,6 +1,7 @@
 //! The Handlebars checker.
 //! This module contains the checker used to determine if Handlebars is
 //! used by the asset.
+//! https://handlebarsjs.com
 
 use std::collections::HashMap;
 

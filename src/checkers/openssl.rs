@@ -1,6 +1,7 @@
 //! The OpenSSL checker.
 //! This module contains the checker used to determine if OpenSSL is
 //! used by the asset and in which version.
+//! https://www.openssl.org
 
 use std::collections::HashMap;
 

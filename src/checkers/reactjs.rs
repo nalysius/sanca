@@ -1,6 +1,7 @@
 //! The ReactJS checker.
 //! This module contains the checker used to determine if ReactJS is
 //! used by the asset.
+//! https://react.dev
 
 use std::collections::HashMap;
 

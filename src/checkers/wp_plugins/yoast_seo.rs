@@ -1,6 +1,7 @@
 //! The Yoast SEO checker.
 //! This module contains the checker used to determine if Yoast SEO is
 //! used by the asset.
+//! https://wordpress.org/plugins/wordpress-seo/
 
 use std::collections::HashMap;
 

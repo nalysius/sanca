@@ -1,6 +1,7 @@
 //! The WP Mail SMTP checker.
 //! This module contains the checker used to determine if WP Mail SMTP is
 //! used by the asset.
+//! https://wordpress.org/plugins/wp-mail-smtp/
 
 use std::collections::HashMap;
 

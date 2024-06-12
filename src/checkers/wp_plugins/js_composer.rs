@@ -1,6 +1,7 @@
 //! The JSComposer checker.
 //! This module contains the checker used to determine if JSComposer is
 //! used by the asset.
+//! https://wordpress.org/plugins/visualcomposer/
 
 use std::collections::HashMap;
 

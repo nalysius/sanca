@@ -1,6 +1,7 @@
 //! The Lodash checker.
 //! This module contains the checker used to determine if Lodash is
 //! used by the asset.
+//! https://lodash.com
 
 use std::collections::HashMap;
 

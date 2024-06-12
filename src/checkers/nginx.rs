@@ -1,6 +1,7 @@
 //! The Nginx checker.
 //! This module contains the checker used to determine if Nginx is
 //! used by the asset.
+//! https://nginx.org
 
 use std::collections::HashMap;
 

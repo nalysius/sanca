@@ -1,6 +1,7 @@
 //! The Email Subscribers checker.
 //! This module contains the checker used to determine if Email Subscribers is
 //! used by the asset.
+//! https://wordpress.org/plugins/email-subscribers/
 
 use std::collections::HashMap;
 

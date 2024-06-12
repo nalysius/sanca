@@ -1,6 +1,7 @@
 //! The Divi checker.
 //! This module contains the checker used to determine if Divi is
 //! used by the asset.
+//! https://www.elegantthemes.com/gallery/divi/
 
 use std::collections::HashMap;
 

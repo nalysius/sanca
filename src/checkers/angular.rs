@@ -1,6 +1,7 @@
 //! The Angular (2+) checker.
 //! This module contains the checker used to determine if Angular is
 //! used by the asset.
+//! https://angular.dev/
 
 use std::collections::HashMap;
 

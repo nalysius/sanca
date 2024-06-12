@@ -1,6 +1,7 @@
 //! The Akismet anti spam checker.
 //! This module contains the checker used to determine if Akismet anti spam is
 //! used by the asset.
+//! https://wordpress.org/plugins/akismet/
 
 use std::collections::HashMap;
 

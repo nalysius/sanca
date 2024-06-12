@@ -1,6 +1,7 @@
 //! The WordPress checker.
 //! This module contains the checker used to determine if WordPress is
 //! used by the asset.
+//! https://wordpress.com
 
 use std::collections::HashMap;
 

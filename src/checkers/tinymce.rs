@@ -1,6 +1,7 @@
 //! The TinyMCE checker.
 //! This module contains the checker used to determine if TinyMCE is
 //! used by the asset.
+//! https://www.tiny.cloud/tinymce
 
 use std::collections::HashMap;
 

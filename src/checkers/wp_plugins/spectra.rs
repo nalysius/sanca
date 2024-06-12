@@ -1,6 +1,7 @@
 //! The Spectra checker.
 //! This module contains the checker used to determine if Spectra is
 //! used by the asset.
+//! https://wordpress.org/plugins/ultimate-addons-for-gutenberg/
 
 use std::collections::HashMap;
 

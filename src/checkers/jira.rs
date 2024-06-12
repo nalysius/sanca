@@ -1,6 +1,7 @@
 //! The Jira checker.
 //! This module contains the checker used to determine if Jira is
 //! used by the asset.
+//! https://www.atlassian.com/software/jira
 
 use std::collections::HashMap;
 

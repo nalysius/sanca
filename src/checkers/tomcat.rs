@@ -1,6 +1,7 @@
 //! The Tomcat checker.
 //! This module contains the checker used to determine if Tomcat is
 //! used by the asset.
+//! https://tomcat.apache.org
 
 use std::collections::HashMap;
 

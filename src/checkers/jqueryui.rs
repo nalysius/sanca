@@ -1,6 +1,7 @@
 //! The jQuery UI checker.
 //! This module contains the checker used to determine if jQuery UI is
 //! used by the asset.
+//! https://jqueryui.com
 
 use std::collections::HashMap;
 

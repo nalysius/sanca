@@ -1,6 +1,7 @@
 //! The jQuery checker.
 //! This module contains the checker used to determine if jQuery is
 //! used by the asset.
+//! https://jquery.com
 
 use std::collections::HashMap;
 

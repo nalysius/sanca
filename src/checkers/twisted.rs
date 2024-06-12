@@ -1,6 +1,7 @@
 //! The Twisted checker.
 //! This module contains the checker used to determine if Twisted is
 //! used by the asset.
+//! https://twisted.org
 
 use std::collections::HashMap;
 

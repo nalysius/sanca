@@ -1,6 +1,7 @@
 //! The MC4WP: Mailchimp for WordPress checker.
 //! This module contains the checker used to determine if MC4WP: Mailchimp for WordPress is
 //! used by the asset.
+//! https://wordpress.org/plugins/mailchimp-for-wp/
 
 use std::collections::HashMap;
 

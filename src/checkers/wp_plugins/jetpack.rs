@@ -1,6 +1,7 @@
 //! The Jetpack checker.
 //! This module contains the checker used to determine if Jetpack is
 //! used by the asset.
+//! https://wordpress.org/plugins/jetpack/
 
 use std::collections::HashMap;
 

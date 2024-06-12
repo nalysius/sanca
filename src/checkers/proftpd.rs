@@ -1,6 +1,7 @@
 //! The ProFTPD checker.
 //! This module contains the checker used to determine if ProFTPd is
 //! used by the asset.
+//! http://proftpd.org
 
 use std::collections::HashMap;
 

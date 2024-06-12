@@ -1,6 +1,7 @@
 //! The MariaDB checker.
 //! This module contains the checker used to determine if MariaDB is
 //! used by the asset.
+//! https://mariadb.org
 
 use std::collections::HashMap;
 

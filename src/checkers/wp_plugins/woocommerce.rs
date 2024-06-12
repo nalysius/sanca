@@ -1,6 +1,7 @@
 //! The WooCommerce checker.
 //! This module contains the checker used to determine if WooCommerce is
 //! used by the asset.
+//! https://wordpress.org/plugins/woocommerce/
 
 use std::collections::HashMap;
 

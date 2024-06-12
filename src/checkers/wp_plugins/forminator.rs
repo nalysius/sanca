@@ -1,6 +1,7 @@
 //! The Forminator checker.
 //! This module contains the checker used to determine if Forminator is
 //! used by the asset.
+//! https://wordpress.org/plugins/forminator/
 
 use std::collections::HashMap;
 

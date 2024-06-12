@@ -1,6 +1,7 @@
 //! The All-in-One WP Migration checker.
 //! This module contains the checker used to determine if All-in-One WP Migration is
 //! used by the asset.
+//! https://wordpress.org/plugins/all-in-one-wp-migration/
 
 use std::collections::HashMap;
 

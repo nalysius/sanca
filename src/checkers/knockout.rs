@@ -1,6 +1,7 @@
 //! The Knockout checker.
 //! This module contains the checker used to determine if Knockout is
 //! used by the asset.
+//! https://knockoutjs.com
 
 use std::collections::HashMap;
 

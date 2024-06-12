@@ -1,6 +1,7 @@
 //! The TYPO3 checker.
 //! This module contains the checker used to determine if TYPO3 is
 //! used by the asset.
+//! https://typo3.org
 
 use std::collections::HashMap;
 

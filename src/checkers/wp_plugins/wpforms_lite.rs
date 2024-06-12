@@ -1,6 +1,7 @@
 //! The Wpforms Lite checker.
 //! This module contains the checker used to determine if Wpforms Lite is
 //! used by the asset.
+//! https://wordpress.org/plugins/wpforms-lite/
 
 use std::collections::HashMap;
 

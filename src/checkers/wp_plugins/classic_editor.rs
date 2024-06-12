@@ -1,6 +1,7 @@
 //! The Classic Editor checker.
 //! This module contains the checker used to determine if Classic Editor is
 //! used by the asset.
+//! https://wordpress.org/plugins/classic-editor/
 
 use std::collections::HashMap;
 

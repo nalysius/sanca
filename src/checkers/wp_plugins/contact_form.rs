@@ -1,6 +1,7 @@
 //! The Contact Form checker.
 //! This module contains the checker used to determine if Contact Form is
 //! used by the asset.
+//! https://wordpress.org/plugins/contact-form-7/
 
 use std::collections::HashMap;
 

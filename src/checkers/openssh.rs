@@ -1,6 +1,7 @@
 //! The OpenSSH checker.
 //! This module contains the checker used to determine if OpenSSH is
 //! used by the asset.
+//! https://www.openssh.com
 
 use std::collections::HashMap;
 

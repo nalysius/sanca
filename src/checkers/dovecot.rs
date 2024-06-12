@@ -1,6 +1,7 @@
 //! The Dovecot checker.
 //! This module contains the checker used to determine if Dovecot is
 //! used by the asset.
+//! https://dovecot.org
 
 use std::collections::HashMap;
 

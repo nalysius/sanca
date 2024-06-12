@@ -1,6 +1,7 @@
 //! The Pure-FTPd checker.
 //! This module contains the checker used to determine if Pure-FTPd is
 //! used by the asset.
+//! https://www.pureftpd.org/
 
 use std::collections::HashMap;
 

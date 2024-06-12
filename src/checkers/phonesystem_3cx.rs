@@ -1,6 +1,7 @@
 //! The Phone System 3CX checker.
 //! This module contains the checker used to determine if Phone System 3CX is
 //! used by the asset.
+//! https://www.3cx.com/phone-system
 
 use std::collections::HashMap;
 

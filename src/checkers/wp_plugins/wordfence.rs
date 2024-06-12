@@ -1,6 +1,7 @@
 //! The Wordfence checker.
 //! This module contains the checker used to determine if Wordfence is
 //! used by the asset.
+//! https://wordpress.org/plugins/wordfence/
 
 use std::collections::HashMap;
 

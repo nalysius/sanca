@@ -1,6 +1,7 @@
 //! The WpMembers checker.
 //! This module contains the checker used to determine if WpMembers is
 //! used by the asset.
+//! https://wordpress.org/plugins/wp-members/
 
 use std::collections::HashMap;
 

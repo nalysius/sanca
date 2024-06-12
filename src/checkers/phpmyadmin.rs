@@ -1,6 +1,7 @@
 //! The phpMyAdmin checker.
 //! This module contains the checker used to determine if phpMyAdmin is
 //! used by the asset.
+//! https://www.phpmyadmin.net/
 
 use std::collections::HashMap;
 

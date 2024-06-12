@@ -1,6 +1,7 @@
 //! The Horde checker.
 //! This module contains the checker used to determine if Horde is
 //! used by the asset.
+//! https://www.horde.org/apps/webmail
 
 use std::collections::HashMap;
 

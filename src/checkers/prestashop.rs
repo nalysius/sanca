@@ -1,6 +1,7 @@
 //! The Prestashop checker.
 //! This module contains the checker used to determine if Prestashop is
 //! used by the asset.
+//! https://www.prestashop.com
 
 use std::collections::HashMap;
 

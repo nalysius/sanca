@@ -1,6 +1,7 @@
 //! The CKEditor checker.
 //! This module contains the checker used to determine if CKEditor is
 //! used by the asset.
+//! https://ckeditor.com
 
 use std::collections::HashMap;
 

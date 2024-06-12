@@ -1,6 +1,7 @@
 //! The GTranslate checker.
 //! This module contains the checker used to determine if GTranslate is
 //! used by the asset.
+//! https://wordpress.org/plugins/gtranslate/
 
 use std::collections::HashMap;
 

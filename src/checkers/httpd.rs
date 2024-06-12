@@ -1,6 +1,7 @@
 //! The Apache httpd checker.
 //! This module contains the checker used to determine if Apache httpd is
 //! used by the asset.
+//! https://httpd.apache.org
 
 use std::collections::HashMap;
 

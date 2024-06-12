@@ -1,6 +1,7 @@
 //! The WP Super Cache checker.
 //! This module contains the checker used to determine if Akismet anti spam is
 //! used by the asset.
+//! https://wordpress.org/plugins/wp-super-cache/
 
 use std::collections::HashMap;
 

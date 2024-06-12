@@ -1,6 +1,7 @@
 //! The Really Simple SSL checker.
 //! This module contains the checker used to determine if Really Simple SSL is
 //! used by the asset.
+//! https://wordpress.org/plugins/really-simple-ssl/
 
 use std::collections::HashMap;
 

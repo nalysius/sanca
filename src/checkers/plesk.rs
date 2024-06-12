@@ -1,6 +1,7 @@
 //! The Plesk checker.
 //! This module contains the checker used to determine if Plesk is
 //! used by the asset.
+//! https://www.plesk.com
 
 use std::collections::HashMap;
 

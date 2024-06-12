@@ -1,6 +1,7 @@
 //! The SquirrelMail checker.
 //! This module contains the checker used to determine if SquirrelMail is
 //! used by the asset.
+//! https://www.squirrelmail.org
 
 use std::collections::HashMap;
 

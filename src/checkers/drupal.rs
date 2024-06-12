@@ -1,6 +1,7 @@
 //! The Drupal checker.
 //! This module contains the checker used to determine if Drupal is
 //! used by the asset.
+//! https://www.drupal.org
 
 use std::collections::HashMap;
 

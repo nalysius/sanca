@@ -1,6 +1,7 @@
 //! The LayerSlider checker.
 //! This module contains the checker used to determine if LayerSlider is
 //! used by the asset.
+//! https://layerslider.com/
 
 use std::collections::HashMap;
 

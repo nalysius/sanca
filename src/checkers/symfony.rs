@@ -1,6 +1,7 @@
 //! The Symfony checker.
 //! This module contains the checker used to determine if Symfony is
 //! used by the asset.
+//! https://symfony.com
 
 use std::collections::HashMap;
 

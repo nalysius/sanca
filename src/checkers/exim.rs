@@ -1,6 +1,7 @@
 //! The Exim checker.
 //! This module contains the checker used to determine if Exim is
 //! used by the asset.
+//! https://www.exim.org
 
 use std::collections::HashMap;
 

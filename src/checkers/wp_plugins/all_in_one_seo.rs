@@ -1,6 +1,7 @@
 //! The All In One SEO checker.
 //! This module contains the checker used to determine if All In One is
 //! used by the asset.
+//! https://wordpress.org/plugins/all-in-one-seo-pack/
 
 use std::collections::HashMap;
 

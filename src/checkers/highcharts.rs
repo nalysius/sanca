@@ -1,6 +1,7 @@
 //! The Highcharts checker.
 //! This module contains the checker used to determine if Highcharts is
 //! used by the asset.
+//! https://www.highcharts.com
 
 use std::collections::HashMap;
 

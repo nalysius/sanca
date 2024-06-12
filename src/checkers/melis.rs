@@ -1,6 +1,7 @@
 //! The Melis checker.
 //! This module contains the checker used to determine if Melis is
 //! used by the asset.
+//! https://github.com/melisplatform/melis-cms
 
 use std::collections::HashMap;
 

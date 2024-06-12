@@ -1,6 +1,7 @@
 //! The Elementor checker.
 //! This module contains the checker used to determine if Elementor is
 //! used by the asset.
+//! https://wordpress.org/plugins/elementor/
 
 use std::collections::HashMap;
 

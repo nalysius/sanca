@@ -1,6 +1,7 @@
 //! The GSAP checker.
 //! This module contains the checker used to determine if GSAP is
 //! used by the asset.
+//! https://gsap.com
 
 use std::collections::HashMap;
 

@@ -1,6 +1,7 @@
 //! The MySQL checker.
 //! This module contains the checker used to determine if MySQL is
 //! used by the asset.
+//! https://www.mysql.com
 
 use std::collections::HashMap;
 
