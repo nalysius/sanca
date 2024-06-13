@@ -62,7 +62,7 @@ impl<'a> Mc4wpChecker<'a> {
                 Some(url_response),
                 keep_left.to_owned(),
                 keep_right.to_owned(),
-                "Mc4wp",
+                Technology::WPPMc4wp,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
             }
@@ -121,7 +121,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Stable tag: 4.9.10",
-            "Mc4wp",
+            Technology::WPPMc4wp,
             Some("4.9.10"),
             Some(url1),
         );
@@ -167,7 +167,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Stable tag: 3.8.12",
-            "Mc4wp",
+            Technology::WPPMc4wp,
             Some("3.8.12"),
             Some(url1),
         );

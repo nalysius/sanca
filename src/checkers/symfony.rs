@@ -64,7 +64,7 @@ impl<'a> SymfonyChecker<'a> {
 		    Some(url_response),
 		    keep_left.to_owned(),
 		    keep_right.to_owned(),
-		    "Symfony",
+		    Technology::Symfony,
 		    "$techno_name$$techno_version$ has been identified because the debug mode was enabled and we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -127,7 +127,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "<span class=\"value\">4.1.2</span>",
-            "Symfony",
+            Technology::Symfony,
             Some("4.1.2"),
             Some(url1),
         );
@@ -171,7 +171,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "<span class='value'>4.1.2</span>",
-            "Symfony",
+            Technology::Symfony,
             Some("4.1.2"),
             Some(url1),
         );

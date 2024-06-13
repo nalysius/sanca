@@ -65,7 +65,7 @@ impl<'a> YoastSEOChecker<'a> {
                 Some(url_response),
                 keep_left_source.to_owned(),
                 keep_right_source.to_owned(),
-                "YoastSEO",
+                Technology::WPPYoastSEO,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
         }
@@ -90,7 +90,7 @@ impl<'a> YoastSEOChecker<'a> {
                 Some(url_response),
                 keep_left_readme.to_owned(),
                 keep_right_readme.to_owned(),
-                "YoastSEO",
+                Technology::WPPYoastSEO,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
             }
@@ -144,7 +144,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Yoast SEO plugin v20.11",
-            "YoastSEO",
+            Technology::WPPYoastSEO,
             Some("20.11"),
             Some(url1),
         );
@@ -166,7 +166,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Stable tag: 21.6",
-            "YoastSEO",
+            Technology::WPPYoastSEO,
             Some("21.6"),
             Some(url2),
         );
@@ -206,7 +206,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Yoast SEO plugin v20.01",
-            "YoastSEO",
+            Technology::WPPYoastSEO,
             Some("20.01"),
             Some(url1),
         );
@@ -228,7 +228,7 @@ mod tests {
         check_finding_fields(
             &finding[0],
             "Stable tag: 20.5",
-            "YoastSEO",
+            Technology::WPPYoastSEO,
             Some("20.5"),
             Some(url2),
         );

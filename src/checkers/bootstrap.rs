@@ -65,7 +65,7 @@ impl<'a> BootstrapChecker<'a> {
                     Some(url_response),
                     keep_left.to_owned(),
                     keep_right.to_owned(),
-                    "Bootstrap",
+                    Technology::Bootstrap,
                     "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -114,7 +114,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "VERSION=\"3.3.7\"",
-            "Bootstrap",
+            Technology::Bootstrap,
             Some("3.3.7"),
             Some(url1),
         );
@@ -126,7 +126,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "return\"3.3.7\"",
-            "Bootstrap",
+            Technology::Bootstrap,
             Some("3.3.7"),
             Some(url1),
         );
@@ -159,7 +159,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Bootstrap v5.2.0",
-            "Bootstrap",
+            Technology::Bootstrap,
             Some("5.2.0"),
             Some(url1),
         );
@@ -171,7 +171,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Bootstrap v5.2.0",
-            "Bootstrap",
+            Technology::Bootstrap,
             Some("5.2.0"),
             Some(url1),
         );
@@ -216,7 +216,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Bootstrap v5.3.0-beta",
-            "Bootstrap",
+            Technology::Bootstrap,
             Some("5.3.0-beta"),
             Some(url1),
         );
@@ -237,7 +237,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Bootstrap v5.3.0",
-            "Bootstrap",
+            Technology::Bootstrap,
             Some("5.3.0"),
             Some(url2),
         );

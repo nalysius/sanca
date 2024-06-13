@@ -62,7 +62,7 @@ impl<'a> EmailSubscribersChecker<'a> {
                 Some(url_response),
                 keep_left.to_owned(),
                 keep_right.to_owned(),
-                "EmailSubscribers",
+                Technology::WPPEmailSubscribers,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
             }
@@ -121,7 +121,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Stable tag: 5.3.22",
-            "EmailSubscribers",
+            Technology::WPPEmailSubscribers,
             Some("5.3.22"),
             Some(url1),
         );
@@ -167,7 +167,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Stable tag: 5.9.9",
-            "EmailSubscribers",
+            Technology::WPPEmailSubscribers,
             Some("5.9.9"),
             Some(url1),
         );

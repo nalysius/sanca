@@ -62,7 +62,7 @@ impl<'a> WpMembersChecker<'a> {
                     Some(url_response),
                     keep_left.to_owned(),
                     keep_right.to_owned(),
-                    "WPMembers",
+                    Technology::WPPWpMembers,
                     "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -120,7 +120,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Stable tag: 3.4.9.3",
-            "WPMembers",
+            Technology::WPPWpMembers,
             Some("3.4.9.3"),
             Some(url1),
         );
@@ -165,7 +165,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Stable tag: 3.1.2.9",
-            "WPMembers",
+            Technology::WPPWpMembers,
             Some("3.1.2.9"),
             Some(url1),
         );

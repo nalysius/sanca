@@ -55,7 +55,7 @@ impl<'a> ReactJSChecker<'a> {
                     Some(url_response),
                     keep_left.to_owned(),
                     keep_right.to_owned(),
-                    "ReactJS",
+                    Technology::ReactJS,
                     "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -103,7 +103,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "ReactVersion = \"18.2.0\"",
-            "ReactJS",
+            Technology::ReactJS,
             Some("18.2.0"),
             Some(url1),
         );
@@ -115,7 +115,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "ReactVersion='18.1.2'",
-            "ReactJS",
+            Technology::ReactJS,
             Some("18.1.2"),
             Some(url1),
         );
@@ -155,7 +155,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "ReactVersion = \"18.2.10\"",
-            "ReactJS",
+            Technology::ReactJS,
             Some("18.2.10"),
             Some(url1),
         );
@@ -176,7 +176,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "ReactVersion=\"18.1.1\"",
-            "ReactJS",
+            Technology::ReactJS,
             Some("18.1.1"),
             Some(url2),
         );

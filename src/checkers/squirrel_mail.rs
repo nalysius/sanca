@@ -62,7 +62,7 @@ impl<'a> SquirrelMailChecker<'a> {
                     Some(url_response),
                     keep_left.to_owned(),
                     keep_right.to_owned(),
-                    "SquirrelMail",
+                    Technology::SquirrelMail,
                     "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
                 ));
             }
@@ -121,7 +121,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "SquirrelMail version 1.4.15",
-            "SquirrelMail",
+            Technology::SquirrelMail,
             Some("1.4.15"),
             Some(url1),
         );
@@ -161,7 +161,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "SquirrelMail wersja 1.4.14",
-            "SquirrelMail",
+            Technology::SquirrelMail,
             Some("1.4.14"),
             Some(url1),
         );

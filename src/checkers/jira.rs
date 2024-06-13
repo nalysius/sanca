@@ -52,7 +52,7 @@ impl<'a> JiraChecker<'a> {
 		    Some(url_response),
 		    keep_left.to_owned(),
 		    keep_right.to_owned(),
-		    "Jira",
+		    Technology::Jira,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
             }
         }
@@ -109,7 +109,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "data-version=\"9.11.6\"",
-            "Jira",
+            Technology::Jira,
             Some("9.11.6"),
             Some(url1),
         );
@@ -149,7 +149,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "data-version  =\"9.10.5\"",
-            "Jira",
+            Technology::Jira,
             Some("9.10.5"),
             Some(url1),
         );

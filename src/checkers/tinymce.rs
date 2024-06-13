@@ -61,7 +61,7 @@ impl<'a> TinyMCEChecker<'a> {
 		    caps, Some(url_response),
 		    keep_left.to_owned(),
 		    keep_right.to_owned(),
-		    "TinyMCE",
+		    Technology::TinyMCE,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -110,7 +110,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "majorVersion:\"4\",minorVersion:\"6.1\"",
-            "TinyMCE",
+            Technology::TinyMCE,
             Some("4.6.1"),
             Some(url1),
         );
@@ -122,7 +122,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "majorVersion : '2' , minorVersion : '1.4'",
-            "TinyMCE",
+            Technology::TinyMCE,
             Some("2.1.4"),
             Some(url1),
         );
@@ -162,7 +162,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "minorVersion:\"6.2\", majorVersion:\"4\"",
-            "TinyMCE",
+            Technology::TinyMCE,
             Some("4.6.2"),
             Some(url1),
         );
@@ -183,7 +183,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "minorVersion: '6.2', majorVersion: '8'",
-            "TinyMCE",
+            Technology::TinyMCE,
             Some("8.6.2"),
             Some(url2),
         );

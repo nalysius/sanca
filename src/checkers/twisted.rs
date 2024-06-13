@@ -62,7 +62,7 @@ impl<'a> TwistedChecker<'a> {
                         Some(url_response),
                         keep_left.to_owned(),
                         keep_right.to_owned(),
-                        "Twisted",
+                        Technology::Twisted,
                         &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)
                     )
                 );
@@ -127,7 +127,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Twisted/8.2.1",
-            "Twisted",
+            Technology::Twisted,
             Some("8.2.1"),
             Some(url1),
         );
@@ -144,7 +144,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Twisted/7.4.8",
-            "Twisted",
+            Technology::Twisted,
             Some("7.4.8"),
             Some(url1),
         );
@@ -198,7 +198,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Twisted/8.1.1",
-            "Twisted",
+            Technology::Twisted,
             Some("8.1.1"),
             Some(url1),
         );

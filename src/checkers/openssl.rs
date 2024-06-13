@@ -67,7 +67,7 @@ impl<'a> OpenSSLChecker<'a> {
 		    Some(url_response),
 		    keep_left_header.to_owned(),
 		    keep_right_header.to_owned(),
-		    "OpenSSL",
+		    Technology::OpenSSL,
 		    &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)
 		));
             }
@@ -97,7 +97,7 @@ impl<'a> OpenSSLChecker<'a> {
 		Some(url_response),
 		keep_left_body.to_owned(),
 		keep_right_body.to_owned(),
-		"OpenSSL",
+		Technology::OpenSSL,
 		"$techno_name$$techno_version$ has been identified by looking at its signature \"$evidence$\" at this page: $url_of_finding$"));
         }
         None
@@ -161,7 +161,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "OpenSSL/3.0.1",
-            "OpenSSL",
+            Technology::OpenSSL,
             Some("3.0.1"),
             Some(url1),
         );
@@ -173,7 +173,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "OpenSSL/1.1.1",
-            "OpenSSL",
+            Technology::OpenSSL,
             Some("1.1.1"),
             Some(url1),
         );
@@ -211,7 +211,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "OpenSSL/1.0.2k",
-            "OpenSSL",
+            Technology::OpenSSL,
             Some("1.0.2k"),
             Some(url1),
         );
@@ -228,7 +228,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "OpenSSL/1.0.2k-fips",
-            "OpenSSL",
+            Technology::OpenSSL,
             Some("1.0.2k-fips"),
             Some(url1),
         );
@@ -285,7 +285,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "OpenSSL/1.0.2k",
-            "OpenSSL",
+            Technology::OpenSSL,
             Some("1.0.2k"),
             Some(url1),
         );
@@ -311,7 +311,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "OpenSSL/1.0.2k-fips",
-            "OpenSSL",
+            Technology::OpenSSL,
             Some("1.0.2k-fips"),
             Some(url2),
         );

@@ -67,7 +67,7 @@ impl<'a> HighchartsChecker<'a> {
 		    Some(url_response),
 		    keep_left.to_owned(),
 		    keep_right.to_owned(),
-		    "Highcharts",
+		    Technology::Highcharts,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -116,7 +116,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "version: \"6.0.1\"",
-            "Highcharts",
+            Technology::Highcharts,
             Some("6.0.1"),
             Some(url1),
         );
@@ -128,7 +128,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "version:\"6.0.1\"",
-            "Highcharts",
+            Technology::Highcharts,
             Some("6.0.1"),
             Some(url1),
         );
@@ -169,7 +169,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "version:\"6.0.1\"",
-            "Highcharts",
+            Technology::Highcharts,
             Some("6.0.1"),
             Some(url1),
         );
@@ -191,7 +191,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "version:\"6.0.1\"",
-            "Highcharts",
+            Technology::Highcharts,
             Some("6.0.1"),
             Some(url2),
         );

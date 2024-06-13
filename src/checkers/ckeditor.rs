@@ -61,7 +61,7 @@ impl<'a> CKEditorChecker<'a> {
 		    Some(url_response),
 		    keep_left.to_owned(),
 		    keep_right.to_owned(),
-		    "CKEditor",
+		    Technology::CKEditor,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -110,7 +110,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "const x=\"39.0.1\"",
-            "CKEditor",
+            Technology::CKEditor,
             Some("39.0.1"),
             Some(url1),
         );
@@ -122,7 +122,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "x.CKEDITOR_VERSION=\"39.0.1\"",
-            "CKEditor",
+            Technology::CKEditor,
             Some("39.0.1"),
             Some(url1),
         );
@@ -163,7 +163,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "const _ ='39.0.1'",
-            "CKEditor",
+            Technology::CKEditor,
             Some("39.0.1"),
             Some(url1),
         );
@@ -184,7 +184,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "x.CKEDITOR_VERSION=\"39.0.1\"",
-            "CKEditor",
+            Technology::CKEditor,
             Some("39.0.1"),
             Some(url2),
         );

@@ -63,7 +63,7 @@ impl<'a> WpformsLiteChecker<'a> {
                 Some(url_response),
                 keep_left.to_owned(),
                 keep_right.to_owned(),
-                "WpformsLite",
+                Technology::WPPWpformsLite,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
             }
@@ -122,7 +122,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Stable tag: 1.8.5.2",
-            "WpformsLite",
+            Technology::WPPWpformsLite,
             Some("1.8.5.2"),
             Some(url1),
         );
@@ -168,7 +168,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Stable tag: 1.8.4.1",
-            "WpformsLite",
+            Technology::WPPWpformsLite,
             Some("1.8.4.1"),
             Some(url1),
         );

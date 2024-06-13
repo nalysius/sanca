@@ -66,7 +66,7 @@ impl<'a> GsapChecker<'a> {
 			Some(url_response),
 			keep_left.to_owned(),
 			keep_right.to_owned(),
-			"GSAP",
+			Technology::Gsap,
 			"$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		    ));
             }
@@ -115,7 +115,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "version:\"3.11.0\"",
-            "GSAP",
+            Technology::Gsap,
             Some("3.11.0"),
             Some(url1),
         );
@@ -127,7 +127,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "version='3.11.0'",
-            "GSAP",
+            Technology::Gsap,
             Some("3.11.0"),
             Some(url1),
         );
@@ -160,7 +160,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Flip 3.11.1",
-            "GSAP",
+            Technology::Gsap,
             Some("3.11.1"),
             Some(url1),
         );
@@ -172,7 +172,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "CustomEase 3.11.1",
-            "GSAP",
+            Technology::Gsap,
             Some("3.11.1"),
             Some(url1),
         );
@@ -217,7 +217,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "ScrollToPlugin    3.1.9",
-            "GSAP",
+            Technology::Gsap,
             Some("3.1.9"),
             Some(url1),
         );
@@ -238,7 +238,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "version='3.10.4'",
-            "GSAP",
+            Technology::Gsap,
             Some("3.10.4"),
             Some(url2),
         );

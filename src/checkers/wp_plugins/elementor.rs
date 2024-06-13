@@ -64,7 +64,7 @@ impl<'a> ElementorChecker<'a> {
                 Some(url_response),
                 keep_left.to_owned(),
                 keep_right.to_owned(),
-                "Elementor",
+                Technology::WPPElementor,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 	    ));
         }
@@ -89,7 +89,7 @@ impl<'a> ElementorChecker<'a> {
                 Some(url_response),
                 keep_left.to_owned(),
                 keep_right.to_owned(),
-                "Elementor",
+                Technology::WPPElementor,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
             }
@@ -148,7 +148,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Stable tag: 3.7.8",
-            "Elementor",
+            Technology::WPPElementor,
             Some("3.7.8"),
             Some(url1),
         );
@@ -162,7 +162,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Elementor 3.21.4",
-            "Elementor",
+            Technology::WPPElementor,
             Some("3.21.4"),
             Some(url2),
         );
@@ -208,7 +208,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Stable tag: 3.7.7",
-            "Elementor",
+            Technology::WPPElementor,
             Some("3.7.7"),
             Some(url1),
         );

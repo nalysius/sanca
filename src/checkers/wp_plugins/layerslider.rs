@@ -63,7 +63,7 @@ impl<'a> LayerSliderChecker<'a> {
                     Some(url_response),
                     keep_left.to_owned(),
                     keep_right.to_owned(),
-                    "LayerSlider",
+                    Technology::WPPLayerSlider,
                     "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -112,7 +112,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "6s:\"6.8.4\"",
-            "LayerSlider",
+            Technology::WPPLayerSlider,
             Some("6.8.4"),
             Some(url1),
         );
@@ -152,7 +152,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "version : '7.8.4'",
-            "LayerSlider",
+            Technology::WPPLayerSlider,
             Some("7.8.4"),
             Some(url1),
         );

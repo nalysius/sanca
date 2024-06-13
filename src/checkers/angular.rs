@@ -55,7 +55,7 @@ impl<'a> AngularChecker<'a> {
                     Some(url_response),
                     keep_left.to_owned(),
                     keep_right.to_owned(),
-                    "Angular",
+                    Technology::Angular,
                     "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -105,7 +105,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Version(\"16.1.8\")",
-            "Angular",
+            Technology::Angular,
             Some("16.1.8"),
             Some(url1),
         );
@@ -146,7 +146,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Version(\"16.1.8\")",
-            "Angular",
+            Technology::Angular,
             Some("16.1.8"),
             Some(url1),
         );

@@ -57,7 +57,7 @@ impl<'a> HordeChecker<'a> {
 		    Some(url_response),
 		    keep_left.to_owned(),
 		    keep_right.to_owned(),
-		    "Horde",
+		    Technology::Horde,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -106,7 +106,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Horde 5.2.18",
-            "Horde",
+            Technology::Horde,
             Some("5.2.18"),
             Some(url1),
         );
@@ -147,7 +147,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Horde 5.1.3",
-            "Horde",
+            Technology::Horde,
             Some("5.1.3"),
             Some(url1),
         );

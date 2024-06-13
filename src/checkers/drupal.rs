@@ -54,7 +54,7 @@ impl<'a> DrupalChecker<'a> {
 		Some(url_response),
 		keep_left_meta.to_owned(),
 		keep_right_meta.to_owned(),
-		"Drupal",
+		Technology::Drupal,
 		"$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 	    ));
         }
@@ -112,7 +112,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Drupal 8",
-            "Drupal",
+            Technology::Drupal,
             Some("8"),
             Some(url1),
         );
@@ -152,7 +152,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "content = \"Drupal 9\"",
-            "Drupal",
+            Technology::Drupal,
             Some("9"),
             Some(url1),
         );

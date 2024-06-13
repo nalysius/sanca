@@ -106,9 +106,17 @@ impl<'a> OSChecker<'a> {
                         header_name,
                         evidence,
                         url_response.url,
-                    );
+                );
+
+                let os_technology = if let Some(t) = self.get_technology_os(&os_name) {
+                    t
+                } else {
+                    info!("OS with name {} not recognized", &os_name);
+                    return None;
+                };
+
                 return Some(Finding::new(
-                    &os_name,
+                    os_technology,
                     os_version,
                     evidence,
                     &evidence_text,
@@ -153,8 +161,15 @@ impl<'a> OSChecker<'a> {
                     url_response.url
                 );
 
+            let os_technology = if let Some(t) = self.get_technology_os(&os_name) {
+                t
+            } else {
+                info!("OS with name {} not recognized", &os_name);
+                return None;
+            };
+
             return Some(Finding::new(
-                &os_name,
+                os_technology,
                 os_version,
                 &evidence,
                 &evidence_text,
@@ -189,10 +204,17 @@ impl<'a> OSChecker<'a> {
                     version_text,
                     evidence,
                     url_response.url
-                );
+            );
+
+            let os_technology = if let Some(t) = self.get_technology_os(&os_name) {
+                t
+            } else {
+                info!("OS with name {} not recognized", &os_name);
+                return None;
+            };
 
             return Some(Finding::new(
-                &os_name,
+                os_technology,
                 os_version,
                 &evidence,
                 &evidence_text,
@@ -200,6 +222,23 @@ impl<'a> OSChecker<'a> {
             ));
         }
         None
+    }
+
+    /// Get the Technology from the OS name.
+    fn get_technology_os(&self, os_name: &str) -> Option<Technology> {
+        match os_name.to_lowercase().as_str() {
+            "ubuntu" => Some(Technology::Ubuntu),
+            "debian" => Some(Technology::Debian),
+            "centos" => Some(Technology::CentOS),
+            "unix" => Some(Technology::Unix),
+            "fedora" => Some(Technology::Fedora),
+            "oracle" => Some(Technology::OracleLinux),
+            "freebsd" => Some(Technology::FreeBSD),
+            "openbsd" => Some(Technology::OpenBSD),
+            "netbsd" => Some(Technology::NetBSD),
+            "almalinux" => Some(Technology::AlmaLinux),
+            _ => None,
+        }
     }
 
     /// Get the OS version according to the OS name, the software name and version.
@@ -336,9 +375,17 @@ impl<'a> TcpChecker for OSChecker<'a> {
                         os_name,
                         version_text,
                         item
-                    );
+                );
+
+                let os_technology = if let Some(t) = self.get_technology_os(&os_name) {
+                    t
+                } else {
+                    info!("OS with name {} not recognized", &os_name);
+                    return None;
+                };
+
                 return Some(Finding::new(
-                    &os_name,
+                    os_technology,
                     os_version,
                     item,
                     &os_evidence_text,
@@ -380,9 +427,17 @@ impl<'a> TcpChecker for OSChecker<'a> {
                         os_name,
                         version_text,
                         item
-                    );
+                );
+
+                let os_technology = if let Some(t) = self.get_technology_os(&os_name) {
+                    t
+                } else {
+                    info!("OS with name {} not recognized", &os_name);
+                    return None;
+                };
+
                 return Some(Finding::new(
-                    &os_name,
+                    os_technology,
                     os_version,
                     item,
                     &os_evidence_text,
@@ -449,7 +504,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "nginx/1.22.0 (Ubuntu)",
-            "Ubuntu",
+            Technology::Ubuntu,
             Some("22.10|23.04"),
             Some(url1),
         );
@@ -461,7 +516,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Apache/2.4.54 (Debian)",
-            "Debian",
+            Technology::Debian,
             Some("11"),
             Some(url1),
         );
@@ -473,7 +528,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Apache/2.4.10 (Fedora)",
-            "Fedora",
+            Technology::Fedora,
             None,
             Some(url1),
         );
@@ -508,7 +563,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "nginx/1.22.1 (Debian)",
-            "Debian",
+            Technology::Debian,
             Some("12"),
             Some(url1),
         );
@@ -522,7 +577,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Apache/2.4.54 (CentOS)",
-            "CentOS",
+            Technology::CentOS,
             None,
             Some(url1),
         );
@@ -570,7 +625,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "nginx/1.18.0 (Debian)",
-            "Debian",
+            Technology::Debian,
             None,
             Some(url1),
         );
@@ -593,7 +648,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "nginx/1.14.2 (Debian)",
-            "Debian",
+            Technology::Debian,
             Some("10"),
             Some(url2),
         );
@@ -630,23 +685,23 @@ mod tests {
         let banner = "SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5";
         let finding = checker.check_tcp(&[banner.to_string()]);
         assert!(finding.is_some());
-        check_finding_fields(&finding.unwrap(), banner, "Ubuntu", Some("20.04"), None);
+        check_finding_fields(&finding.unwrap(), banner, Technology::Ubuntu, Some("20.04"), None);
 
         let banner = "SSH-2.0-OpenSSH_8.4p1 Debian-2~bpo10+1";
         let finding = checker.check_tcp(&[banner.to_string()]);
         assert!(finding.is_some());
-        check_finding_fields(&finding.unwrap(), banner, "Debian", Some("10"), None);
+        check_finding_fields(&finding.unwrap(), banner, Technology::Debian, Some("10"), None);
 
         let banner = "SSH-2.0-OpenSSH_8.4p1 Debian-2~deb11+1";
         let finding = checker.check_tcp(&[banner.to_string()]);
         assert!(finding.is_some());
-        check_finding_fields(&finding.unwrap(), banner, "Debian", Some("11"), None);
+        check_finding_fields(&finding.unwrap(), banner, Technology::Debian, Some("11"), None);
 
         let banner =
             "c5.5.5-10.3.17-MariaDB-0+deb10u1�42g0YPc##��-��#%3mMz=aPLlZmysql_native_password";
         let finding = checker.check_tcp(&[banner.to_string()]);
         assert!(finding.is_some());
-        check_finding_fields(&finding.unwrap(), banner, "Debian", Some("10"), None);
+        check_finding_fields(&finding.unwrap(), banner, Technology::Debian, Some("10"), None);
     }
 
     #[test]

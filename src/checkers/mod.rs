@@ -100,7 +100,7 @@ pub trait Checker {
         url_response: Option<&UrlResponse>,
         evidence_first_chars: usize,
         evidence_last_chars: usize,
-        technology_name: &str,
+        technology: Technology,
         evidence_text_templace: &str,
     ) -> Finding {
         trace!("Running HttpChecker::extract_finding_from_captures()");
@@ -149,7 +149,7 @@ pub trait Checker {
         }
 
         let evidence_text = evidence_text_templace
-            .replace("$techno_name$", technology_name)
+            .replace("$techno_name$", &technology.to_string())
             .replace("$techno_version$", &version_text)
             .replace("$evidence$", &evidence)
             .replace("$url_of_finding$", &url);
@@ -157,7 +157,7 @@ pub trait Checker {
         trace!("Evidence text: {}", evidence_text);
 
         return Finding::new(
-            technology_name,
+            technology,
             version.as_deref(),
             &evidence,
             &evidence_text,
@@ -180,8 +180,11 @@ pub trait Checker {
 /// # Example
 ///
 /// ```rust
+///
+/// use crate::models::Technology;
+///
 /// let finding = Finding::new(
-///     "WordPress",
+///     Technology::WordPress,
 ///     Some("6.1.2"),
 ///     "<meta name='generator' content='WordPress 6.1.2'/>",
 ///     "WordPress 6.1.2 has been identified because we found 'content='WordPress 6.1.2'/>' at 'https://example.com/blog/index.php'"
@@ -191,7 +194,7 @@ pub trait Checker {
 /// check_finding_fields(
 ///     Some(finding),
 ///     "content='WordPress 6.1.2'",
-///     "WordPress",
+///     Technology::WordPress,
 ///     Some("6.1.2"),
 ///     Some("https://example.com/blog/index.php")
 /// );
@@ -200,7 +203,7 @@ pub trait Checker {
 fn check_finding_fields(
     finding: &Finding,
     evidence: &str,
-    technology: &str,
+    technology: Technology,
     version: Option<&str>,
     url: Option<&str>,
 ) {
@@ -241,7 +244,7 @@ fn check_finding_fields(
         technology
     );
     assert!(
-        evidence_text.contains(technology),
+        evidence_text.contains(&technology.to_string()),
         "Assertion 'finding.evidence_text.contains(technology)' failed. Finding's evidence text: {}, technology: {}",
         evidence_text,
         technology

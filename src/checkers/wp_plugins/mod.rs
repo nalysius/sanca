@@ -2,6 +2,7 @@
 //! They have nothing special, they are standard checkers, but they are
 //! similar and grouping them in a module helps keeping a clean architecture.
 
+pub mod advanced_custom_fields;
 pub mod akismet;
 pub mod all_in_one_seo;
 pub mod all_in_one_wp_migration;

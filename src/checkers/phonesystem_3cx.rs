@@ -50,7 +50,7 @@ impl<'a> PhoneSystem3CXChecker<'a> {
 		    Some(url_response),
 		    keep_left.to_owned(),
 		    keep_right.to_owned(),
-		    "3CXPhoneSystem",
+		    Technology::PhoneSystem3CX,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -99,7 +99,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "version: \"18.0.9.20\"",
-            "3CXPhoneSystem",
+            Technology::PhoneSystem3CX,
             Some("18.0.9.20"),
             Some(url1),
         );
@@ -111,7 +111,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "version:'18.0.8.17'",
-            "3CXPhoneSystem",
+            Technology::PhoneSystem3CX,
             Some("18.0.8.17"),
             Some(url1),
         );
@@ -156,7 +156,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "version : '18.1.2.3'",
-            "3CXPhoneSystem",
+            Technology::PhoneSystem3CX,
             Some("18.1.2.3"),
             Some(url1),
         );
@@ -177,7 +177,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "version : '18.1.4.3'",
-            "3CXPhoneSystem",
+            Technology::PhoneSystem3CX,
             Some("18.1.4.3"),
             Some(url2),
         );

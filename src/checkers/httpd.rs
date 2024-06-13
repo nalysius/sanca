@@ -66,7 +66,7 @@ impl<'a> ApacheHttpdChecker<'a> {
 		    Some(url_response),
 		    keep_left_header.to_owned(),
 		    keep_right_header.to_owned(),
-		    "Apache httpd",
+		    Technology::Httpd,
 		    &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)
 		));
             }
@@ -97,7 +97,7 @@ impl<'a> ApacheHttpdChecker<'a> {
 		Some(url_response),
 		keep_left_body.to_owned(),
 		keep_right_body.to_owned(),
-		"Apache httpd",
+		Technology::Httpd,
 		"$techno_name$$techno_version$ has been identified by looking at its signature \"$evidence$\" at this page: $url_of_finding$"
 	    ));
         }
@@ -165,7 +165,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Apache Server",
-            "Apache httpd",
+            Technology::Httpd,
             None,
             Some(url1),
         );
@@ -177,7 +177,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Apache/2.4.52",
-            "Apache httpd",
+            Technology::Httpd,
             Some("2.4.52"),
             Some(url1),
         );
@@ -212,7 +212,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Apache/2.4.52",
-            "Apache httpd",
+            Technology::Httpd,
             Some("2.4.52"),
             Some(url1),
         );
@@ -226,7 +226,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Apache/2.4.52",
-            "Apache httpd",
+            Technology::Httpd,
             Some("2.4.52"),
             Some(url1),
         );
@@ -275,7 +275,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Apache Server",
-            "Apache httpd",
+            Technology::Httpd,
             None,
             Some(url1),
         );
@@ -298,7 +298,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Apache/2.4.52",
-            "Apache httpd",
+            Technology::Httpd,
             Some("2.4.52"),
             Some(url2),
         );

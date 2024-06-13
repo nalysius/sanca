@@ -67,7 +67,7 @@ impl<'a> PHPChecker<'a> {
                         Some(url_response),
                         keep_left_header.to_owned(),
                         keep_right_header.to_owned(),
-                        "PHP",
+                        Technology::PHP,
                         &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)
                     )
                 );
@@ -98,7 +98,7 @@ impl<'a> PHPChecker<'a> {
 		Some(url_response),
 		keep_left_body.to_owned(),
 		keep_right_body.to_owned(),
-		"PHP",
+		Technology::PHP,
 		"$techno_name$$techno_version$ has been identified by looking at the phpinfo()'s output \"$evidence$\" at this page: $url_of_finding$"
 	    ));
         }
@@ -164,7 +164,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "PHP Version 8.2.0",
-            "PHP",
+            Technology::PHP,
             Some("8.2.0"),
             Some(url1),
         );
@@ -176,7 +176,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "PHP Version 8.2.1",
-            "PHP",
+            Technology::PHP,
             Some("8.2.1-alpha"),
             Some(url1),
         );
@@ -211,7 +211,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "PHP/8.2.1",
-            "PHP",
+            Technology::PHP,
             Some("8.2.1"),
             Some(url1),
         );
@@ -223,7 +223,13 @@ mod tests {
         url_response_valid.headers = headers2;
         let finding = checker.check_http_headers(&url_response_valid);
         assert!(finding.is_some());
-        check_finding_fields(&finding.unwrap(), "PHP/7.4", "PHP", Some("7.4"), Some(url1));
+        check_finding_fields(
+            &finding.unwrap(),
+            "PHP/7.4",
+            Technology::PHP,
+            Some("7.4"),
+            Some(url1),
+        );
     }
 
     #[test]
@@ -269,7 +275,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "PHP Version 5.6.40",
-            "PHP",
+            Technology::PHP,
             Some("5.6.40"),
             Some(url1),
         );
@@ -292,7 +298,13 @@ mod tests {
         );
         let findings = checker.check_http(&[url_response_valid, url_response_invalid]);
         assert_eq!(1, findings.len());
-        check_finding_fields(&findings[0], "PHP/8.1", "PHP", Some("8.1"), Some(url2));
+        check_finding_fields(
+            &findings[0],
+            "PHP/8.1",
+            Technology::PHP,
+            Some("8.1"),
+            Some(url2),
+        );
     }
 
     #[test]

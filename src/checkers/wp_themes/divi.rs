@@ -68,7 +68,7 @@ impl<'a> DiviChecker<'a> {
                 Some(url_response),
                 keep_left.to_owned(),
                 keep_right.to_owned(),
-                "Divi",
+                Technology::WPTDivi,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
             }
@@ -125,7 +125,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Version: 4.23.0",
-            "Divi",
+            Technology::WPTDivi,
             Some("4.23.0"),
             Some(url1),
         );
@@ -169,7 +169,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Version: 4.23.1",
-            "Divi",
+            Technology::WPTDivi,
             Some("4.23.1"),
             Some(url1),
         );

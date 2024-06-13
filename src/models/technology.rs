@@ -7,9 +7,11 @@
 //! technologies. It's mainly useful in HTTP scan, since it allows to
 //! send less requests.
 
+use clap::{builder::PossibleValue, ValueEnum};
+use std::fmt::{Display, Formatter};
+use std::string::ToString;
 use super::reqres::UrlRequest;
 use super::ScanType;
-use clap::{builder::PossibleValue, ValueEnum};
 
 /// An enumeration to represent the technologies that Sanca can tried to identify.
 /// In practice it is useful mainly for the web technologies to send only
@@ -26,7 +28,20 @@ pub enum Technology {
     ProFTPD,
     PureFTPd,
     /// OS is generic for all OSes.
+    /// It can be given as CLI input (with -t), but the specific OSes,
+    /// on the other hand, cannot be given as input, they can only be returned
+    /// in findings.
     OS,
+    Ubuntu,
+    Debian,
+    CentOS,
+    Fedora,
+    Unix,
+    OracleLinux,
+    FreeBSD,
+    OpenBSD,
+    NetBSD,
+    AlmaLinux,
     PHP,
     PhpMyAdmin,
     Typo3,
@@ -89,6 +104,7 @@ pub enum Technology {
     WPPWpSuperCache,
     WPPEmailSubscribers,
     WPPBetterSearchReplace,
+    WPPAdvancedCustomFields,
 }
 
 impl Technology {
@@ -116,6 +132,16 @@ impl Technology {
             Self::ProFTPD => ("proftpd_project".to_string(), "proftpd".to_string()),
             Self::PureFTPd => ("pureftpd".to_string(), "pure-ftpd".to_string()),
             Self::OS => ("".to_string(), "".to_string()),
+            Self::Ubuntu => ("canonical".to_string(), "ubuntu_linux".to_string()),
+            Self::Debian => ("debian".to_string(), "debian_linux".to_string()),
+            Self::Fedora => ("fedoraproject".to_string(), "fedora".to_string()),
+            Self::CentOS => ("centos".to_string(), "centos".to_string()),
+            Self::AlmaLinux => ("alma".to_string(), "linux".to_string()),
+            Self::OracleLinux => ("oracle".to_string(), "linux".to_string()),
+            Self::FreeBSD => ("freebsd".to_string(), "freebsd".to_string()),
+            Self::OpenBSD => ("openbsd".to_string(), "openbsd".to_string()),
+            Self::NetBSD => ("netbsd".to_string(), "netbsd".to_string()),
+            Self::Unix => ("unix".to_string(), "unix".to_string()),
             Self::PHP => ("php".to_string(), "php".to_string()),
             Self::PhpMyAdmin => ("phpmyadmin".to_string(), "phpmyadmin".to_string()),
             Self::Typo3 => ("typo3".to_string(), "typo3".to_string()),
@@ -192,7 +218,13 @@ impl Technology {
             Self::Knockout => ("knockoutjs".to_string(), "knockout".to_string()),
             Self::WPPWpSuperCache => ("automattic".to_string(), "wp_super_cache".to_string()),
             Self::WPPEmailSubscribers => ("icegram".to_string(), "email_subscribers".to_string()),
-            Self::WPPBetterSearchReplace => ("wpengine".to_string(), "better_search_replace".to_string()),
+            Self::WPPBetterSearchReplace => {
+                ("wpengine".to_string(), "better_search_replace".to_string())
+            }
+            Self::WPPAdvancedCustomFields => (
+                "advancedcustomfields".to_string(),
+                "advanced_custom_fields".to_string(),
+            ),
         }
     }
 
@@ -633,9 +665,9 @@ impl Technology {
                     ),
                 ]
             }
-	    Self::WPPBetterSearchReplace => {
-		vec![
-		    UrlRequest::from_path(
+            Self::WPPBetterSearchReplace => {
+                vec![
+                    UrlRequest::from_path(
                         main_url,
                         "/wp-content/plugins/better-search-replace/readme.txt",
                         false,
@@ -645,10 +677,111 @@ impl Technology {
                         "wp-content/plugins/better-search-replace/readme.txt",
                         false,
                     ),
-		]
-	    }
+                ]
+            }
+            Self::WPPAdvancedCustomFields => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/advanced-custom-fields/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/advanced-custom-fields/readme.txt",
+                        false,
+                    ),
+                ]
+            }
             _ => vec![UrlRequest::new(main_url, true)],
         }
+    }
+}
+
+impl Display for Technology {
+    /// Format a Technology
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
+	let s = match self {
+            Technology::Dovecot => "Dovecot".to_string(),
+            Technology::Exim => "Exim".to_string(),
+            Technology::MariaDB => "MariaDB".to_string(),
+            Technology::MySQL => "MySQL".to_string(),
+            Technology::OpenSSH => "OpenSSH".to_string(),
+            Technology::ProFTPD => "ProFTPD".to_string(),
+            Technology::PureFTPd => "PureFTPd".to_string(),
+            Technology::OS => "OS".to_string(),
+            Technology::Ubuntu => "Ubuntu".to_string(),
+            Technology::Debian => "Debian".to_string(),
+            Technology::CentOS => "CentOS".to_string(),
+            Technology::Fedora => "Fedora".to_string(),
+            Technology::AlmaLinux => "AlmaLinux".to_string(),
+            Technology::OracleLinux => "OracleLinux".to_string(),
+            Technology::FreeBSD => "FreeBSD".to_string(),
+            Technology::OpenBSD => "OpenBSD".to_string(),
+            Technology::NetBSD => "NetBSD".to_string(),
+            Technology::Unix => "Unix".to_string(),
+            Technology::PHP => "PHP".to_string(),
+            Technology::PhpMyAdmin => "phpMyAdmin".to_string(),
+            Technology::Typo3 => "TYPO3".to_string(),
+            Technology::WordPress => "WordPress".to_string(),
+            Technology::Drupal => "Drupal".to_string(),
+            Technology::Httpd => "Apachehttpd".to_string(),
+            Technology::Tomcat => "Tomcat".to_string(),
+            Technology::Nginx => "Nginx".to_string(),
+            Technology::OpenSSL => "OpenSSL".to_string(),
+            Technology::JQuery => "jQuery".to_string(),
+            Technology::ReactJS => "React".to_string(),
+            Technology::Handlebars => "Handlebars".to_string(),
+            Technology::Lodash => "Lodash".to_string(),
+            Technology::AngularJS => "AngularJS".to_string(),
+            Technology::Gsap => "GSAP".to_string(),
+            Technology::Bootstrap => "Bootstrap".to_string(),
+            Technology::Angular => "Angular".to_string(),
+            Technology::Plesk => "Plesk".to_string(),
+            Technology::CKEditor => "CKEditor".to_string(),
+            Technology::Highcharts => "Highcharts".to_string(),
+            Technology::WPPYoastSEO => "YoastSEO".to_string(),
+            Technology::WPPRevSlider => "SliderRevolution".to_string(),
+            Technology::WPPJSComposer => "JSComposer".to_string(),
+            Technology::WPPContactForm => "ContactForm7".to_string(),
+            Technology::Melis => "Melis".to_string(),
+            Technology::WPPElementor => "Elementor".to_string(),
+            Technology::WPPElementsReadyLite => "ElementsReadyLite".to_string(),
+            Technology::WPPGTranslate => "GTranslate".to_string(),
+            Technology::WPPWooCommerce => "WooCommerce".to_string(),
+            Technology::WPTDivi => "Divi".to_string(),
+            Technology::WPPClassicEditor => "ClassicEditor".to_string(),
+            Technology::WPPAkismet => "Akismet".to_string(),
+            Technology::WPPWpformsLite => "WpFormsLite".to_string(),
+            Technology::WPPAllInOneWpMigration => "AllInOneWpMigration".to_string(),
+            Technology::WPPReallySimpleSSL => "ReallySimpleSSL".to_string(),
+            Technology::WPPJetpack => "Jetpack".to_string(),
+            Technology::WPPLiteSpeedCache => "LiteSpeedCache".to_string(),
+            Technology::WPPAllInOneSEO => "AllInOneSEO".to_string(),
+            Technology::WPPWordfence => "Wordfence".to_string(),
+            Technology::WPPWpMailSmtp => "WpMailSmtp".to_string(),
+            Technology::WPPMc4wp => "Mc4wp".to_string(),
+            Technology::WPPSpectra => "Spectra".to_string(),
+            Technology::SquirrelMail => "SquirrelMail".to_string(),
+            Technology::PhoneSystem3CX => "PhoneSystem3CX".to_string(),
+            Technology::Prestashop => "Prestashop".to_string(),
+            Technology::Jira => "Jira".to_string(),
+            Technology::Twisted => "Twisted".to_string(),
+            Technology::TwistedWeb => "TwistedWeb".to_string(),
+            Technology::Symfony => "Symfony".to_string(),
+            Technology::TinyMCE => "TinyMCE".to_string(),
+            Technology::JQueryUI => "jQueryUI".to_string(),
+            Technology::WPPLayerSlider => "LayerSlider".to_string(),
+            Technology::WPPWpMembers => "WpMembers".to_string(),
+            Technology::WPPForminator => "Forminator".to_string(),
+            Technology::Horde => "Horde".to_string(),
+            Technology::Knockout => "Knockout".to_string(),
+            Technology::WPPWpSuperCache => "WpSuperCache".to_string(),
+            Technology::WPPEmailSubscribers => "EmailSubscribers".to_string(),
+            Technology::WPPBetterSearchReplace => "BetterSearchReplace".to_string(),
+            Technology::WPPAdvancedCustomFields => "AdvancedCustomFields".to_string(),
+        };
+	write!(f, "{}", s)
     }
 }
 
@@ -722,7 +855,8 @@ impl ValueEnum for Technology {
             Technology::Knockout,
             Technology::WPPWpSuperCache,
             Technology::WPPEmailSubscribers,
-	    Technology::WPPBetterSearchReplace,
+            Technology::WPPBetterSearchReplace,
+            Technology::WPPAdvancedCustomFields,
         ]
     }
 
@@ -795,7 +929,10 @@ impl ValueEnum for Technology {
             Technology::Knockout => Some(PossibleValue::new("knockout")),
             Technology::WPPWpSuperCache => Some(PossibleValue::new("wpsupercache")),
             Technology::WPPEmailSubscribers => Some(PossibleValue::new("emailsubscribers")),
-	    Technology::WPPBetterSearchReplace => Some(PossibleValue::new("bettersearchreplace")),
+            Technology::WPPBetterSearchReplace => Some(PossibleValue::new("bettersearchreplace")),
+            Technology::WPPAdvancedCustomFields => Some(PossibleValue::new("advancedcustomfields")),
+            // Ignore the specific OS since they cannot be given as CLI argument. Use OS instead.
+            _ => None,
         }
     }
 }

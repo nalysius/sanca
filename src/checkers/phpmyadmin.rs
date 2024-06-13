@@ -63,7 +63,7 @@ impl<'a> PhpMyAdminChecker<'a> {
 		Some(url_response),
 		keep_left_body.to_owned(),
 		keep_right_body.to_owned(),
-		"phpMyAdmin",
+		Technology::PhpMyAdmin,
 		"$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"));
         }
 
@@ -86,7 +86,7 @@ impl<'a> PhpMyAdminChecker<'a> {
 		    Some(url_response),
 		    keep_left_header.to_owned(),
 		    keep_right_header.to_owned(),
-		    "phpMyAdmin",
+		    Technology::PhpMyAdmin,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -144,7 +144,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "phpMyAdmin 5.2.0",
-            "phpMyAdmin",
+            Technology::PhpMyAdmin,
             Some("5.2.0"),
             Some(url1),
         );
@@ -158,7 +158,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "5.2.0 (2022-05-10)",
-            "phpMyAdmin",
+            Technology::PhpMyAdmin,
             Some("5.2.0"),
             Some(url2),
         );
@@ -198,7 +198,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "phpMyAdmin 5.2.1",
-            "phpMyAdmin",
+            Technology::PhpMyAdmin,
             Some("5.2.1"),
             Some(url1),
         );
@@ -219,7 +219,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "5.2.1 (2022-05-11)",
-            "phpMyAdmin",
+            Technology::PhpMyAdmin,
             Some("5.2.1"),
             Some(url2),
         );

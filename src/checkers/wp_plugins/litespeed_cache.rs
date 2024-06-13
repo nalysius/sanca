@@ -63,7 +63,7 @@ impl<'a> LiteSpeedCacheChecker<'a> {
                 Some(url_response),
                 keep_left.to_owned(),
                 keep_right.to_owned(),
-                "LiteSpeedCache",
+                Technology::WPPLiteSpeedCache,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
             }
@@ -121,7 +121,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Stable tag: 5.7.0.1",
-            "LiteSpeedCache",
+            Technology::WPPLiteSpeedCache,
             Some("5.7.0.1"),
             Some(url1),
         );
@@ -166,7 +166,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Stable tag: 5.6.2.8",
-            "LiteSpeedCache",
+            Technology::WPPLiteSpeedCache,
             Some("5.6.2.8"),
             Some(url1),
         );

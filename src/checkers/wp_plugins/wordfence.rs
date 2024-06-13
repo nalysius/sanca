@@ -62,7 +62,7 @@ impl<'a> WordfenceChecker<'a> {
                 Some(url_response),
                 keep_left.to_owned(),
                 keep_right.to_owned(),
-                "Wordfence",
+                Technology::WPPWordfence,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
             }
@@ -121,7 +121,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Stable tag: 7.11.0",
-            "Wordfence",
+            Technology::WPPWordfence,
             Some("7.11.0"),
             Some(url1),
         );
@@ -167,7 +167,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Stable tag: 6.1.2",
-            "Wordfence",
+            Technology::WPPWordfence,
             Some("6.1.2"),
             Some(url1),
         );

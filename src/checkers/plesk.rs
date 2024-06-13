@@ -60,7 +60,7 @@ impl<'a> PleskChecker<'a> {
 		    Some(url_response),
 		    keep_left.to_owned(),
 		    keep_right.to_owned(),
-		    "Plesk",
+		    Technology::Plesk,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -119,7 +119,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Plesk Obsidian 18.1.36",
-            "Plesk",
+            Technology::Plesk,
             Some("18.1.36"),
             Some(url1),
         );
@@ -133,7 +133,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Plesk Onyx 17.1.36",
-            "Plesk",
+            Technology::Plesk,
             Some("17.1.36"),
             Some(url2),
         );
@@ -173,7 +173,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Plesk Obsidian 18.2.42",
-            "Plesk",
+            Technology::Plesk,
             Some("18.2.42"),
             Some(url1),
         );
@@ -194,7 +194,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Plesk Onyx 17.42.1",
-            "Plesk",
+            Technology::Plesk,
             Some("17.42.1"),
             Some(url2),
         );

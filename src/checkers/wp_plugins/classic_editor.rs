@@ -62,7 +62,7 @@ impl<'a> ClassicEditorChecker<'a> {
                 Some(url_response),
                 keep_left.to_owned(),
                 keep_right.to_owned(),
-                "ClassicEditor",
+                Technology::WPPClassicEditor,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
             }
@@ -121,7 +121,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Stable tag: 1.6.3",
-            "ClassicEditor",
+            Technology::WPPClassicEditor,
             Some("1.6.3"),
             Some(url1),
         );
@@ -167,7 +167,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Stable tag: 1.6.4",
-            "ClassicEditor",
+            Technology::WPPClassicEditor,
             Some("1.6.4"),
             Some(url1),
         );

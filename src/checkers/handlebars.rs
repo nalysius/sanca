@@ -78,7 +78,7 @@ impl<'a> HandlebarsChecker<'a> {
                     Some(url_response),
                     keep_left.to_owned(),
                     keep_right.to_owned(),
-                    "Handlebars",
+                    Technology::Handlebars,
                     "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -127,7 +127,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "c=\"4.7.6\"",
-            "Handlebars",
+            Technology::Handlebars,
             Some("4.7.6"),
             Some(url1),
         );
@@ -139,7 +139,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "var1=\"4.7.7\"",
-            "Handlebars",
+            Technology::Handlebars,
             Some("4.7.7"),
             Some(url1),
         );
@@ -151,7 +151,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "VERSION=\"3.0.1\"",
-            "Handlebars",
+            Technology::Handlebars,
             Some("3.0.1"),
             Some(url1),
         );
@@ -184,7 +184,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "handlebars v4.7.7",
-            "Handlebars",
+            Technology::Handlebars,
             Some("4.7.7"),
             Some(url1),
         );
@@ -197,7 +197,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "handlebars v4.7.7",
-            "Handlebars",
+            Technology::Handlebars,
             Some("4.7.7"),
             Some(url1),
         );
@@ -246,7 +246,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "handlebars v4.7.7",
-            "Handlebars",
+            Technology::Handlebars,
             Some("4.7.7"),
             Some(url1),
         );
@@ -269,7 +269,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "handlebars v4.7.7",
-            "Handlebars",
+            Technology::Handlebars,
             Some("4.7.7"),
             Some(url2),
         );
@@ -290,7 +290,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "VERSION ='3.0.0'",
-            "Handlebars",
+            Technology::Handlebars,
             Some("3.0.0"),
             Some(url2),
         );

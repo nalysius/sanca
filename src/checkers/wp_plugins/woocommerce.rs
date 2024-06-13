@@ -59,7 +59,7 @@ impl<'a> WooCommerceChecker<'a> {
                 Some(url_response),
                 keep_left.to_owned(),
                 keep_right.to_owned(),
-                "WooCommerce",
+                Technology::WPPWooCommerce,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
         }
@@ -111,7 +111,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "WooCommerce 7.0.1",
-            "WooCommerce",
+            Technology::WPPWooCommerce,
             Some("7.0.1"),
             Some(url1),
         );
@@ -151,7 +151,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "WooCommerce 6.1.4",
-            "WooCommerce",
+            Technology::WPPWooCommerce,
             Some("6.1.4"),
             Some(url1),
         );

@@ -59,7 +59,7 @@ impl<'a> TcpChecker for DovecotChecker<'a> {
 		    None,
 		    keep_left.to_owned(),
 		    keep_right.to_owned(),
-		    "Dovecot",
+		    Technology::Dovecot,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" in its banner",
 		));
             }

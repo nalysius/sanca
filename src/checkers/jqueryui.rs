@@ -76,7 +76,7 @@ impl<'a> JQueryUIChecker<'a> {
 		    Some(url_response),
 		    keep_left.to_owned(),
 		    keep_right.to_owned(),
-		    "jQueryUI",
+		    Technology::JQueryUI,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -126,7 +126,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "version: \"1.7.1\"",
-            "jQueryUI",
+            Technology::JQueryUI,
             Some("1.7.1"),
             Some(url1),
         );
@@ -138,7 +138,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "version :'1.7.1'",
-            "jQueryUI",
+            Technology::JQueryUI,
             Some("1.7.1"),
             Some(url1),
         );
@@ -150,7 +150,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "ui.version=\"1.12.0\"",
-            "jQueryUI",
+            Technology::JQueryUI,
             Some("1.12.0"),
             Some(url1),
         );
@@ -162,7 +162,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "$.ui.version=\"1.13.0\"",
-            "jQueryUI",
+            Technology::JQueryUI,
             Some("1.13.0"),
             Some(url1),
         );
@@ -195,7 +195,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "jQuery UI - v1.7.3",
-            "jQueryUI",
+            Technology::JQueryUI,
             Some("1.7.3"),
             Some(url1),
         );
@@ -244,7 +244,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "jQuery UI - v1.7.7",
-            "jQueryUI",
+            Technology::JQueryUI,
             Some("1.7.7"),
             Some(url1),
         );
@@ -265,7 +265,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "jQuery UI - v1.6.1",
-            "jQueryUI",
+            Technology::JQueryUI,
             Some("1.6.1"),
             Some(url2),
         );
@@ -279,7 +279,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "ui.version = '1.12.1'",
-            "jQueryUI",
+            Technology::JQueryUI,
             Some("1.12.1"),
             Some(url3),
         );

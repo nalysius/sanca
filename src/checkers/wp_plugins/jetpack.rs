@@ -62,7 +62,7 @@ impl<'a> JetpackChecker<'a> {
                 Some(url_response),
                 keep_left.to_owned(),
                 keep_right.to_owned(),
-                "Jetpack",
+                Technology::WPPJetpack,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
             }
@@ -121,7 +121,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Stable tag: 12.9",
-            "Jetpack",
+            Technology::WPPJetpack,
             Some("12.9"),
             Some(url1),
         );
@@ -167,7 +167,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Stable tag: 11.3",
-            "Jetpack",
+            Technology::WPPJetpack,
             Some("11.3"),
             Some(url1),
         );

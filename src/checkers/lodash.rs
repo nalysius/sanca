@@ -95,7 +95,7 @@ impl<'a> LodashChecker<'a> {
 		    Some(url_response),
 		    keep_left.to_owned(),
 		    keep_right.to_owned(),
-		    "Lodash",
+		    Technology::Lodash,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -144,7 +144,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "VERSION= '4.17.15'",
-            "Lodash",
+            Technology::Lodash,
             Some("4.17.15"),
             Some(url1),
         );
@@ -156,7 +156,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "v=\"4.17.15\"",
-            "Lodash",
+            Technology::Lodash,
             Some("4.17.15"),
             Some(url1),
         );
@@ -196,7 +196,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "VERSION = \"4.17.15\"",
-            "Lodash",
+            Technology::Lodash,
             Some("4.17.15"),
             Some(url1),
         );
@@ -217,7 +217,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "v=\"4.17.15\"",
-            "Lodash",
+            Technology::Lodash,
             Some("4.17.15"),
             Some(url2),
         );

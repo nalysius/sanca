@@ -64,7 +64,7 @@ impl Writer for CsvWriter {
             // Escape quotes (") to avoid breaking the CSV
             let mut csv_line = format!(
                 "\"{}\",\"{}\",",
-                finding.technology.replace("\"", "\"\""),
+                finding.technology.to_string().replace("\"", "\"\""),
                 version.replace("\"", "\"\"")
             );
             // TCP or UDP scan (could be set in HTTP scan based on the URL)

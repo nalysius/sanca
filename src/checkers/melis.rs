@@ -53,7 +53,7 @@ impl<'a> MelisChecker<'a> {
 			Some(url_response),
 			keep_left.to_owned(),
 			keep_right.to_owned(),
-			"Melis",
+			Technology::Melis,
 			"$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		    ));
                 }
@@ -113,7 +113,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "- Version: v5.0.3",
-            "Melis",
+            Technology::Melis,
             Some("5.0.3"),
             Some(url1),
         );
@@ -153,7 +153,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "- Version: v5.0.2",
-            "Melis",
+            Technology::Melis,
             Some("5.0.2"),
             Some(url1),
         );

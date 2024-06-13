@@ -62,7 +62,7 @@ impl<'a> ForminatorChecker<'a> {
                 Some(url_response),
                 keep_left.to_owned(),
                 keep_right.to_owned(),
-                "Forminator",
+                Technology::WPPForminator,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
             }
@@ -124,7 +124,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Stable tag: 1.29.3",
-            "Forminator",
+            Technology::WPPForminator,
             Some("1.29.3"),
             Some(url1),
         );
@@ -173,7 +173,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Stable tag: 1.28.1",
-            "Forminator",
+            Technology::WPPForminator,
             Some("1.28.1"),
             Some(url1),
         );

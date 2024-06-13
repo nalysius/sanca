@@ -5,6 +5,7 @@ pub mod reqres;
 pub mod technology;
 
 use clap::{builder::PossibleValue, ValueEnum};
+use technology::Technology;
 
 /// Represents the type of scan
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -36,7 +37,7 @@ impl ValueEnum for ScanType {
 /// Represents a finding of a technology running on an asset
 pub struct Finding {
     /// The technology found
-    pub technology: String,
+    pub technology: Technology,
     /// The version of the technology
     /// Optional since it can be unknown
     pub version: Option<String>,
@@ -51,27 +52,19 @@ pub struct Finding {
 impl Finding {
     /// Creates a new finding
     pub fn new(
-        technology: &str,
+        technology: Technology,
         version: Option<&str>,
         evidence: &str,
         evidence_text: &str,
         url_of_finding: Option<&str>,
     ) -> Self {
         Finding {
-            technology: technology.to_string(),
+            technology: technology,
             version: version.map(|f| f.to_string()),
             evidence: evidence.to_string(),
             evidence_text: evidence_text.to_string(),
             url_of_finding: url_of_finding.map(|f| f.to_string()),
         }
-    }
-
-    /// Read the CVEs in the directory and add the ones concerning the current finding.
-    ///
-    /// If cve_dir isn't a valid path or not readable, an Err is returned.
-    /// Otherwise, nothing is returned.
-    pub fn check_cves(&mut self, _cve_dir: String) {
-        // TODO
     }
 }
 

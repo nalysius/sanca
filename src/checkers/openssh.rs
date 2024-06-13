@@ -62,7 +62,7 @@ impl<'a> TcpChecker for OpenSSHChecker<'a> {
 		    None,
 		    keep_left.to_owned(),
 		    keep_right.to_owned(),
-		    "OpenSSH",
+		    Technology::OpenSSH,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" in its banner",
 		));
             }

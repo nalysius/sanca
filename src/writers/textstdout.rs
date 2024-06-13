@@ -48,7 +48,9 @@ impl Writer for TextStdoutWriter {
             }
             println!(
                 "[{}/{}] {}\n",
-                finding.technology, version, finding.evidence_text
+                finding.technology.to_string(),
+                version,
+                finding.evidence_text
             );
         }
     }

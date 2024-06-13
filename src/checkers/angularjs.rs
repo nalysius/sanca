@@ -81,7 +81,7 @@ impl<'a> AngularJSChecker<'a> {
 		    Some(url_response),
 		    keep_left.to_owned(),
 		    keep_right.to_owned(),
-		    "AngularJS",
+		    Technology::AngularJS,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -129,7 +129,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "https://errors.angularjs.org/1.8.2",
-            "AngularJS",
+            Technology::AngularJS,
             Some("1.8.2"),
             Some(url1),
         );
@@ -142,7 +142,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "angularVersion: \"1.8.3\"",
-            "AngularJS",
+            Technology::AngularJS,
             Some("1.8.3"),
             Some(url1),
         );
@@ -175,7 +175,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "AngularJS v1.8.2",
-            "AngularJS",
+            Technology::AngularJS,
             Some("1.8.2"),
             Some(url1),
         );
@@ -187,7 +187,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "AngularJS v1.5.3",
-            "AngularJS",
+            Technology::AngularJS,
             Some("1.5.3"),
             Some(url1),
         );
@@ -232,7 +232,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "http://errors.angularjs.org/1.9.3/",
-            "AngularJS",
+            Technology::AngularJS,
             Some("1.9.3"),
             Some(url1),
         );
@@ -253,7 +253,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "AngularJS v1.5.3",
-            "AngularJS",
+            Technology::AngularJS,
             Some("1.5.3"),
             Some(url2),
         );

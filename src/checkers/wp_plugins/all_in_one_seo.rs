@@ -71,7 +71,7 @@ impl<'a> AllInOneSEOChecker<'a> {
                 Some(url_response),
                 keep_left.to_owned(),
                 keep_right.to_owned(),
-                "AllInOneSEO",
+                Technology::WPPAllInOneSEO,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
         }
@@ -93,7 +93,7 @@ impl<'a> AllInOneSEOChecker<'a> {
                 Some(url_response),
                 keep_left_meta.to_owned(),
                 keep_right_meta.to_owned(),
-                "AllInOneSEO",
+                Technology::WPPAllInOneSEO,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
         }
@@ -119,7 +119,7 @@ impl<'a> AllInOneSEOChecker<'a> {
                 Some(url_response),
                 keep_left_readme.to_owned(),
                 keep_right_readme.to_owned(),
-                "AllInOneSEO",
+                Technology::WPPAllInOneSEO,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
             }
@@ -174,7 +174,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "All in One SEO Pro 4.3.1.1",
-            "AllInOneSEO",
+            Technology::WPPAllInOneSEO,
             Some("4.3.1.1"),
             Some(url1),
         );
@@ -195,7 +195,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Stable tag: 4.5.1.1",
-            "AllInOneSEO",
+            Technology::WPPAllInOneSEO,
             Some("4.5.1.1"),
             Some(url2),
         );
@@ -210,7 +210,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "All in One SEO Pro (AIOSEO) 4.5.1.1",
-            "AllInOneSEO",
+            Technology::WPPAllInOneSEO,
             Some("4.5.1.1"),
             Some(url3),
         );
@@ -251,7 +251,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "All in One SEO 4.5.1.1",
-            "AllInOneSEO",
+            Technology::WPPAllInOneSEO,
             Some("4.5.1.1"),
             Some(url1),
         );
@@ -272,7 +272,7 @@ mod tests {
         check_finding_fields(
             &finding[0],
             "Stable tag: 4.5.2.1",
-            "AllInOneSEO",
+            Technology::WPPAllInOneSEO,
             Some("4.5.2.1"),
             Some(url2),
         );
@@ -288,7 +288,7 @@ mod tests {
         check_finding_fields(
             &finding[0],
             "All in One SEO (AIOSEO) 4.5.1.1",
-            "AllInOneSEO",
+            Technology::WPPAllInOneSEO,
             Some("4.5.1.1"),
             Some(url3),
         );

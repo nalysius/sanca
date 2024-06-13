@@ -60,7 +60,7 @@ impl<'a> JSComposerChecker<'a> {
                 Some(url_response),
                 keep_left.to_owned(),
                 keep_right.to_owned(),
-                "JSComposer",
+                Technology::WPPJSComposer,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
         }
@@ -112,7 +112,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "js-comp-ver-6.1",
-            "JSComposer",
+            Technology::WPPJSComposer,
             Some("6.1"),
             Some(url1),
         );
@@ -152,7 +152,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "js-comp-ver-7.3",
-            "JSComposer",
+            Technology::WPPJSComposer,
             Some("7.3"),
             Some(url1),
         );

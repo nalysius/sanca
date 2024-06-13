@@ -76,7 +76,7 @@ impl<'a> TcpChecker for MySQLChecker<'a> {
 		    None,
 		    keep_left.to_owned(),
 		    keep_right.to_owned(),
-		    "MySQL",
+		    Technology::MySQL,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" in its banner",
 		));
             }

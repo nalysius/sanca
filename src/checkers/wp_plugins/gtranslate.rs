@@ -62,7 +62,7 @@ impl<'a> GTranslateChecker<'a> {
                 Some(url_response),
                 keep_left.to_owned(),
                 keep_right.to_owned(),
-                "GTranslate",
+                Technology::WPPGTranslate,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
             }
@@ -121,7 +121,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Stable tag: 2.9.13",
-            "GTranslate",
+            Technology::WPPGTranslate,
             Some("2.9.13"),
             Some(url1),
         );
@@ -167,7 +167,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Stable tag: 2.9.13",
-            "GTranslate",
+            Technology::WPPGTranslate,
             Some("2.9.13"),
             Some(url1),
         );

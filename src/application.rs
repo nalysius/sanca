@@ -58,6 +58,7 @@ use crate::checkers::twisted::TwistedChecker;
 use crate::checkers::twistedweb::TwistedWebChecker;
 use crate::checkers::typo3::Typo3Checker;
 use crate::checkers::wordpress::WordPressChecker;
+use crate::checkers::wp_plugins::advanced_custom_fields::AdvancedCustomFieldsChecker;
 use crate::checkers::wp_plugins::akismet::AkismetChecker;
 use crate::checkers::wp_plugins::all_in_one_seo::AllInOneSEOChecker;
 use crate::checkers::wp_plugins::all_in_one_wp_migration::AllInOneWpMigrationChecker;
@@ -89,6 +90,7 @@ use crate::checkers::{HttpChecker, TcpChecker};
 use crate::models::{reqres::UrlRequest, technology::Technology, Finding, ScanType, Writers};
 use crate::readers::http::HttpReader;
 use crate::readers::tcp::TcpReader;
+use crate::vulnerabilities::{CacheType, VulnSource};
 use crate::writers::csv::CsvWriter;
 use crate::writers::textstdout::TextStdoutWriter;
 use crate::writers::Writer;
@@ -147,6 +149,7 @@ impl Application {
             Box::new(PrestashopChecker::new()),
             Box::new(Typo3Checker::new()),
             Box::new(WordPressChecker::new()),
+            Box::new(AdvancedCustomFieldsChecker::new()),
             Box::new(AkismetChecker::new()),
             Box::new(AllInOneWpMigrationChecker::new()),
             Box::new(AllInOneSEOChecker::new()),
@@ -386,12 +389,6 @@ impl Application {
             }
         };
 
-        if let Some(cve_dir) = &args.cve_dir {
-            for finding in &mut findings {
-                finding.check_cves(cve_dir.clone())
-            }
-        }
-
         info!("Scan finished, writing output");
         let writer: Box<dyn Writer> = match args.writer {
             Writers::TextStdout => Box::new(TextStdoutWriter::new(args)),
@@ -429,8 +426,12 @@ pub struct Args {
     /// Hide the header with the URL to the Sanca's website
     #[arg(short('e'), long)]
     pub hide_header: bool,
-    /// The directory containing the CVEs, in JSON format.
-    /// CVEs can be downloaded at https://github.com/CVEProject/cvelistV5/releases.
-    #[arg(short('c'), long)]
-    pub cve_dir: Option<String>,
+    /// The source where download the CVEs to match the findings against.
+    /// Only the technology and the version are transmitted.
+    #[arg(long("vuln-source"))]
+    pub vuln_source: Option<VulnSource>,
+    /// The type of cache to use to store the downloaded vulnerabilities.
+    /// Can be used only if vuln-source is given.
+    #[arg(long("vuln-cache"))]
+    pub vuln_cache: Option<CacheType>,
 }

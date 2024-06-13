@@ -75,7 +75,7 @@ impl<'a> PrestashopChecker<'a> {
 		    Some(url_response),
 		    keep_left.to_owned(),
 		    keep_right.to_owned(),
-		    "Prestashop",
+		    Technology::Prestashop,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -135,7 +135,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "1.7.4 - (2022-10-04)",
-            "Prestashop",
+            Technology::Prestashop,
             Some("1.7.4"),
             Some(url1),
         );
@@ -175,7 +175,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "8.1.4 - (2024-02-12)",
-            "Prestashop",
+            Technology::Prestashop,
             Some("8.1.4"),
             Some(url1),
         );

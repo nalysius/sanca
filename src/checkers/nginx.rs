@@ -66,7 +66,7 @@ impl<'a> NginxChecker<'a> {
 		    Some(url_response),
 		    keep_left_header.to_owned(),
 		    keep_right_header.to_owned(),
-		    "Nginx",
+		    Technology::Nginx,
 		    &format!("$techno_name$$techno_version$ has been identified using the HTTP header \"{}: $evidence$\" returned at the following URL: $url_of_finding$", header_name)
 		));
             }
@@ -93,7 +93,7 @@ impl<'a> NginxChecker<'a> {
 		Some(url_response),
 		keep_left.to_owned(),
 		keep_right.to_owned(),
-		"Nginx",
+		Technology::Nginx,
 		"$techno_name$$techno_version$ has been identified by looking at its signature \"$evidence$\" at this page: $url_of_finding$"
 	    ));
         }
@@ -160,7 +160,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "nginx/1.22.0",
-            "Nginx",
+            Technology::Nginx,
             Some("1.22.0"),
             Some(url1),
         );
@@ -169,7 +169,13 @@ mod tests {
         url_response_valid.body = body2.to_string();
         let finding = checker.check_http_body(&url_response_valid);
         assert!(finding.is_some());
-        check_finding_fields(&finding.unwrap(), "nginx", "Nginx", None, Some(url1));
+        check_finding_fields(
+            &finding.unwrap(),
+            "nginx",
+            Technology::Nginx,
+            None,
+            Some(url1),
+        );
     }
 
     #[test]
@@ -201,7 +207,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "nginx/1.22.2",
-            "Nginx",
+            Technology::Nginx,
             Some("1.22.2"),
             Some(url1),
         );
@@ -215,7 +221,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "nginx/1.22.0.1",
-            "Nginx",
+            Technology::Nginx,
             Some("1.22.0.1"),
             Some(url1),
         );
@@ -229,7 +235,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "nginx/1.22",
-            "Nginx",
+            Technology::Nginx,
             Some("1.22"),
             Some(url1),
         );
@@ -278,7 +284,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "nginx/1.22.4",
-            "Nginx",
+            Technology::Nginx,
             Some("1.22.4"),
             Some(url1),
         );
@@ -301,7 +307,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "nginx/1.22.2",
-            "Nginx",
+            Technology::Nginx,
             Some("1.22.2"),
             Some(url2),
         );

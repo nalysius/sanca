@@ -62,7 +62,7 @@ impl<'a> WpMailSmtpChecker<'a> {
                 Some(url_response),
                 keep_left.to_owned(),
                 keep_right.to_owned(),
-                "WpMailSmtp",
+                Technology::WPPWpMailSmtp,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
             }
@@ -121,7 +121,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Stable tag: 3.10.0",
-            "WpMailSmtp",
+            Technology::WPPWpMailSmtp,
             Some("3.10.0"),
             Some(url1),
         );
@@ -167,7 +167,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Stable tag: 2.9.9",
-            "WpMailSmtp",
+            Technology::WPPWpMailSmtp,
             Some("2.9.9"),
             Some(url1),
         );

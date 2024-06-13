@@ -57,7 +57,7 @@ impl<'a> KnockoutChecker<'a> {
 		    Some(url_response),
 		    keep_left.to_owned(),
 		    keep_right.to_owned(),
-		    "Knockout",
+		    Technology::Knockout,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -106,7 +106,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "version=\"2.1.0\"",
-            "Knockout",
+            Technology::Knockout,
             Some("2.1.0"),
             Some(url1),
         );
@@ -140,7 +140,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Knockout JavaScript library v2.1.0",
-            "Knockout",
+            Technology::Knockout,
             Some("2.1.0"),
             Some(url1),
         );
@@ -180,7 +180,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Knockout JavaScript library v3.1.7",
-            "Knockout",
+            Technology::Knockout,
             Some("3.1.7"),
             Some(url1),
         );
@@ -201,7 +201,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "version = \"3.2.1\"",
-            "Knockout",
+            Technology::Knockout,
             Some("3.2.1"),
             Some(url2),
         );

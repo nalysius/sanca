@@ -71,7 +71,7 @@ impl<'a> JQueryChecker<'a> {
 		    Some(url_response),
 		    keep_left.to_owned(),
 		    keep_right.to_owned(),
-		    "jQuery",
+		    Technology::JQuery,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -120,7 +120,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "jquery:\"3.3.1\"",
-            "jQuery",
+            Technology::JQuery,
             Some("3.3.1"),
             Some(url1),
         );
@@ -133,7 +133,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "version=\"3.1.1\"",
-            "jQuery",
+            Technology::JQuery,
             Some("3.1.1"),
             Some(url1),
         );
@@ -166,7 +166,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "jQuery v3.7.0",
-            "jQuery",
+            Technology::JQuery,
             Some("3.7.0"),
             Some(url1),
         );
@@ -179,7 +179,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "jQuery JavaScript Library v3.7.0",
-            "jQuery",
+            Technology::JQuery,
             Some("3.7.0"),
             Some(url1),
         );
@@ -228,7 +228,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "jQuery v3.7.7",
-            "jQuery",
+            Technology::JQuery,
             Some("3.7.7"),
             Some(url1),
         );
@@ -249,7 +249,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "jQuery v3.6.1",
-            "jQuery",
+            Technology::JQuery,
             Some("3.6.1"),
             Some(url2),
         );

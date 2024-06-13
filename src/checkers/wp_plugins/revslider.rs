@@ -62,7 +62,7 @@ impl<'a> RevSliderChecker<'a> {
                     Some(url_response),
                     keep_left.to_owned(),
                     keep_right.to_owned(),
-                    "RevSlider",
+                    Technology::WPPRevSlider,
                     "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -115,7 +115,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Slider Revolution 6.5.11",
-            "RevSlider",
+            Technology::WPPRevSlider,
             Some("6.5.11"),
             Some(url1),
         );
@@ -128,7 +128,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "REVOLUTION SLIDER 5.4.8.3",
-            "RevSlider",
+            Technology::WPPRevSlider,
             Some("5.4.8.3"),
             Some(url1),
         );
@@ -179,7 +179,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Slider Revolution 6.4.11",
-            "RevSlider",
+            Technology::WPPRevSlider,
             Some("6.4.11"),
             Some(url1),
         );

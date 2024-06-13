@@ -66,7 +66,7 @@ impl<'a> Typo3Checker<'a> {
                 Some(url_response),
                 keep_left_source.to_owned(),
                 keep_right_source.to_owned(),
-                "TYPO3",
+                Technology::Typo3,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$")
             );
         }
@@ -91,7 +91,7 @@ impl<'a> Typo3Checker<'a> {
 		    Some(url_response),
 		    keep_left_composer.to_owned(),
 		    keep_right_composer.to_owned(),
-		    "TYPO3",
+		    Technology::Typo3,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -150,7 +150,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "\"4.7.1",
-            "TYPO3",
+            Technology::Typo3,
             Some("4.7.1"),
             Some(url),
         );
@@ -161,7 +161,13 @@ mod tests {
             UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::Default, 200);
         let finding = checker.check_http_body(&url_response_valid1);
         assert!(finding.is_some());
-        check_finding_fields(&finding.unwrap(), "4.7", "TYPO3", Some("4.7"), Some(url2));
+        check_finding_fields(
+            &finding.unwrap(),
+            "4.7",
+            Technology::Typo3,
+            Some("4.7"),
+            Some(url2),
+        );
     }
 
     #[test]
@@ -205,7 +211,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "\"4.7.2.8",
-            "TYPO3",
+            Technology::Typo3,
             Some("4.7.2.8"),
             Some(url1),
         );
@@ -216,7 +222,13 @@ mod tests {
             UrlResponse::new(url2, HashMap::new(), body2, UrlRequestType::Default, 200);
         let finding = checker.check_http(&[url_response_valid1]);
         assert_eq!(1, finding.len());
-        check_finding_fields(&finding[0], "4.7", "TYPO3", Some("4.7"), Some(url2));
+        check_finding_fields(
+            &finding[0],
+            "4.7",
+            Technology::Typo3,
+            Some("4.7"),
+            Some(url2),
+        );
     }
 
     #[test]

@@ -58,7 +58,7 @@ impl<'a> WordPressChecker<'a> {
 		Some(url_response),
 		keep_left_meta.to_owned(),
 		keep_right_meta.to_owned(),
-		"WordPress",
+		Technology::WordPress,
 		"$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 	    ));
         }
@@ -83,7 +83,7 @@ impl<'a> WordPressChecker<'a> {
 		    Some(url_response),
 		    keep_left_login.to_owned(),
 		    keep_right_login.to_owned(),
-		    "WordPress",
+		    Technology::WordPress,
 		    "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
 		));
             }
@@ -146,7 +146,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "WordPress 6.1.2",
-            "WordPress",
+            Technology::WordPress,
             Some("6.1.2"),
             Some(url1),
         );
@@ -160,7 +160,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "ver=6.1.2",
-            "WordPress",
+            Technology::WordPress,
             Some("6.1.2"),
             Some(url2),
         );
@@ -200,7 +200,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "content = \"WordPress 5.8.4\"",
-            "WordPress",
+            Technology::WordPress,
             Some("5.8.4"),
             Some(url1),
         );
@@ -221,7 +221,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "?ver=5.8.4",
-            "WordPress",
+            Technology::WordPress,
             Some("5.8.4"),
             Some(url2),
         );

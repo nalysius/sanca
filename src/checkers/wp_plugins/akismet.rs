@@ -62,7 +62,7 @@ impl<'a> AkismetChecker<'a> {
                 Some(url_response),
                 keep_left.to_owned(),
                 keep_right.to_owned(),
-                "Akismet",
+                Technology::WPPAkismet,
                 "$techno_name$$techno_version$ has been identified because we found \"$evidence$\" at this url: $url_of_finding$"
             ));
             }
@@ -120,7 +120,7 @@ mod tests {
         check_finding_fields(
             &finding.unwrap(),
             "Stable tag: 5.3",
-            "Akismet",
+            Technology::WPPAkismet,
             Some("5.3"),
             Some(url1),
         );
@@ -165,7 +165,7 @@ mod tests {
         check_finding_fields(
             &findings[0],
             "Stable tag: 5.2",
-            "Akismet",
+            Technology::WPPAkismet,
             Some("5.2"),
             Some(url1),
         );
