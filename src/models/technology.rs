@@ -88,6 +88,7 @@ pub enum Technology {
     Knockout,
     WPPWpSuperCache,
     WPPEmailSubscribers,
+    WPPBetterSearchReplace,
 }
 
 impl Technology {
@@ -106,74 +107,93 @@ impl Technology {
 
     /// Returns the CPE vendor and product as a tuple.
     pub fn get_cpe_vendor_product(&self) -> (String, String) {
-	match self {
-	    Dovecot => ("dovecot".to_string(), "dovecot".to_string()),
-	    Exim => ("exim".to_string(), "exim".to_string()),
-	    MariaDB => ("mariadb".to_string(), "mariadb".to_string()),
-	    MySQL => ("oracle".to_string(), "mysql_server".to_string()),
-	    OpenSSH => ("openbsd".to_string(), "openssh".to_string()),
-	    ProFTPD => ("proftpd_project".to_string(), "proftpd".to_string()),
-	    PureFTPd => ("pureftpd".to_string(), "pure-ftpd".to_string()),
-	    OS => ("".to_string(), "".to_string()),
-	    PHP => ("php".to_string(), "php".to_string()),
-	    PhpMyAdmin => ("phpmyadmin".to_string(), "phpmyadmin".to_string()),
-	    Typo3 => ("typo3".to_string(), "typo3".to_string()),
-	    WordPress => ("wordpress".to_string(), "wordpress".to_string()),
-	    Drupal => ("drupal".to_string(), "drupal".to_string()),
-	    Httpd => ("apache".to_string(), "httpd_server".to_string()),
-	    Tomcat => ("apache".to_string(), "tomcat".to_string()),
-	    Nginx => ("nginx".to_string(), "nginx".to_string()),
-	    OpenSSL => ("openssl".to_string(), "openssl".to_string()),
-	    JQuery => ("jquery".to_string(), "jquery".to_string()),
-	    ReactJS => ("facebook".to_string(), "react".to_string()),
-	    Handlebars => ("handlebarsjs".to_string(), "handlebars".to_string()),
-	    Lodash => ("lodash".to_string(), "lodash".to_string()),
-	    AngularJS => ("angularjs".to_string(), "angular".to_string()),
-	    Gsap => ("greensock".to_string(), "greensock_animation_platform".to_string()),
-	    Bootstrap => ("getbootstrap".to_string(), "bootstrap".to_string()),
-	    Angular => ("angular".to_string(), "angular".to_string()),
-	    Plesk => ("plesk".to_string(), "plesk".to_string()),
-	    CKEditor => ("ckeditor".to_string(), "ckeditor".to_string()),
-	    Highcharts => ("highcharts".to_string(), "highcharts".to_string()),
-	    WPPYoastSEO => ("yoast".to_string(), "yoastseo".to_string()),
-	    WPPRevSlider => ("themepunch".to_string(), "slider_revolution".to_string()),
-	    WPPJSComposer => ("wpbakery".to_string(), "page_builder".to_string()),
-	    WPPContactForm => ("rocklobster".to_string(), "contact_form_7".to_string()),
-	    Melis => ("melistechnology".to_string(), "meliscms".to_string()),
-	    WPPElementor => ("webtechstreet".to_string(), "elementor_addon_elements".to_string()),
-	    WPPElementsReadyLite => ("".to_string(), "".to_string()),
-	    WPPGTranslate => ("gtranslate".to_string(), "translate_wordpress_with_gtranslate".to_string()),
-	    WPPWooCommerce => ("woocommerce".to_string(), "woocommerce".to_string()),
-	    WPTDivi => ("elegant_themes".to_string(), "divi".to_string()),
-	    WPPClassicEditor => ("".to_string(), "".to_string()),
-	    WPPAkismet => ("automattic".to_string(), "akismet".to_string()),
-	    WPPWpformsLite => ("wpforms".to_string(), "wpforms".to_string()),
-	    WPPAllInOneWpMigration => ("servmask".to_string(), "all-in-one_wp_migration".to_string()),
-	    WPPReallySimpleSSL => ("really-simple-plugins".to_string(), "really-simple-ssl".to_string()),
-	    WPPJetpack => ("automattic".to_string(), "jetpack".to_string()),
-	    WPPLiteSpeedCache => ("litespeedtech".to_string(), "litespeed_cache".to_string()),
-	    WPPAllInOneSEO => ("aioseo".to_string(), "all_in_one_seo".to_string()),
-	    WPPWordfence => ("".to_string(), "".to_string()),
-	    WPPWpMailSmtp => ("wpforms".to_string(), "wp_mail_smtp".to_string()),
-	    WPPMc4wp => ("mailchimp_for_wordpress_project".to_string(), "mailchimp_for_wordpress".to_string()),
-	    WPPSpectra => ("brainstormforce".to_string(), "spectra".to_string()),
-	    SquirrelMail => ("squirrelmail".to_string(), "squirrelmail".to_string()),
-	    PhoneSystem3CX => ("3cx".to_string(), "3cx".to_string()),
-	    Prestashop => ("prestashop".to_string(), "prestashop".to_string()),
-	    Jira => ("atlassian".to_string(), "jira".to_string()),
-	    Twisted => ("twistedmatrix".to_string(), "twisted".to_string()),
-	    TwistedWeb => ("twistedmatrix".to_string(), "twistedweb".to_string()),
-	    Symfony => ("sensiolabs".to_string(), "symfony".to_string()),
-	    TinyMCE => ("tiny".to_string(), "tinymce".to_string()),
-	    JQueryUI => ("jquery".to_string(), "jquery_ui".to_string()),
-	    WPPLayerSlider => ("layslider".to_string(), "layslider".to_string()),
-	    WPPWpMembers => ("wp-members_project".to_string(), "wp-members".to_string()),
-	    WPPForminator => ("incsub".to_string(), "forminator".to_string()),
-	    Horde => ("horde".to_string(), "groupware".to_string()),
-	    Knockout => ("knockoutjs".to_string(), "knockout".to_string()),
-	    WPPWpSuperCache => ("automattic".to_string(), "wp_super_cache".to_string()),
-	    WPPEmailSubscribers => ("icegram".to_string(), "email_subscribers".to_string()),
-	}
+        match self {
+            Self::Dovecot => ("dovecot".to_string(), "dovecot".to_string()),
+            Self::Exim => ("exim".to_string(), "exim".to_string()),
+            Self::MariaDB => ("mariadb".to_string(), "mariadb".to_string()),
+            Self::MySQL => ("oracle".to_string(), "mysql_server".to_string()),
+            Self::OpenSSH => ("openbsd".to_string(), "openssh".to_string()),
+            Self::ProFTPD => ("proftpd_project".to_string(), "proftpd".to_string()),
+            Self::PureFTPd => ("pureftpd".to_string(), "pure-ftpd".to_string()),
+            Self::OS => ("".to_string(), "".to_string()),
+            Self::PHP => ("php".to_string(), "php".to_string()),
+            Self::PhpMyAdmin => ("phpmyadmin".to_string(), "phpmyadmin".to_string()),
+            Self::Typo3 => ("typo3".to_string(), "typo3".to_string()),
+            Self::WordPress => ("wordpress".to_string(), "wordpress".to_string()),
+            Self::Drupal => ("drupal".to_string(), "drupal".to_string()),
+            Self::Httpd => ("apache".to_string(), "httpd_server".to_string()),
+            Self::Tomcat => ("apache".to_string(), "tomcat".to_string()),
+            Self::Nginx => ("nginx".to_string(), "nginx".to_string()),
+            Self::OpenSSL => ("openssl".to_string(), "openssl".to_string()),
+            Self::JQuery => ("jquery".to_string(), "jquery".to_string()),
+            Self::ReactJS => ("facebook".to_string(), "react".to_string()),
+            Self::Handlebars => ("handlebarsjs".to_string(), "handlebars".to_string()),
+            Self::Lodash => ("lodash".to_string(), "lodash".to_string()),
+            Self::AngularJS => ("angularjs".to_string(), "angular".to_string()),
+            Self::Gsap => (
+                "greensock".to_string(),
+                "greensock_animation_platform".to_string(),
+            ),
+            Self::Bootstrap => ("getbootstrap".to_string(), "bootstrap".to_string()),
+            Self::Angular => ("angular".to_string(), "angular".to_string()),
+            Self::Plesk => ("plesk".to_string(), "plesk".to_string()),
+            Self::CKEditor => ("ckeditor".to_string(), "ckeditor".to_string()),
+            Self::Highcharts => ("highcharts".to_string(), "highcharts".to_string()),
+            Self::WPPYoastSEO => ("yoast".to_string(), "yoastseo".to_string()),
+            Self::WPPRevSlider => ("themepunch".to_string(), "slider_revolution".to_string()),
+            Self::WPPJSComposer => ("wpbakery".to_string(), "page_builder".to_string()),
+            Self::WPPContactForm => ("rocklobster".to_string(), "contact_form_7".to_string()),
+            Self::Melis => ("melistechnology".to_string(), "meliscms".to_string()),
+            Self::WPPElementor => (
+                "webtechstreet".to_string(),
+                "elementor_addon_elements".to_string(),
+            ),
+            Self::WPPElementsReadyLite => ("".to_string(), "".to_string()),
+            Self::WPPGTranslate => (
+                "gtranslate".to_string(),
+                "translate_wordpress_with_gtranslate".to_string(),
+            ),
+            Self::WPPWooCommerce => ("woocommerce".to_string(), "woocommerce".to_string()),
+            Self::WPTDivi => ("elegant_themes".to_string(), "divi".to_string()),
+            Self::WPPClassicEditor => ("".to_string(), "".to_string()),
+            Self::WPPAkismet => ("automattic".to_string(), "akismet".to_string()),
+            Self::WPPWpformsLite => ("wpforms".to_string(), "wpforms".to_string()),
+            Self::WPPAllInOneWpMigration => (
+                "servmask".to_string(),
+                "all-in-one_wp_migration".to_string(),
+            ),
+            Self::WPPReallySimpleSSL => (
+                "really-simple-plugins".to_string(),
+                "really-simple-ssl".to_string(),
+            ),
+            Self::WPPJetpack => ("automattic".to_string(), "jetpack".to_string()),
+            Self::WPPLiteSpeedCache => ("litespeedtech".to_string(), "litespeed_cache".to_string()),
+            Self::WPPAllInOneSEO => ("aioseo".to_string(), "all_in_one_seo".to_string()),
+            Self::WPPWordfence => ("".to_string(), "".to_string()),
+            Self::WPPWpMailSmtp => ("wpforms".to_string(), "wp_mail_smtp".to_string()),
+            Self::WPPMc4wp => (
+                "mailchimp_for_wordpress_project".to_string(),
+                "mailchimp_for_wordpress".to_string(),
+            ),
+            Self::WPPSpectra => ("brainstormforce".to_string(), "spectra".to_string()),
+            Self::SquirrelMail => ("squirrelmail".to_string(), "squirrelmail".to_string()),
+            Self::PhoneSystem3CX => ("3cx".to_string(), "3cx".to_string()),
+            Self::Prestashop => ("prestashop".to_string(), "prestashop".to_string()),
+            Self::Jira => ("atlassian".to_string(), "jira".to_string()),
+            Self::Twisted => ("twistedmatrix".to_string(), "twisted".to_string()),
+            Self::TwistedWeb => ("twistedmatrix".to_string(), "twistedweb".to_string()),
+            Self::Symfony => ("sensiolabs".to_string(), "symfony".to_string()),
+            Self::TinyMCE => ("tiny".to_string(), "tinymce".to_string()),
+            Self::JQueryUI => ("jquery".to_string(), "jquery_ui".to_string()),
+            Self::WPPLayerSlider => ("layslider".to_string(), "layslider".to_string()),
+            Self::WPPWpMembers => ("wp-members_project".to_string(), "wp-members".to_string()),
+            Self::WPPForminator => ("incsub".to_string(), "forminator".to_string()),
+            Self::Horde => ("horde".to_string(), "groupware".to_string()),
+            Self::Knockout => ("knockoutjs".to_string(), "knockout".to_string()),
+            Self::WPPWpSuperCache => ("automattic".to_string(), "wp_super_cache".to_string()),
+            Self::WPPEmailSubscribers => ("icegram".to_string(), "email_subscribers".to_string()),
+            Self::WPPBetterSearchReplace => ("wpengine".to_string(), "better_search_replace".to_string()),
+        }
     }
 
     /// Checks whether the technology supports the given scan type
@@ -598,19 +618,33 @@ impl Technology {
                         false,
                     ),
                 ]
-            },
-	    Self::WPPEmailSubscribers => {
-		vec![
-		    UrlRequest::from_path(
+            }
+            Self::WPPEmailSubscribers => {
+                vec![
+                    UrlRequest::from_path(
                         main_url,
                         "/wp-content/plugins/email-subscribers/readme.txt",
                         false,
                     ),
-		    UrlRequest::from_path(
+                    UrlRequest::from_path(
                         main_url,
                         "wp-content/plugins/email-subscribers/readme.txt",
                         false,
-                    )
+                    ),
+                ]
+            }
+	    Self::WPPBetterSearchReplace => {
+		vec![
+		    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/better-search-replace/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/better-search-replace/readme.txt",
+                        false,
+                    ),
 		]
 	    }
             _ => vec![UrlRequest::new(main_url, true)],
@@ -687,7 +721,8 @@ impl ValueEnum for Technology {
             Technology::Horde,
             Technology::Knockout,
             Technology::WPPWpSuperCache,
-	    Technology::WPPEmailSubscribers,
+            Technology::WPPEmailSubscribers,
+	    Technology::WPPBetterSearchReplace,
         ]
     }
 
@@ -759,7 +794,8 @@ impl ValueEnum for Technology {
             Technology::Horde => Some(PossibleValue::new("horde")),
             Technology::Knockout => Some(PossibleValue::new("knockout")),
             Technology::WPPWpSuperCache => Some(PossibleValue::new("wpsupercache")),
-	    Technology::WPPEmailSubscribers => Some(PossibleValue::new("emailsubscribers")),
+            Technology::WPPEmailSubscribers => Some(PossibleValue::new("emailsubscribers")),
+	    Technology::WPPBetterSearchReplace => Some(PossibleValue::new("bettersearchreplace")),
         }
     }
 }

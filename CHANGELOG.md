@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detection for Knockout.
 - Detection for WP Super Cache WordPress plugin.
 - Detection for Email Subscribers WordPress plugin.
+- Detection for Better Search Replace WordPress plugin.
 
 ### Fixed
 

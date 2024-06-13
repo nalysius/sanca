@@ -61,6 +61,7 @@ use crate::checkers::wordpress::WordPressChecker;
 use crate::checkers::wp_plugins::akismet::AkismetChecker;
 use crate::checkers::wp_plugins::all_in_one_seo::AllInOneSEOChecker;
 use crate::checkers::wp_plugins::all_in_one_wp_migration::AllInOneWpMigrationChecker;
+use crate::checkers::wp_plugins::better_search_replace::BetterSearchReplaceChecker;
 use crate::checkers::wp_plugins::classic_editor::ClassicEditorChecker;
 use crate::checkers::wp_plugins::contact_form::ContactFormChecker;
 use crate::checkers::wp_plugins::elementor::ElementorChecker;
@@ -149,11 +150,12 @@ impl Application {
             Box::new(AkismetChecker::new()),
             Box::new(AllInOneWpMigrationChecker::new()),
             Box::new(AllInOneSEOChecker::new()),
+            Box::new(BetterSearchReplaceChecker::new()),
             Box::new(ClassicEditorChecker::new()),
             Box::new(ContactFormChecker::new()),
             Box::new(ElementorChecker::new()),
             Box::new(ElementsReadyLiteChecker::new()),
-	    Box::new(EmailSubscribersChecker::new()),
+            Box::new(EmailSubscribersChecker::new()),
             Box::new(ForminatorChecker::new()),
             Box::new(DiviChecker::new()),
             Box::new(GTranslateChecker::new()),
@@ -384,11 +386,11 @@ impl Application {
             }
         };
 
-	if let Some(cve_dir) = &args.cve_dir {
-	    for finding in &mut findings {
-		finding.check_cves(cve_dir.clone())
-	    }
-	}
+        if let Some(cve_dir) = &args.cve_dir {
+            for finding in &mut findings {
+                finding.check_cves(cve_dir.clone())
+            }
+        }
 
         info!("Scan finished, writing output");
         let writer: Box<dyn Writer> = match args.writer {

@@ -71,7 +71,7 @@ impl Finding {
     /// If cve_dir isn't a valid path or not readable, an Err is returned.
     /// Otherwise, nothing is returned.
     pub fn check_cves(&mut self, _cve_dir: String) {
-	// TODO
+        // TODO
     }
 }
 

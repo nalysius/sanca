@@ -5,6 +5,7 @@
 pub mod akismet;
 pub mod all_in_one_seo;
 pub mod all_in_one_wp_migration;
+pub mod better_search_replace;
 pub mod classic_editor;
 pub mod contact_form;
 pub mod elementor;
