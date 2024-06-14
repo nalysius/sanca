@@ -7,11 +7,11 @@
 //! technologies. It's mainly useful in HTTP scan, since it allows to
 //! send less requests.
 
+use super::reqres::UrlRequest;
+use super::ScanType;
 use clap::{builder::PossibleValue, ValueEnum};
 use std::fmt::{Display, Formatter};
 use std::string::ToString;
-use super::reqres::UrlRequest;
-use super::ScanType;
 
 /// An enumeration to represent the technologies that Sanca can tried to identify.
 /// In practice it is useful mainly for the web technologies to send only
@@ -105,6 +105,7 @@ pub enum Technology {
     WPPEmailSubscribers,
     WPPBetterSearchReplace,
     WPPAdvancedCustomFields,
+    WPPHealthCheck,
 }
 
 impl Technology {
@@ -224,6 +225,10 @@ impl Technology {
             Self::WPPAdvancedCustomFields => (
                 "advancedcustomfields".to_string(),
                 "advanced_custom_fields".to_string(),
+            ),
+            Self::WPPHealthCheck => (
+                "wordpress".to_string(),
+                "health_check_\\&_troubleshooting".to_string(),
             ),
         }
     }
@@ -693,6 +698,20 @@ impl Technology {
                     ),
                 ]
             }
+            Self::WPPHealthCheck => {
+                vec![
+                    UrlRequest::from_path(
+                        main_url,
+                        "/wp-content/plugins/health-check/readme.txt",
+                        false,
+                    ),
+                    UrlRequest::from_path(
+                        main_url,
+                        "wp-content/plugins/health-check/readme.txt",
+                        false,
+                    ),
+                ]
+            }
             _ => vec![UrlRequest::new(main_url, true)],
         }
     }
@@ -701,7 +720,7 @@ impl Technology {
 impl Display for Technology {
     /// Format a Technology
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
-	let s = match self {
+        let s = match self {
             Technology::Dovecot => "Dovecot".to_string(),
             Technology::Exim => "Exim".to_string(),
             Technology::MariaDB => "MariaDB".to_string(),
@@ -780,8 +799,9 @@ impl Display for Technology {
             Technology::WPPEmailSubscribers => "EmailSubscribers".to_string(),
             Technology::WPPBetterSearchReplace => "BetterSearchReplace".to_string(),
             Technology::WPPAdvancedCustomFields => "AdvancedCustomFields".to_string(),
+            Technology::WPPHealthCheck => "HealthCheck".to_string(),
         };
-	write!(f, "{}", s)
+        write!(f, "{}", s)
     }
 }
 
@@ -857,6 +877,7 @@ impl ValueEnum for Technology {
             Technology::WPPEmailSubscribers,
             Technology::WPPBetterSearchReplace,
             Technology::WPPAdvancedCustomFields,
+            Technology::WPPHealthCheck,
         ]
     }
 
@@ -931,6 +952,7 @@ impl ValueEnum for Technology {
             Technology::WPPEmailSubscribers => Some(PossibleValue::new("emailsubscribers")),
             Technology::WPPBetterSearchReplace => Some(PossibleValue::new("bettersearchreplace")),
             Technology::WPPAdvancedCustomFields => Some(PossibleValue::new("advancedcustomfields")),
+            Technology::WPPHealthCheck => Some(PossibleValue::new("healthcheck")),
             // Ignore the specific OS since they cannot be given as CLI argument. Use OS instead.
             _ => None,
         }

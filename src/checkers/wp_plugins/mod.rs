@@ -14,6 +14,7 @@ pub mod elements_ready_lite;
 pub mod email_subscribers;
 pub mod forminator;
 pub mod gtranslate;
+pub mod health_check;
 pub mod jetpack;
 pub mod js_composer;
 pub mod layerslider;
