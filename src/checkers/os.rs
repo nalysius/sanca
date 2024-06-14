@@ -685,23 +685,47 @@ mod tests {
         let banner = "SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5";
         let finding = checker.check_tcp(&[banner.to_string()]);
         assert!(finding.is_some());
-        check_finding_fields(&finding.unwrap(), banner, Technology::Ubuntu, Some("20.04"), None);
+        check_finding_fields(
+            &finding.unwrap(),
+            banner,
+            Technology::Ubuntu,
+            Some("20.04"),
+            None,
+        );
 
         let banner = "SSH-2.0-OpenSSH_8.4p1 Debian-2~bpo10+1";
         let finding = checker.check_tcp(&[banner.to_string()]);
         assert!(finding.is_some());
-        check_finding_fields(&finding.unwrap(), banner, Technology::Debian, Some("10"), None);
+        check_finding_fields(
+            &finding.unwrap(),
+            banner,
+            Technology::Debian,
+            Some("10"),
+            None,
+        );
 
         let banner = "SSH-2.0-OpenSSH_8.4p1 Debian-2~deb11+1";
         let finding = checker.check_tcp(&[banner.to_string()]);
         assert!(finding.is_some());
-        check_finding_fields(&finding.unwrap(), banner, Technology::Debian, Some("11"), None);
+        check_finding_fields(
+            &finding.unwrap(),
+            banner,
+            Technology::Debian,
+            Some("11"),
+            None,
+        );
 
         let banner =
             "c5.5.5-10.3.17-MariaDB-0+deb10u1�42g0YPc##��-��#%3mMz=aPLlZmysql_native_password";
         let finding = checker.check_tcp(&[banner.to_string()]);
         assert!(finding.is_some());
-        check_finding_fields(&finding.unwrap(), banner, Technology::Debian, Some("10"), None);
+        check_finding_fields(
+            &finding.unwrap(),
+            banner,
+            Technology::Debian,
+            Some("10"),
+            None,
+        );
     }
 
     #[test]
