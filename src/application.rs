@@ -91,6 +91,8 @@ use crate::checkers::{HttpChecker, TcpChecker};
 use crate::models::{reqres::UrlRequest, technology::Technology, Finding, ScanType, Writers};
 use crate::readers::http::HttpReader;
 use crate::readers::tcp::TcpReader;
+use crate::vulnerabilities::cache_managers::{files::FileCacheManager, CacheManager};
+use crate::vulnerabilities::fetchers::{nvd::NVDFetcher, VulnFetcher};
 use crate::vulnerabilities::{CacheType, VulnSource};
 use crate::writers::csv::CsvWriter;
 use crate::writers::textstdout::TextStdoutWriter;
@@ -390,6 +392,19 @@ impl Application {
                 )
             }
         };
+
+        // Complete the findings with their vulnerabilities
+        if let Some(vuln_source) = &args.vuln_source {
+            info!("Completing findings with CVEs");
+            let cache_manager: Option<Box<dyn CacheManager>> = match &args.vuln_cache {
+                Some(CacheType::Files) => Some(Box::new(FileCacheManager::new())),
+                None => None,
+            };
+            let vuln_fetcher = match vuln_source {
+                VulnSource::NVD => NVDFetcher::new(cache_manager),
+            };
+            vuln_fetcher.complete_findings(&mut findings);
+        }
 
         info!("Scan finished, writing output");
         let writer: Box<dyn Writer> = match args.writer {

@@ -46,11 +46,23 @@ impl Writer for TextStdoutWriter {
             if finding.version.is_some() {
                 version = &finding.version.as_ref().unwrap();
             }
+            let mut cve_ids = Vec::new();
+            for vuln in finding.vulnerabilities {
+                cve_ids.push(vuln.cve_id);
+            }
+
+	    let cve_str = if cve_ids.len() > 0 {
+		format!(" | CVE: {}", cve_ids.join(", "))
+	    } else {
+		String::new()
+	    };
+
             println!(
-                "[{}/{}] {}\n",
+                "[{}/{}] {}{}\n",
                 finding.technology.to_string(),
                 version,
-                finding.evidence_text
+                finding.evidence_text,
+                cve_str
             );
         }
     }

@@ -53,7 +53,7 @@ impl Writer for CsvWriter {
             csv.push_str("\"Main URL\",\"URL of finding\",");
         }
 
-        csv.push_str("\"Evidence\",\"Evidence text\"\n");
+        csv.push_str("\"Evidence\",\"Evidence text\", \"CVEs\"\n");
         for finding in findings {
             let mut version = "unknown";
             if finding.version.is_some() {
@@ -83,10 +83,18 @@ impl Writer for CsvWriter {
                     finding.url_of_finding.unwrap().replace("\"", "\"\"")
                 ));
             }
+
+	    // Add the CVEs
+	    let mut cve_ids = Vec::new();
+            for vuln in finding.vulnerabilities {
+                cve_ids.push(vuln.cve_id);
+            }
+
             csv_line.push_str(&format!(
-                "\"{}\",\"{}\"\n",
+                "\"{}\",\"{}\", \"{}\"\n",
                 finding.evidence.replace("\"", "\"\""),
-                finding.evidence_text.replace("\"", "\"\"")
+                finding.evidence_text.replace("\"", "\"\""),
+		cve_ids.join(", ").replace("\"", "\"\"")
             ));
             csv.push_str(&csv_line);
         }
