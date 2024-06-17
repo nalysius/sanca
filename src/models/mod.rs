@@ -5,6 +5,7 @@ pub mod technology;
 
 use crate::vulnerabilities::fetchers::nvd::Vulnerability;
 use clap::{builder::PossibleValue, ValueEnum};
+use serde::{Deserialize, Serialize};
 use std::convert::From;
 use technology::Technology;
 
@@ -104,6 +105,7 @@ impl ValueEnum for Writers {
 }
 
 /// Represents a CVE, as embedded in a Finding.
+#[derive(Clone, Deserialize, Serialize)]
 pub struct CVE {
     /// The CVE identifier.
     /// Example: CVE-2012-6708

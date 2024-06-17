@@ -49,6 +49,10 @@ impl NVDFetcher {
                 finding.vulnerabilities.push(cve);
             }
         }
+
+	if let Some(c) = self.cache.as_ref() {
+	    c.store(finding.vulnerabilities.clone(), finding.technology.clone(), finding.version.as_ref().unwrap());
+	}
     }
 }
 
@@ -69,7 +73,6 @@ impl VulnFetcher for NVDFetcher {
                 self.fetch_vulns(finding);
             }
         }
-        println!("Findings completed");
     }
 }
 
