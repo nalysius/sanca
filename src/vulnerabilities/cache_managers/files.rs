@@ -22,7 +22,58 @@ impl CacheManager for FileCacheManager {
     /// Returns true if the technology & version in the finding were
     /// stored in cache, false otherwise.
     fn complete_finding(&self, finding: &mut Finding) -> bool {
-        false
+	if finding.version.is_none() {
+	    return false;
+	}
+	if let Some(cves) = self.read(finding.technology.clone(), &finding.version.as_ref().unwrap()) {
+	    finding.vulnerabilities = cves;
+	    return true;
+	} else {
+	    return false;
+	}
+    }
+
+    /// Read the CVEs associated with a Technology & version in cache.
+    fn read(&self, technology: Technology, version: &str) -> Option<Vec<CVE>> {
+	trace!("Running FileCacheManager::read");
+	let root_dir = if let Ok(mut p) = env::current_exe() {
+	    p.pop();
+	    p.join("cves")
+	} else {
+	    // By default, a "cves" directory is created in the current working directory
+	    PathBuf::new().join("cves")
+	};
+
+	let (_part, vendor, product) = technology.get_cpe_part_vendor_product();
+	let dirname = Path::new(&root_dir).join(vendor).join(product);
+	if !dirname.exists() {
+	    return None;
+	}
+
+	let filename = dirname.join(&format!("{}.json", version));
+	if !filename.exists() {
+	    return None;
+	}
+
+	let mut file = if let Ok(f) = File::open(filename.clone()) {
+	    f
+	} else {
+	    error!("Unable to open the JSON file {}", filename.to_string_lossy());
+	    return None;
+	};
+
+	let mut json = String::new();
+	if file.read_to_string(&mut json).is_err() {
+	    error!("Unable to read the JSON file {}", filename.to_string_lossy());
+	    return None;
+	}
+
+	let cves: Vec<CVE> = if let Ok(c) = serde_json::from_str(json.as_str()) {
+	    c
+	} else {
+	    return None;
+	};
+	return Some(cves)
     }
 
     /// Stores the CVEs associated with a Technology & version in cache.

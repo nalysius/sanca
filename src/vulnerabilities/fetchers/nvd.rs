@@ -4,7 +4,7 @@ use crate::vulnerabilities::fetchers::VulnFetcher;
 /// This module implements a vulnerability fetcher which downloads
 /// the CVEs from the NVD.
 /// https://nvd.nist.gov/developers/vulnerabilities
-use log::{error, trace};
+use log::{debug, error, trace};
 use serde::Deserialize;
 
 /// This structs represents the NVD vulnerabilities fetcher.
@@ -19,6 +19,7 @@ impl NVDFetcher {
         trace!("Running NVDFetcher::fetch_vulns()");
         let (part, vendor, product) = finding.technology.get_cpe_part_vendor_product();
         if vendor.is_empty() || product.is_empty() || finding.version.is_none() {
+	    debug!("Vendor, product of version is empty, technology is ignored.");
             return;
         }
         // Example: https://services.nvd.nist.gov/rest/json/cves/2.0?noRejected&cpeName=cpe:2.3:a:jquery:jquery:1.8.3

@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detection for Better Search Replace WordPress plugin.
 - Detection for Advanced Custom Fields WordPress plugin
 - Detection for Health Check & Troubleshooting WordPress plugin.
+- Fetching of CVEs associated with technologies.
 
 ### Fixed
 
