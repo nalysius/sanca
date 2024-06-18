@@ -29,7 +29,7 @@ impl<'a> EximChecker<'a> {
         let mut regexes = HashMap::new();
         // Example: 220 test.example.com ESMTP Exim 4.96 Mon, 10 Jul 2023 19:39:15 +0300
         // Date / time are ignored
-        let regex = Regex::new(r"^(?P<wholematch>\d\d\d ([a-zA-Z0-9-]+\.)?([a-zA-Z0-9-]+\.)?[a-zA-Z0-9-]+ (?P<smtpprotocol>E?SMTP) Exim (?P<version>\d+\.\d+)) ").unwrap();
+        let regex = Regex::new(r"^(?P<wholematch>\d\d\d( |-)([a-zA-Z0-9-]+\.)?([a-zA-Z0-9-]+\.)?[a-zA-Z0-9-]+\s+(?P<smtpprotocol>E?SMTP)\s+Exim\s+(?P<version1>\d+\.\d+(\.\d+)?))\s+").unwrap();
         regexes.insert("exim-banner", (regex, 20, 20));
         Self { regexes: regexes }
     }
