@@ -287,9 +287,9 @@ impl HttpReader<'_> {
             }
 
             if url_or_path.starts_with("https://") || url_or_path.starts_with("http://") {
-                url_requests.push(UrlRequest::new(&url_or_path, false));
+                url_requests.push(UrlRequest::new(&url_or_path, true));
             } else {
-                url_requests.push(UrlRequest::from_path(request_url, &url_or_path, false));
+                url_requests.push(UrlRequest::from_path(request_url, &url_or_path, true));
             }
         }
 

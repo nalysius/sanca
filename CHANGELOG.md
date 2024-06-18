@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Server-side technologies like Nginx could be detected on JavaScript
+  subrequests, sometimes on CDN servers.
+
 ## [1.5.0]
 
 ### Added
