@@ -84,8 +84,8 @@ impl Writer for CsvWriter {
                 ));
             }
 
-	    // Add the CVEs
-	    let mut cve_ids = Vec::new();
+            // Add the CVEs
+            let mut cve_ids = Vec::new();
             for vuln in finding.vulnerabilities {
                 cve_ids.push(vuln.cve_id);
             }
@@ -94,7 +94,7 @@ impl Writer for CsvWriter {
                 "\"{}\",\"{}\", \"{}\"\n",
                 finding.evidence.replace("\"", "\"\""),
                 finding.evidence_text.replace("\"", "\"\""),
-		cve_ids.join(", ").replace("\"", "\"\"")
+                cve_ids.join(", ").replace("\"", "\"\"")
             ));
             csv.push_str(&csv_line);
         }

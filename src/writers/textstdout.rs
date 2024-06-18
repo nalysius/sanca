@@ -51,11 +51,11 @@ impl Writer for TextStdoutWriter {
                 cve_ids.push(vuln.cve_id);
             }
 
-	    let cve_str = if cve_ids.len() > 0 {
-		format!(" | CVE: {}", cve_ids.join(", "))
-	    } else {
-		String::new()
-	    };
+            let cve_str = if cve_ids.len() > 0 {
+                format!(" | CVE: {}", cve_ids.join(", "))
+            } else {
+                String::new()
+            };
 
             println!(
                 "[{}/{}] {}{}\n",

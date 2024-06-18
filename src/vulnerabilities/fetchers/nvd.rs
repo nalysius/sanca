@@ -19,7 +19,7 @@ impl NVDFetcher {
         trace!("Running NVDFetcher::fetch_vulns()");
         let (part, vendor, product) = finding.technology.get_cpe_part_vendor_product();
         if vendor.is_empty() || product.is_empty() || finding.version.is_none() {
-	    debug!("Vendor, product of version is empty, technology is ignored.");
+            debug!("Vendor, product of version is empty, technology is ignored.");
             return;
         }
         // Example: https://services.nvd.nist.gov/rest/json/cves/2.0?noRejected&cpeName=cpe:2.3:a:jquery:jquery:1.8.3
@@ -51,9 +51,13 @@ impl NVDFetcher {
             }
         }
 
-	if let Some(c) = self.cache.as_ref() {
-	    c.store(finding.vulnerabilities.clone(), finding.technology.clone(), finding.version.as_ref().unwrap());
-	}
+        if let Some(c) = self.cache.as_ref() {
+            c.store(
+                finding.vulnerabilities.clone(),
+                finding.technology.clone(),
+                finding.version.as_ref().unwrap(),
+            );
+        }
     }
 }
 

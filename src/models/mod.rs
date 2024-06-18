@@ -126,20 +126,20 @@ impl From<Vulnerability> for CVE {
         let mut base_score = 0.0;
         let mut cvss_version = String::new();
         if let Some(metric) = metrics.cvss_metric_v31 {
-	    if !metric.is_empty() {
-		base_score = metric[0].cvss_data.base_score;
-		cvss_version = "3.1".to_string();
-	    }
+            if !metric.is_empty() {
+                base_score = metric[0].cvss_data.base_score;
+                cvss_version = "3.1".to_string();
+            }
         } else if let Some(metric) = metrics.cvss_metric_v30 {
-	    if !metric.is_empty() {
-		base_score = metric[0].cvss_data.base_score;
-		cvss_version = "3.0".to_string();
-	    }
+            if !metric.is_empty() {
+                base_score = metric[0].cvss_data.base_score;
+                cvss_version = "3.0".to_string();
+            }
         } else if let Some(metric) = metrics.cvss_metric_v2 {
-	    if !metric.is_empty() {
-		base_score = metric[0].cvss_data.base_score;
-		cvss_version = "2".to_string();
-	    }
+            if !metric.is_empty() {
+                base_score = metric[0].cvss_data.base_score;
+                cvss_version = "2".to_string();
+            }
         }
 
         Self {
