@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Server-side technologies like Nginx could be detected on JavaScript
   subrequests, sometimes on CDN servers.
 - The Exim version wasn't extracted in the finding.
+- Some JavaScript URLs weren't completely extracted.
 
 ## [1.5.0]
 

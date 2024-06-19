@@ -29,7 +29,7 @@ impl HttpReader<'_> {
     /// Creates a new HttpReader
     pub fn new() -> Self {
         let script_regex = Regex::new(
-            r#"<script[^>]+src\s*=\s*["']?\s*(?P<url>(((?P<protocol>[a-z0-9]+):)?\/\/(?P<hostname>[^\/:]+)(:(?P<port>\d{1,5}))?)?(?P<path>\/?[a-zA-Z0-9\/._ %@-]*(?P<extension>\.[a-zA-Z0-9_-]+)?)?(?P<querystring>\?[^#\s'">]*)?(#[^'">\s]*)?)\s*["']?"#
+            r#"<script[^>]+src\s*=\s*["']?\s*(?P<url>(((?P<protocol>[a-z0-9]+):)?\/\/(?P<hostname>[^\/:]+)(:(?P<port>\d{1,5}))?)?(?P<path>\/?[a-zA-Z0-9\/._ %;=@-]*(?P<extension>\.[a-zA-Z0-9_-]+)?)?(?P<querystring>\?[^#\s'">]*)?(#[^'">\s]*)?)\s*["']?"#
         ).unwrap();
 
         // Example: Sfjs.loadToolbar('c32ea2')
@@ -328,5 +328,26 @@ impl HttpReader<'_> {
         }
 
         return None;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn extract_script_urls() {
+        let hr = HttpReader::new();
+        let data = r#"<hr /><script type="text/javascript" src="/login/javax.faces.resource/jquery/jquery.js.jsf?ln=primefaces&amp;v=8.0"></script>"#;
+        let url_requests =
+            hr.extract_urls("https://www.example.org/index.html", data, None, "scripts");
+        assert_eq!(url_requests.len(), 1);
+        assert_eq!(url_requests[0].url, "https://www.example.org/login/javax.faces.resource/jquery/jquery.js.jsf?ln=primefaces&amp;v=8.0");
+
+        let data = r#"<script type="text/javascript" src="/login/javax.faces.resource/jquery/jquery.js.jsf;jsessionid=pYKnBiK_o8OyDlcQakjdpd2xmR_8mMal_lhg5js8.uldspt02?ln=primefaces&amp;v=8.0"></script>"#;
+	let url_requests =
+            hr.extract_urls("https://www.example.org/index.html", data, None, "scripts");
+        assert_eq!(url_requests.len(), 1);
+        assert_eq!(url_requests[0].url, "https://www.example.org/login/javax.faces.resource/jquery/jquery.js.jsf;jsessionid=pYKnBiK_o8OyDlcQakjdpd2xmR_8mMal_lhg5js8.uldspt02?ln=primefaces&amp;v=8.0");
     }
 }
