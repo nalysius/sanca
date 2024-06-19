@@ -91,10 +91,10 @@ impl Writer for CsvWriter {
             }
 
             csv_line.push_str(&format!(
-                "\"{}\",\"{}\", \"{}\"\n",
+                "\"{}\",\"{}\",\"{}\"\n",
                 finding.evidence.replace("\"", "\"\""),
                 finding.evidence_text.replace("\"", "\"\""),
-                cve_ids.join(", ").replace("\"", "\"\"")
+                cve_ids.join(", ")
             ));
             csv.push_str(&csv_line);
         }
