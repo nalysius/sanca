@@ -61,9 +61,9 @@ impl Writer for JsonWriter {
             Value::String(self.url.clone().unwrap_or(String::new())),
         );
 
-	// serde_json::to_value() should never return Err, since Finding derives
-	// Serialize.
-	let findings_value = serde_json::to_value(findings).unwrap();
+        // serde_json::to_value() should never return Err, since Finding derives
+        // Serialize.
+        let findings_value = serde_json::to_value(findings).unwrap();
         map.insert("findings".to_string(), findings_value);
         let result = Value::Object(map);
         println!("{:#}", result);
