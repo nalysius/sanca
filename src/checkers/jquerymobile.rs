@@ -100,7 +100,7 @@ mod tests {
         let checker = JQueryMobileChecker::new();
         let body1 = r#"/*! jQuery Mobile 1.3.2"#;
         let url1 = "https://www.example.com/that.jsp?abc=def";
-        let mut url_response_valid =
+        let url_response_valid =
             UrlResponse::new(url1, HashMap::new(), body1, UrlRequestType::Default, 200);
         let finding = checker.check_http_body(&url_response_valid);
         assert!(finding.is_some());
@@ -119,7 +119,7 @@ mod tests {
         let body1 = r#"/**
         * jQuery Mobile 1.2.3
         "#;
-        let mut url_response_invalid = UrlResponse::new(
+        let url_response_invalid = UrlResponse::new(
             "https://www.example.com/that.jsp?abc=def",
             HashMap::new(),
             body1,
