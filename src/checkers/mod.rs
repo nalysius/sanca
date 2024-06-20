@@ -27,6 +27,7 @@ pub mod horde;
 pub mod httpd;
 pub mod jira;
 pub mod jquery;
+pub mod jquerymobile;
 pub mod jqueryui;
 pub mod knockout;
 pub mod lodash;

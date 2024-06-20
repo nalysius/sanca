@@ -106,6 +106,7 @@ pub enum Technology {
     WPPBetterSearchReplace,
     WPPAdvancedCustomFields,
     WPPHealthCheck,
+    JQueryMobile,
 }
 
 impl Technology {
@@ -376,7 +377,7 @@ impl Technology {
             Self::TinyMCE => ("a".to_string(), "tiny".to_string(), "tinymce".to_string()),
             Self::JQueryUI => (
                 "a".to_string(),
-                "jquery".to_string(),
+                "jqueryui".to_string(),
                 "jquery_ui".to_string(),
             ),
             Self::WPPLayerSlider => (
@@ -429,6 +430,11 @@ impl Technology {
                 "wordpress".to_string(),
                 "health_check_\\&_troubleshooting".to_string(),
             ),
+	    Self::JQueryMobile => (
+		"a".to_string(),
+		"jquery".to_string(),
+		"jquery_mobile".to_string(),
+	    )
         }
     }
 
@@ -999,6 +1005,7 @@ impl Display for Technology {
             Technology::WPPBetterSearchReplace => "BetterSearchReplace".to_string(),
             Technology::WPPAdvancedCustomFields => "AdvancedCustomFields".to_string(),
             Technology::WPPHealthCheck => "HealthCheck".to_string(),
+	    Technology::JQueryMobile => "jQueryMobile".to_string(),
         };
         write!(f, "{}", s)
     }
@@ -1077,6 +1084,7 @@ impl ValueEnum for Technology {
             Technology::WPPBetterSearchReplace,
             Technology::WPPAdvancedCustomFields,
             Technology::WPPHealthCheck,
+	    Technology::JQueryMobile,
         ]
     }
 
@@ -1152,6 +1160,7 @@ impl ValueEnum for Technology {
             Technology::WPPBetterSearchReplace => Some(PossibleValue::new("bettersearchreplace")),
             Technology::WPPAdvancedCustomFields => Some(PossibleValue::new("advancedcustomfields")),
             Technology::WPPHealthCheck => Some(PossibleValue::new("healthcheck")),
+	    Technology::JQueryMobile => Some(PossibleValue::new("jquerymobile")),
             // Ignore the specific OS since they cannot be given as CLI argument. Use OS instead.
             _ => None,
         }

@@ -32,6 +32,7 @@ use crate::checkers::horde::HordeChecker;
 use crate::checkers::httpd::ApacheHttpdChecker;
 use crate::checkers::jira::JiraChecker;
 use crate::checkers::jquery::JQueryChecker;
+use crate::checkers::jquerymobile::JQueryMobileChecker;
 use crate::checkers::jqueryui::JQueryUIChecker;
 use crate::checkers::knockout::KnockoutChecker;
 use crate::checkers::lodash::LodashChecker;
@@ -189,6 +190,7 @@ impl Application {
             Box::new(HandlebarsChecker::new()),
             Box::new(HighchartsChecker::new()),
             Box::new(JQueryChecker::new()),
+	    Box::new(JQueryMobileChecker::new()),
             Box::new(JQueryUIChecker::new()),
             Box::new(KnockoutChecker::new()),
             Box::new(LodashChecker::new()),
