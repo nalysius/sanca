@@ -6,7 +6,8 @@ use crate::{
     application::Args,
     models::{reqres::UrlRequest, Finding},
 };
-use serde_json::json;
+use serde_json::value::Value;
+use serde_json::Map;
 
 /// A writer to print the findings as JSON.
 pub struct JsonWriter {
@@ -45,6 +46,26 @@ impl Writer for JsonWriter {
     fn write(&self, findings: Vec<Finding>) {
         // TODO: Add an object to contain ip_hostname & port
         // { ip_hostname: "example.org", port: 25, findings: [...]  }
-        println!("{}", json!(findings));
+
+        let mut map = Map::new();
+        map.insert(
+            "ip_hostname".to_string(),
+            Value::String(self.ip_hostname.clone().unwrap_or(String::new())),
+        );
+        map.insert(
+            "port".to_string(),
+            Value::Number(self.port.unwrap_or(0).into()),
+        );
+        map.insert(
+            "url".to_string(),
+            Value::String(self.url.clone().unwrap_or(String::new())),
+        );
+
+	// serde_json::to_value() should never return Err, since Finding derives
+	// Serialize.
+	let findings_value = serde_json::to_value(findings).unwrap();
+        map.insert("findings".to_string(), findings_value);
+        let result = Value::Object(map);
+        println!("{:#}", result);
     }
 }
