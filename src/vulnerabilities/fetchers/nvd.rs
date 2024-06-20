@@ -175,10 +175,10 @@ pub struct CVSSMetric<T: CVSSData> {
     pub cvss_data: T,
     /// The exploitability score.
     #[serde(rename = "exploitabilityScore")]
-    pub exploitability_score: f32,
+    pub exploitability_score: f64,
     /// The impact score.
     #[serde(rename = "impactScore")]
-    pub impact_score: f32,
+    pub impact_score: f64,
 }
 
 /// An empty trait that will be implemented by all CVSSxxData structures
@@ -218,7 +218,7 @@ pub struct CVSS3Data {
     pub availability_impact: String,
     /// The base score.
     #[serde(rename = "baseScore")]
-    pub base_score: f32,
+    pub base_score: f64,
     /// The base severity.
     #[serde(rename = "baseSeverity")]
     pub base_severity: String,
@@ -254,7 +254,7 @@ pub struct CVSS2Data {
     pub availability_impact: String,
     /// The base score.
     #[serde(rename = "baseScore")]
-    pub base_score: f32,
+    pub base_score: f64,
 }
 
 impl CVSSData for CVSS2Data {}

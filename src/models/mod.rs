@@ -116,7 +116,7 @@ pub struct CVE {
     pub cve_id: String,
     /// The base score.
     /// Example: 8.3
-    pub base_score: f32,
+    pub base_score: f64,
     /// The CVSS version.
     pub cvss_version: String,
 }
@@ -127,7 +127,7 @@ impl From<Vulnerability> for CVE {
     fn from(vuln: Vulnerability) -> Self {
         let cve_id = vuln.cve.id.clone();
         let metrics = vuln.cve.metrics;
-        let mut base_score = 0.0;
+        let mut base_score: f64 = 0.0;
         let mut cvss_version = String::new();
         if let Some(metric) = metrics.cvss_metric_v31 {
             if !metric.is_empty() {

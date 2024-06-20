@@ -103,8 +103,8 @@ impl CacheManager for FileCacheManager {
             PathBuf::new().join("cves")
         };
 
-        let vulns_json = if let Ok(j) = serde_json::to_string(&vulns) {
-            j
+        let vulns_json = if let Ok(j) = serde_json::value::to_value(vulns) {
+            format!("{:#}", j)
         } else {
             error!("Error while serializing a CVE to a JSON string");
             return;
