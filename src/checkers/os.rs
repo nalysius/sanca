@@ -334,13 +334,15 @@ impl<'a> TcpChecker for OSChecker<'a> {
 
         // For each item, check if it's an OpenSSH banner
         for item in data {
-            trace!("Checking item: {}", item);
+            // Remove the null chars and white chars at the beginning and end
+            let item_clean = item.trim_matches(char::from(0)).trim();
+            trace!("Checking item: {}", item_clean);
 
             // Avoid duplicating the whole handling of OpenSSH
             // It's similar between Windows and the rest, only the regex
             // is different to keep them clean.
-            let caps_result_default = openssh_regex.captures(item);
-            let caps_result_windows = openssh_windows_regex.captures(item);
+            let caps_result_default = openssh_regex.captures(item_clean);
+            let caps_result_windows = openssh_windows_regex.captures(item_clean);
             let caps_result = if caps_result_default.is_some() {
                 caps_result_default
             } else if caps_result_windows.is_some() {
@@ -374,7 +376,7 @@ impl<'a> TcpChecker for OSChecker<'a> {
                         "The operating system {}{} has been identified using the banner presented by OpenSSH: {}",
                         os_name,
                         version_text,
-                        item
+                        item_clean
                 );
 
                 let os_technology = if let Some(t) = self.get_technology_os(&os_name) {
@@ -387,7 +389,7 @@ impl<'a> TcpChecker for OSChecker<'a> {
                 return Some(Finding::new(
                     os_technology,
                     os_version,
-                    item,
+                    item_clean,
                     &os_evidence_text,
                     None,
                 ));
@@ -399,7 +401,7 @@ impl<'a> TcpChecker for OSChecker<'a> {
             let (mariadb_regex, _keep_left_mariadb, _keep_right_mariadb) =
                 body_mariadb_regex_params;
 
-            let caps_result = mariadb_regex.captures(item);
+            let caps_result = mariadb_regex.captures(item_clean);
             // The regex matches
             if caps_result.is_some() {
                 info!("Regex OS/mariadb-banner matches");
@@ -426,7 +428,7 @@ impl<'a> TcpChecker for OSChecker<'a> {
                         "The operating system {}{} has been identified using the banner presented by MariaDB: {}",
                         os_name,
                         version_text,
-                        item
+                        item_clean
                 );
 
                 let os_technology = if let Some(t) = self.get_technology_os(&os_name) {
@@ -439,7 +441,7 @@ impl<'a> TcpChecker for OSChecker<'a> {
                 return Some(Finding::new(
                     os_technology,
                     os_version,
-                    item,
+                    item_clean,
                     &os_evidence_text,
                     None,
                 ));
