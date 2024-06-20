@@ -96,6 +96,7 @@ use crate::vulnerabilities::cache_managers::{files::FileCacheManager, CacheManag
 use crate::vulnerabilities::fetchers::{nvd::NVDFetcher, VulnFetcher};
 use crate::vulnerabilities::{CacheType, VulnSource};
 use crate::writers::csv::CsvWriter;
+use crate::writers::json::JsonWriter;
 use crate::writers::textstdout::TextStdoutWriter;
 use crate::writers::Writer;
 
@@ -190,7 +191,7 @@ impl Application {
             Box::new(HandlebarsChecker::new()),
             Box::new(HighchartsChecker::new()),
             Box::new(JQueryChecker::new()),
-	    Box::new(JQueryMobileChecker::new()),
+            Box::new(JQueryMobileChecker::new()),
             Box::new(JQueryUIChecker::new()),
             Box::new(KnockoutChecker::new()),
             Box::new(LodashChecker::new()),
@@ -412,6 +413,7 @@ impl Application {
         let writer: Box<dyn Writer> = match args.writer {
             Writers::TextStdout => Box::new(TextStdoutWriter::new(args)),
             Writers::Csv => Box::new(CsvWriter::new(args)),
+            Writers::Json => Box::new(JsonWriter::new(args)),
         };
         writer.write(findings);
     }

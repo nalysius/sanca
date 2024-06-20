@@ -37,6 +37,7 @@ impl ValueEnum for ScanType {
 }
 
 /// Represents a finding of a technology running on an asset
+#[derive(Serialize)]
 pub struct Finding {
     /// The technology found
     pub technology: Technology,
@@ -87,12 +88,14 @@ pub enum Writers {
     TextStdout,
     /// CsvWriter
     Csv,
+    /// JsonWriter
+    Json,
 }
 
 impl ValueEnum for Writers {
     /// Lists the variants available for clap
     fn value_variants<'a>() -> &'a [Self] {
-        &[Self::TextStdout, Self::Csv]
+        &[Self::TextStdout, Self::Csv, Self::Json]
     }
 
     /// Map each value to a possible value in clap
@@ -100,6 +103,7 @@ impl ValueEnum for Writers {
         match &self {
             Self::TextStdout => Some(PossibleValue::new("textstdout")),
             Self::Csv => Some(PossibleValue::new("csv")),
+            Self::Json => Some(PossibleValue::new("json")),
         }
     }
 }

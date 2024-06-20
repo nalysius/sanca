@@ -5,6 +5,7 @@
 //! findings without affecting the execution of the application.
 
 pub mod csv;
+pub mod json;
 pub mod textstdout;
 
 use crate::{application::Args, models::Finding};

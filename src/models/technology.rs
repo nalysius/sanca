@@ -10,6 +10,7 @@
 use super::reqres::UrlRequest;
 use super::ScanType;
 use clap::{builder::PossibleValue, ValueEnum};
+use serde::Serialize;
 use std::fmt::{Display, Formatter};
 use std::string::ToString;
 
@@ -18,7 +19,7 @@ use std::string::ToString;
 /// HTTP requests needed to identify the given technologies.
 /// As an example, it's not needed to send a request at /phpinfo.php
 /// if we want to identify only the JavaScript libraries.
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, Debug, PartialEq, Serialize)]
 pub enum Technology {
     Dovecot,
     Exim,
@@ -430,11 +431,11 @@ impl Technology {
                 "wordpress".to_string(),
                 "health_check_\\&_troubleshooting".to_string(),
             ),
-	    Self::JQueryMobile => (
-		"a".to_string(),
-		"jquery".to_string(),
-		"jquery_mobile".to_string(),
-	    )
+            Self::JQueryMobile => (
+                "a".to_string(),
+                "jquery".to_string(),
+                "jquery_mobile".to_string(),
+            ),
         }
     }
 
@@ -1005,7 +1006,7 @@ impl Display for Technology {
             Technology::WPPBetterSearchReplace => "BetterSearchReplace".to_string(),
             Technology::WPPAdvancedCustomFields => "AdvancedCustomFields".to_string(),
             Technology::WPPHealthCheck => "HealthCheck".to_string(),
-	    Technology::JQueryMobile => "jQueryMobile".to_string(),
+            Technology::JQueryMobile => "jQueryMobile".to_string(),
         };
         write!(f, "{}", s)
     }
@@ -1084,7 +1085,7 @@ impl ValueEnum for Technology {
             Technology::WPPBetterSearchReplace,
             Technology::WPPAdvancedCustomFields,
             Technology::WPPHealthCheck,
-	    Technology::JQueryMobile,
+            Technology::JQueryMobile,
         ]
     }
 
@@ -1160,7 +1161,7 @@ impl ValueEnum for Technology {
             Technology::WPPBetterSearchReplace => Some(PossibleValue::new("bettersearchreplace")),
             Technology::WPPAdvancedCustomFields => Some(PossibleValue::new("advancedcustomfields")),
             Technology::WPPHealthCheck => Some(PossibleValue::new("healthcheck")),
-	    Technology::JQueryMobile => Some(PossibleValue::new("jquerymobile")),
+            Technology::JQueryMobile => Some(PossibleValue::new("jquerymobile")),
             // Ignore the specific OS since they cannot be given as CLI argument. Use OS instead.
             _ => None,
         }
