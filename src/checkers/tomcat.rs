@@ -43,7 +43,8 @@ impl<'a> TomcatChecker<'a> {
         );
 
         // Checks only on the not found page to avoid false positive
-        if url_response.url.contains("/pageNotFoundNotFound") {
+	// and on a page that should trigger a bug.
+        if url_response.url.contains("/pageNotFoundNotFound") || url_response.url.contains("..;") {
             let body_regex_params = self
                 .regexes
                 .get("http-body")
