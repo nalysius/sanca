@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Some JavaScript URLs weren't completely extracted.
 - CSV formatting when there is no CVEs.
 - OS OpenSSH banner contained null characters in evidence & evidence text.
+- Bootstrap detection from comments, when there are several spaces before the version.
 
 ## [1.5.0]
 
