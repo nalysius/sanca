@@ -31,7 +31,7 @@ impl<'a> JQueryChecker<'a> {
         // or
         //
         // /*! jQuery v3.7.0 |
-        let comment_regex = Regex::new(r".*\/\*![\s\*]+(?P<wholematch>jQuery (JavaScript Library )?(v@?(?P<version1>\d+\.\d+\.\d+)))( |)?").unwrap();
+        let comment_regex = Regex::new(r".*\/\*![\s\*]+(?P<wholematch>jQuery\s+(JavaScript Library )?(v@?(?P<version1>\d+\.\d+\.\d+)))( |)?").unwrap();
 
         // Example: {jquery:"3.3.1",
         let body_minified_regex =
