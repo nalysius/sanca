@@ -37,7 +37,7 @@ use crate::checkers::jqueryui::JQueryUIChecker;
 use crate::checkers::knockout::KnockoutChecker;
 use crate::checkers::lodash::LodashChecker;
 use crate::checkers::mariadb::MariaDBChecker;
-use crate::checkers::melis::MelisChecker;
+//use crate::checkers::melis::MelisChecker;
 use crate::checkers::mysql::MySQLChecker;
 use crate::checkers::nginx::NginxChecker;
 use crate::checkers::openssh::OpenSSHChecker;
