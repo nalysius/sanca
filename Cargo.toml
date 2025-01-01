@@ -10,11 +10,11 @@ categories = ["command-line-utilities"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-regex = "1.10.5"
-clap = { version = "4.5.9", features = ["derive"] }
-reqwest = { version = "0.12.5", features = ["blocking", "gzip", "json", "rustls-tls"], default-features = false }
-tokio = "1.38.0"
-futures = "0.3.30"
+regex = "1.11.1"
+clap = { version = "4.5.23", features = ["derive"] }
+reqwest = { version = "0.12.12", features = ["blocking", "gzip", "json", "rustls-tls"], default-features = false }
+tokio = "1.42.0"
+futures = "0.3.31"
 log = "0.4.22"
 simple_logger = "5.0.0"
 serde = { version = "1.0", features = ["derive"] }
