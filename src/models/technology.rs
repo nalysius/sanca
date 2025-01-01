@@ -483,22 +483,10 @@ impl Technology {
             }
             Self::Tomcat => {
                 vec![
-		    UrlRequest::from_path(
-			main_url,
-			"/pageNotFoundNotFound",
-			false,
-                    ),
-		    UrlRequest::from_path(
-			main_url,
-			"/..;/..;/",
-			false,
-                    ),
-		    UrlRequest::from_path(
-			main_url,
-			"/..;/status.html",
-			false,
-                    )
-		]
+                    UrlRequest::from_path(main_url, "/pageNotFoundNotFound", false),
+                    UrlRequest::from_path(main_url, "/..;/..;/", false),
+                    UrlRequest::from_path(main_url, "/..;/status.html", false),
+                ]
             }
             Self::PhpMyAdmin => {
                 vec![

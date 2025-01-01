@@ -138,8 +138,8 @@ impl Application {
             Box::new(ApacheHttpdChecker::new()),
             Box::new(HordeChecker::new()),
             Box::new(JiraChecker::new()),
-	    // Disable Melis because there is a confusion between
-	    // Melis Platform & Melis CMS.
+            // Disable Melis because there is a confusion between
+            // Melis Platform & Melis CMS.
             //Box::new(MelisChecker::new()),
             Box::new(NginxChecker::new()),
             Box::new(OpenSSLChecker::new()),
