@@ -10,11 +10,11 @@
 //!
 //! The readers have the responsibility to fetch the data, be it a TCP banner
 //! or HTTP resource(s).
-//! The checkers have the role to match the data fetched by the readers against
-//! regular expression, fingerprints or more, to confirm whether a given
-//! technology is used by the remote host.
+//! The checkers have the role to compare the data fetched by the readers against
+//! regular expressions, fingerprints or more, to confirm whether a technology is
+//! used by the remote host.
 //! The writers are there to handle the findings returned by the checkers. They
-//! can write them to standard output or in a CSV file for example.
+//! can write them to standard output or in a file for example.
 
 use clap::{Parser, ValueEnum};
 
@@ -265,7 +265,7 @@ impl Application {
         scan_type: ScanType,
         technologies: &[Technology],
     ) -> Vec<Finding> {
-        trace!("In Application::tcp_urp_scan()");
+        trace!("In Application::tcp_udp_scan()");
         let mut findings: Vec<Finding> = Vec::new();
         if scan_type == ScanType::Tcp {
             debug!("Starting a TCP scan");

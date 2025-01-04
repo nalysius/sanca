@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.1]
+
 ### Added
 
 - Detect Ubuntu 24.10 from Apache httpd.
+
+### Changed
+
+- Release under license 0BSD.
 
 ## [1.6.0]
 
